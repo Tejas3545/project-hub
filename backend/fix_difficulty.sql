@@ -1,0 +1,1 @@
+UPDATE "GitHubProject" SET difficulty = 'Beginner' WHERE difficulty = 'EASY'; UPDATE "GitHubProject" SET difficulty = 'Intermediate' WHERE difficulty = 'MEDIUM'; UPDATE "GitHubProject" SET difficulty = 'Advanced' WHERE difficulty = 'HARD'; 

@@ -1,0 +1,187 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id            String   @id @default(uuid())
+  email         String   @unique
+  passwordHash  String
+  firstName     String?
+  lastName      String?
+  role          UserRole @default(STUDENT)
+  isVerified    Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  bookmarks     Bookmark[]
+  progress      ProjectProgress[]
+
+  @@map("users")
+}
+
+model Domain {
+  id             String          @id @default(uuid())
+  name           String          @unique
+  slug           String          @unique
+  description    String?
+  projects       Project[]
+  githubProjects GitHubProject[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  @@map("domains")
+}
+
+model Project {
+  id                    String     @id @default(uuid())
+  title                 String
+  domainId              String
+  domain                Domain     @relation(fields: [domainId], references: [id], onDelete: Cascade)
+  subDomain             String?    // Sub-domain within the main domain
+  difficulty            Difficulty
+  minTime               Int        // in hours
+  maxTime               Int        // in hours
+  skillFocus            String[]
+  industryContext       String     @db.Text
+  problemStatement      String     @db.Text
+  scope                 String     @db.Text
+  prerequisites         String[]
+  deliverables          String[]
+  advancedExtensions    String?    @db.Text
+  evaluationCriteria    String?    @db.Text
+  isPublished           Boolean    @default(false)
+  deletedAt             DateTime?
+  createdAt             DateTime   @default(now())
+  updatedAt             DateTime   @updatedAt
+  
+  bookmarks             Bookmark[]
+  progress              ProjectProgress[]
+
+  @@index([domainId])
+  @@index([difficulty])
+  @@index([isPublished])
+  @@index([createdAt])
+  @@map("projects")
+}
+
+model Bookmark {
+  id        String   @id @default(uuid())
+  userId    String
+  projectId String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, projectId])
+  @@index([userId])
+  @@index([projectId])
+  @@map("bookmarks")
+}
+
+model ProjectProgress {
+  id          String         @id @default(uuid())
+  userId      String
+  projectId   String
+  user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project     Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  status      ProgressStatus @default(NOT_STARTED)
+  startedAt   DateTime?
+  completedAt DateTime?
+  notes       String?        @db.Text
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  @@unique([userId, projectId])
+  @@index([userId])
+  @@index([projectId])
+  @@index([status])
+  @@map("project_progress")
+}
+
+enum ProgressStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+  ON_HOLD
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum UserRole {
+  STUDENT
+  ADMIN
+}
+
+model GitHubProject {
+  id            String     @id @default(uuid())
+  title         String
+  slug          String?    @unique // URL-friendly identifier (optional during migration)
+  description   String     @db.Text
+  repoUrl       String
+  repoOwner     String     @default("unknown") // GitHub username/org (e.g., "OWASP")
+  repoName      String     @default("unknown") // Repository name (e.g., "NodeGoat")
+  defaultBranch String     @default("main") // main, master, etc.
+  downloadUrl   String     @default("") // Direct ZIP download URL from GitHub
+  liveUrl       String?    // Live demo/deployed application URL
+  downloadCount Int        @default(0) // Track download analytics
+  domainId      String
+  domain        Domain     @relation(fields: [domainId], references: [id], onDelete: Cascade)
+  stars         Int        @default(0)
+  forks         Int        @default(0)
+  language      String?
+  techStack     String[]
+  difficulty    Difficulty @default(MEDIUM)
+  topics        String[]
+  lastUpdated   DateTime?
+  isActive      Boolean    @default(true)
+  
+  // Client Required Fields (Production-Level Documentation)
+  author             String    @default("Project Hub") // Project author
+  introduction       String?   @db.Text // 150-250 word project overview
+  implementation     String?   @db.Text // Technical explanation, workflow, architecture
+  technicalSkills    String[]  @default([]) // Languages, concepts, algorithms, frameworks
+  toolsUsed          String[]  @default([]) // IDEs, platforms, databases, third-party tools
+  conceptsUsed       String[]  @default([]) // Programming concepts applied
+  
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  
+  sourceCode    ProjectSourceCode?
+
+  @@index([domainId])
+  @@index([difficulty])
+  @@index([stars])
+  @@index([isActive])
+  @@index([language])
+  @@index([slug])
+  @@map("github_projects")
+}
+
+model ProjectSourceCode {
+  id              String        @id @default(uuid())
+  githubProjectId String        @unique
+  githubProject   GitHubProject @relation(fields: [githubProjectId], references: [id], onDelete: Cascade)
+  downloadUrl     String        // Direct download link
+  repositoryUrl   String?       // GitHub repository URL
+  fileSize        Int?          // File size in bytes
+  techStack       String[]      @default([]) // Technologies used
+  hasReadme       Boolean       @default(true) // Has README.md
+  hasRequirements Boolean       @default(true) // Has requirements/dependencies file
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([githubProjectId])
+  @@map("project_source_code")
+}

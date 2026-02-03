@@ -1,0 +1,237 @@
+@import "tailwindcss";
+
+:root {
+  /* "Geometric" Theme - Solid Black, High Visibility, No Borders */
+
+  /* Backgrounds */
+  --bg-primary: #030303;
+  /* Absolute Black (matches hero) */
+  --bg-secondary: #0A0A0A;
+  /* Very dark grey for inputs/panels */
+  --bg-card: #0F0F0F;
+  /* Distinct from black but solid */
+
+  /* Accents - Retaining Blue/Indigo as primary but cleaner */
+  --primary: #6366f1;
+  /* Indigo 500 */
+  --primary-hover: #4f46e5;
+  /* Indigo 600 */
+  --primary-light: #818cf8;
+  /* Indigo 400 */
+
+  /* Text - High Visibility */
+  --text-primary: #FFFFFF;
+  /* Pure White */
+  --text-secondary: #D4D4D4;
+  /* Neutral 300 */
+  --text-muted: #A3A3A3;
+  /* Neutral 400 */
+
+  /* Borders - Minimal to None */
+  --border-subtle: #262626;
+  /* Neutral 800 - only for inputs/dividers */
+  --border-card: transparent;
+  /* No borders on cards as requested */
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  /* "SF Pro" / System Stack - High legibility */
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Headings */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: 600;
+  /* Medium-Bold */
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+}
+
+/* Card - Solid, No Border, Shadow for lift */
+.pro-card,
+.glass-card {
+  background-color: var(--bg-card);
+  border: none !important;
+  /* Explicitly removing border */
+  border-radius: 12px;
+  /* Shadow for separation without border */
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+  transition: transform 0.2s ease, background-color 0.2s;
+}
+
+.pro-card:hover,
+.glass-card:hover {
+  background-color: #171717;
+  /* Lighten slightly on hover */
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.6), 0 4px 6px -2px rgba(0, 0, 0, 0.4);
+}
+
+/* Button - High Visibility, "B.G." */
+.btn-primary {
+  background-color: var(--primary);
+  color: #ffffff;
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  /* Slightly softer */
+  border: none;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+  /* Standard readable size */
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-hover);
+  transform: translateY(-1px);
+}
+
+/* Secondary Button */
+.btn-secondary {
+  background-color: #262626;
+  /* Solid dark grey, no transparent border */
+  color: var(--text-primary);
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.2s;
+  border: none;
+}
+
+.btn-secondary:hover {
+  background-color: #404040;
+}
+
+/* Badges */
+.badge {
+  padding: 0.3rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  /* Readable */
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: inline-block;
+}
+
+/* Difficulty - High Contrast */
+.difficulty-easy {
+  background-color: #065f46;
+  /* Emerald 800 */
+  color: #d1fae5;
+  /* Emerald 100 */
+}
+
+.difficulty-medium {
+  background-color: #92400e;
+  /* Amber 800 */
+  color: #fef3c7;
+  /* Amber 100 */
+}
+
+.difficulty-hard {
+  background-color: #991b1b;
+  /* Red 800 */
+  color: #fee2e2;
+  /* Red 100 */
+}
+
+/* Inputs - High Visibility */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="search"] {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+  border-radius: 8px;
+  padding: 0.75rem;
+  font-size: 1rem;
+  /* User asked for visible size */
+}
+
+input:focus {
+  border-color: var(--primary);
+  outline: 2px solid rgba(99, 102, 241, 0.3);
+}
+
+/* Utilities */
+.fade-in-up {
+  animation: fadeInUp 0.5s ease-out forwards;
+  animation-delay: calc(var(--animation-order, 0) * 0.1s);
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Mobile-specific improvements */
+@media (max-width: 640px) {
+  /* Ensure touch targets are large enough */
+  button, a {
+    min-height: 44px;
+  }
+  
+  /* Prevent text from being too small on mobile */
+  body {
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+  
+  /* Better spacing for cards on mobile */
+  .glass-card, .pro-card {
+    margin-bottom: 0.5rem;
+  }
+}
+
+/* Tablet optimizations */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .container {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+/* Prevent horizontal scroll */
+html, body {
+  overflow-x: hidden;
+  width: 100%;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+  /* Larger touch targets on touch devices */
+  button, a, input, select {
+    min-height: 48px;
+  }
+  
+  /* Remove hover effects on touch devices */
+  .glass-card:hover, .pro-card:hover {
+    transform: none;
+  }
+}
