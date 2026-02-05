@@ -1,4 +1,6 @@
-import Link from 'next/link';\n\nexport default function AdminPage() {
+import Link from 'next/link';
+
+export default function AdminPage() {
     return (
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
             <div className="max-w-4xl mx-auto">
