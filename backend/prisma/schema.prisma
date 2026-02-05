@@ -50,13 +50,22 @@ model Project {
   minTime               Int        // in hours
   maxTime               Int        // in hours
   skillFocus            String[]
+  
+  // Real-World Solution Framework Fields
+  caseStudy             String?    @db.Text  // The Story (3-4 sentences about persona & situation)
+  problemStatement      String     @db.Text  // Core technical/logical gap
+  solutionDescription   String?    @db.Text  // High-level explanation of what project builds
+  techStack             String[]   @default([]) // Recommended technologies
+  supposedDeadline      String?    // Realistic timeframe (e.g., "1-2 Weeks")
+  
+  // Legacy fields (keeping for backwards compatibility)
   industryContext       String     @db.Text
-  problemStatement      String     @db.Text
   scope                 String     @db.Text
   prerequisites         String[]
   deliverables          String[]
   advancedExtensions    String?    @db.Text
   evaluationCriteria    String?    @db.Text
+  
   isPublished           Boolean    @default(false)
   deletedAt             DateTime?
   createdAt             DateTime   @default(now())
@@ -154,6 +163,14 @@ model GitHubProject {
   technicalSkills    String[]  @default([]) // Languages, concepts, algorithms, frameworks
   toolsUsed          String[]  @default([]) // IDEs, platforms, databases, third-party tools
   conceptsUsed       String[]  @default([]) // Programming concepts applied
+  
+  // Real-World Solution Framework Fields (Client Requirement)
+  caseStudy          String?   @db.Text // The Story (3-4 sentences about persona & situation)
+  problemStatement   String?   @db.Text // Core technical/logical gap
+  solutionDescription String?  @db.Text // High-level explanation of what project builds
+  prerequisites      String[]  @default([]) // Fundamental concepts student must know
+  deliverables       String[]  @default([]) // Specific items student must submit
+  supposedDeadline   String?   // Realistic timeframe (e.g., "1 Week")
   
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt

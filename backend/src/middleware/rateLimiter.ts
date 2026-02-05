@@ -21,11 +21,11 @@ import { AuthRequest } from './auth';
 
 // Environment-based configuration with secure defaults
 const RATE_LIMIT_WINDOW = parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000'); // 15 minutes
-const RATE_LIMIT_MAX_GENERAL = parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '1000'); // Increased for development
-const RATE_LIMIT_MAX_AUTH = parseInt(process.env.RATE_LIMIT_AUTH_MAX || '10'); // Increased for development
-const RATE_LIMIT_MAX_REGISTER = parseInt(process.env.RATE_LIMIT_REGISTER_MAX || '10'); // Increased for development
-const RATE_LIMIT_MAX_WRITE = parseInt(process.env.RATE_LIMIT_WRITE_MAX || '100'); // Increased for development
-const RATE_LIMIT_MAX_SEARCH = parseInt(process.env.RATE_LIMIT_SEARCH_MAX || '100'); // Increased for development
+const RATE_LIMIT_MAX_GENERAL = parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '10000'); // Very high for development
+const RATE_LIMIT_MAX_AUTH = parseInt(process.env.RATE_LIMIT_AUTH_MAX || '100'); // Increased for development
+const RATE_LIMIT_MAX_REGISTER = parseInt(process.env.RATE_LIMIT_REGISTER_MAX || '20'); // Increased for development
+const RATE_LIMIT_MAX_WRITE = parseInt(process.env.RATE_LIMIT_WRITE_MAX || '1000'); // Increased for development
+const RATE_LIMIT_MAX_SEARCH = parseInt(process.env.RATE_LIMIT_SEARCH_MAX || '1000'); // Increased for development
 
 /**
  * Standard rate limiter for general API endpoints
@@ -71,6 +71,8 @@ export const authLimiter = rateLimit({
     max: RATE_LIMIT_MAX_AUTH,
     skipSuccessfulRequests: true, // Don't count successful logins
     skipFailedRequests: false, // Count failed attempts
+    // Skip rate limiting for /me endpoint (auth check only)
+    skip: (req: Request) => req.path === '/me',
     message: {
         status: 429,
         error: 'Too Many Login Attempts',

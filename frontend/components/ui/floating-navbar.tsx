@@ -90,18 +90,11 @@ export const FloatingNav = ({
                         Logout
                     </button>
                 ) : (
-                    <div className="flex items-center gap-1 sm:gap-2">
-                        <Link href="/login">
-                            <Button className="text-[10px] sm:text-xs px-2 sm:px-3 md:px-5 py-1.5 sm:py-2 h-auto" neon={true} variant="ghost">
-                                Login
-                            </Button>
-                        </Link>
-                        <Link href="/register">
-                            <Button className="text-[10px] sm:text-xs px-2 sm:px-3 md:px-5 py-1.5 sm:py-2 h-auto" neon={true}>
-                                Sign Up
-                            </Button>
-                        </Link>
-                    </div>
+                    <Link href="/login">
+                        <Button className="text-[10px] sm:text-xs px-2 sm:px-3 md:px-5 py-1.5 sm:py-2 h-auto" neon={true}>
+                            Login
+                        </Button>
+                    </Link>
                 )}
 
             </motion.div>

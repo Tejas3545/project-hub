@@ -58,14 +58,25 @@ export default function GitHubProjectsList({
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/github-projects/domain/${domainSlug}?${params}`
       );
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
       const data = await response.json();
 
-      setProjects(data.projects);
-      setTotal(data.pagination.total);
-      setCurrentPage(data.pagination.page);
-      setTotalPages(data.pagination.totalPages);
+      // Handle response with proper fallbacks
+      setProjects(data.projects || []);
+      setTotal(data.pagination?.total || 0);
+      setCurrentPage(data.pagination?.page || 1);
+      setTotalPages(data.pagination?.totalPages || 1);
     } catch (error) {
       console.error('Error fetching projects:', error);
+      // Set safe defaults on error
+      setProjects([]);
+      setTotal(0);
+      setCurrentPage(1);
+      setTotalPages(1);
     } finally {
       setLoading(false);
     }

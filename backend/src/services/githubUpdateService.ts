@@ -77,9 +77,9 @@ class GitHubProjectUpdateService {
         console.log('🎯 Next update will run at the top of the hour');
         console.log('');
         
-        // Run immediately on startup
-        console.log('▶️  Running initial update now...\n');
-        this.runProjectUpdate();
+        // Skip initial update on startup to prevent crashes
+        // The scheduled updates will run normally every 6 hours
+        console.log('⏭️  Skipping initial update (will run on schedule)\n');
     }
     
     /**

@@ -16,7 +16,6 @@ interface AuthContextType {
     user: User | null;
     loading: boolean;
     login: (email: string, password: string) => Promise<void>;
-    register: (data: { email: string; password: string; firstName?: string; lastName?: string }) => Promise<void>;
     logout: () => Promise<void>;
     isAdmin: boolean;
 }
@@ -53,13 +52,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(data.user);
     };
 
-    const register = async (data: { email: string; password: string; firstName?: string; lastName?: string }) => {
-        const response = await authApi.register(data);
-        // After registration, user needs to login
-        // Or you can auto-login by calling login(data.email, data.password)
-        return response;
-    };
-
     const logout = async () => {
         await authApi.logout();
         setUser(null);
@@ -68,7 +60,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const isAdmin = user?.role === 'ADMIN';
 
     return (
-        <AuthContext.Provider value={{ user, loading, login, register, logout, isAdmin }}>
+        <AuthContext.Provider value={{ user, loading, login, logout, isAdmin }}>
             {children}
         </AuthContext.Provider>
     );

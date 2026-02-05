@@ -27,62 +27,69 @@ const DOMAIN_CONFIGS: DomainConfig[] = [
         slug: 'artificial-intelligence',
         name: 'Artificial Intelligence',
         searchQueries: [
-            'ai chatbot', 'neural network', 'computer vision', 'nlp natural language',
-            'ai assistant', 'image recognition', 'speech recognition', 'ai automation',
-            'generative ai', 'ai tools', 'llm application', 'ai agent', 'gpt wrapper',
-            'stable diffusion', 'face recognition', 'object detection', 'sentiment analysis'
+            'ai chatbot app', 'ai assistant application', 'computer vision project',
+            'image recognition app', 'face recognition system', 'speech recognition app',
+            'sentiment analysis app', 'text generation app', 'ai automation system',
+            'object detection app', 'ai powered app', 'machine translation app',
+            'ai recommendation system', 'voice assistant', 'ai image generator',
+            'nlp application', 'ai content generator', 'ai summarizer'
         ],
-        topics: ['artificial-intelligence', 'ai', 'neural-networks', 'computer-vision', 'nlp', 'chatbot', 'llm', 'gpt', 'transformers'],
-        languages: ['Python', 'JavaScript', 'TypeScript', 'C++', 'Java']
+        topics: ['chatbot', 'computer-vision', 'object-detection', 'voice-assistant', 'ai-application'],
+        languages: ['Python', 'JavaScript', 'TypeScript', 'Java']
     },
     {
         slug: 'machine-learning',
         name: 'Machine Learning',
         searchQueries: [
-            'machine learning model', 'deep learning', 'tensorflow project', 'pytorch tutorial',
-            'ml classification', 'regression analysis', 'supervised learning', 'unsupervised learning',
-            'reinforcement learning', 'ml pipeline', 'model deployment', 'ml algorithms',
-            'scikit learn', 'keras model', 'xgboost', 'random forest', 'neural architecture'
+            'ml prediction app', 'ml classification app', 'recommendation system',
+            'ml model deployment', 'ml web application', 'ml dashboard',
+            'predictive analytics app', 'ml api service', 'ml monitoring system',
+            'ml pipeline app', 'ml automation', 'anomaly detection system',
+            'ml inference app', 'ml model serving', 'ml platform'
         ],
-        topics: ['machine-learning', 'deep-learning', 'tensorflow', 'pytorch', 'scikit-learn', 'keras', 'ml', 'data-science'],
-        languages: ['Python', 'R', 'Julia', 'JavaScript']
+        topics: ['machine-learning-application', 'ml-deployment', 'ml-pipeline', 'ml-system'],
+        languages: ['Python', 'JavaScript', 'TypeScript']
     },
     {
         slug: 'data-science',
         name: 'Data Science',
         searchQueries: [
-            'data analysis', 'data visualization', 'pandas project', 'data pipeline',
-            'exploratory data analysis', 'statistical analysis', 'data mining', 'big data',
-            'jupyter notebook', 'data cleaning', 'dashboard', 'analytics', 'plotly', 'seaborn',
-            'data warehouse', 'etl pipeline', 'data engineering'
+            'data analysis dashboard', 'data visualization app', 'analytics platform',
+            'data pipeline system', 'etl application', 'data processing app',
+            'business intelligence dashboard', 'reporting system', 'data explorer',
+            'statistical analysis app', 'data warehouse app', 'metrics dashboard',
+            'data monitoring system', 'analytics dashboard', 'data insights platform'
         ],
-        topics: ['data-science', 'data-visualization', 'pandas', 'data-analysis', 'jupyter-notebook', 'analytics', 'statistics'],
-        languages: ['Python', 'R', 'JavaScript', 'SQL']
+        topics: ['data-visualization', 'analytics', 'dashboard', 'data-pipeline'],
+        languages: ['Python', 'JavaScript', 'TypeScript', 'R']
     },
     {
         slug: 'web-development',
         name: 'Web Development',
         searchQueries: [
-            'react app', 'nextjs project', 'vue application', 'angular project',
-            'fullstack web', 'nodejs backend', 'express api', 'web dashboard',
-            'ecommerce website', 'social media app', 'cms system', 'portfolio website',
-            'authentication system', 'rest api', 'graphql server', 'real-time chat',
-            'mern stack', 'crud app', 'blog platform', 'task manager'
+            'react web app', 'nextjs application', 'vue web app', 'fullstack application',
+            'ecommerce platform', 'social media clone', 'cms application', 'blog platform',
+            'task management app', 'project management system', 'chat application',
+            'video streaming app', 'booking system', 'crm application', 'admin dashboard',
+            'portfolio website', 'authentication app', 'real-time collaboration', 'marketplace app',
+            'learning platform', 'food delivery app', 'hotel booking', 'fitness tracker'
         ],
-        topics: ['react', 'nextjs', 'vue', 'angular', 'nodejs', 'express', 'fullstack', 'web-development', 'frontend', 'backend'],
-        languages: ['JavaScript', 'TypeScript', 'PHP', 'Ruby', 'Go', 'Python']
+        topics: ['web-application', 'fullstack-application', 'saas', 'web-app'],
+        languages: ['JavaScript', 'TypeScript', 'Python', 'Go', 'PHP']
     },
     {
         slug: 'cybersecurity',
         name: 'Cybersecurity',
         searchQueries: [
-            'security tool', 'penetration testing', 'vulnerability scanner', 'encryption tool',
-            'firewall', 'network security', 'security automation', 'malware analysis',
-            'password manager', 'authentication security', 'intrusion detection', 'security monitoring',
-            'exploit framework', 'security audit', 'ddos protection', 'web application security'
+            'vulnerability scanner', 'penetration testing tool', 'security scanner',
+            'network monitoring system', 'firewall application', 'intrusion detection system',
+            'security audit tool', 'password manager app', 'encryption tool',
+            'security monitoring dashboard', 'malware detector', 'web security scanner',
+            'network security tool', 'security automation', 'threat detection system',
+            'security analyzer', 'ddos protection', 'security dashboard'
         ],
-        topics: ['cybersecurity', 'security', 'penetration-testing', 'encryption', 'security-tools', 'infosec', 'hacking'],
-        languages: ['Python', 'C', 'C++', 'Go', 'Rust', 'Shell']
+        topics: ['security-tool', 'penetration-testing-tool', 'security-scanner', 'security-system'],
+        languages: ['Python', 'Go', 'Rust', 'C', 'JavaScript']
     }
 ];
 
@@ -124,6 +131,67 @@ function determineDifficulty(stars: number, language: string, description: strin
     if (score >= 7) return 'HARD';
     if (score >= 4) return 'MEDIUM';
     return 'EASY';
+}
+
+/**
+ * Filters out libraries, frameworks, and tools - only keep actual projects/applications
+ * Client requirement: Fetch REAL projects, not libraries (e.g., TensorFlow is a library)
+ */
+function isRealProject(repo: any): boolean {
+    const name = repo.name?.toLowerCase() || '';
+    const description = repo.description?.toLowerCase() || '';
+    const topics = repo.topics || [];
+    
+    // Keywords that indicate it's a library/framework, not a project
+    const libraryKeywords = [
+        'library', 'framework', 'package', 'sdk', 'api wrapper', 'toolkit',
+        'boilerplate', 'template', 'starter', 'generator', 'plugin', 'extension',
+        'components', 'utilities', 'helpers', 'tools collection', 'module',
+        'awesome-', 'resources', 'curated list', 'learning', 'tutorial',
+        'course', 'book', 'documentation', 'guide', 'cheatsheet', 'examples'
+    ];
+    
+    // Check if name or description contains library indicators
+    const hasLibraryKeyword = libraryKeywords.some(keyword => 
+        name.includes(keyword) || description.includes(keyword)
+    );
+    
+    // Check topics for library indicators
+    const libraryTopics = ['library', 'framework', 'package', 'sdk', 'boilerplate', 'template', 'awesome-list'];
+    const hasLibraryTopic = topics.some((topic: string) => 
+        libraryTopics.some(libTopic => topic.includes(libTopic))
+    );
+    
+    // Keywords that indicate it's an actual application/project
+    const projectKeywords = [
+        'app', 'application', 'system', 'platform', 'website', 'web app',
+        'dashboard', 'portal', 'manager', 'tracker', 'monitor', 'analyzer',
+        'clone', 'game', 'bot', 'automation', 'scraper', 'crawler',
+        'ecommerce', 'cms', 'blog', 'social', 'chat', 'messenger',
+        'editor', 'player', 'viewer', 'converter', 'scanner', 'detector'
+    ];
+    
+    const hasProjectKeyword = projectKeywords.some(keyword =>
+        name.includes(keyword) || description.includes(keyword)
+    );
+    
+    // If it has project keywords and no library keywords, it's likely a real project
+    // Or if it has neither, but has a detailed description (likely a project)
+    if (hasProjectKeyword && !hasLibraryKeyword && !hasLibraryTopic) {
+        return true;
+    }
+    
+    // If it has library indicators, exclude it
+    if (hasLibraryKeyword || hasLibraryTopic) {
+        return false;
+    }
+    
+    // If description is detailed (not just a tagline), it's likely a project
+    if (description && description.length > 50 && !hasLibraryKeyword) {
+        return true;
+    }
+    
+    return false;
 }
 
 async function searchGitHub(query: string, language?: string, perPage: number = 30): Promise<any[]> {
@@ -217,7 +285,14 @@ async function fetchProjectsForDomain(config: DomainConfig, targetCount: number 
             for (const repo of results) {
                 if (allProjects.size >= targetCount) break;
                 
+                // Filter: Skip archived, disabled, or repos without description
                 if (!repo.description || repo.archived || repo.disabled) continue;
+                
+                // Filter: Skip libraries and frameworks - only real projects
+                if (!isRealProject(repo)) {
+                    console.log(`    ⏭️  Skipped library/framework: ${repo.name}`);
+                    continue;
+                }
                 
                 const project: GitHubProject = {
                     name: repo.name,
@@ -248,7 +323,14 @@ async function fetchProjectsForDomain(config: DomainConfig, targetCount: number 
             for (const repo of results) {
                 if (allProjects.size >= targetCount) break;
                 
+                // Filter: Skip archived, disabled, or repos without description
                 if (!repo.description || repo.archived || repo.disabled) continue;
+                
+                // Filter: Skip libraries and frameworks - only real projects
+                if (!isRealProject(repo)) {
+                    console.log(`    ⏭️  Skipped library/framework: ${repo.name}`);
+                    continue;
+                }
                 
                 const project: GitHubProject = {
                     name: repo.name,

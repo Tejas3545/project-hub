@@ -109,7 +109,11 @@ export default function ProjectsPage() {
                                 </div>
                             ) : (
                                 <div className="glass-card p-8 sm:p-12 text-center fade-in-up">
-                                    <div className="text-4xl mb-4">🔍</div>
+                                    <div className="flex justify-center mb-4">
+                                        <svg className="w-10 h-10 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35m1.6-4.15a7.5 7.5 0 11-15 0 7.5 7.5 0 0115 0z" />
+                                        </svg>
+                                    </div>
                                     <h3 className="text-lg sm:text-xl font-bold text-text-primary mb-2">No projects found</h3>
                                     <p className="text-sm sm:text-base text-text-secondary">
                                         Try adjusting your filters to find more results.

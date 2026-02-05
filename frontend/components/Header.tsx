@@ -78,15 +78,9 @@ export default function Header() {
                         <div className="absolute right-0 hidden md:flex items-center gap-2">
                             <Link
                                 href="/login"
-                                className="px-4 py-2 text-sm font-medium text-text-secondary hover:text-text-primary transition-colors"
-                            >
-                                Sign In
-                            </Link>
-                            <Link
-                                href="/register"
                                 className="px-4 py-2 text-sm font-medium bg-gradient-to-r from-primary to-primary-light text-white rounded-lg hover:opacity-90 transition-opacity"
                             >
-                                Get Started
+                                Sign In
                             </Link>
                         </div>
                     )}
@@ -168,22 +162,13 @@ export default function Header() {
                                     </button>
                                 </>
                             ) : (
-                                <>
-                                    <Link
-                                        href="/login"
-                                        className="px-2 py-2 text-sm font-medium text-text-secondary hover:text-text-primary transition-colors"
-                                        onClick={closeMobileMenu}
-                                    >
-                                        Sign In
-                                    </Link>
-                                    <Link
-                                        href="/register"
-                                        className="px-4 py-2 text-sm font-medium bg-gradient-to-r from-primary to-primary-light text-white rounded-lg hover:opacity-90 transition-opacity text-center"
-                                        onClick={closeMobileMenu}
-                                    >
-                                        Get Started
-                                    </Link>
-                                </>
+                                <Link
+                                    href="/login"
+                                    className="px-4 py-2 text-sm font-medium bg-gradient-to-r from-primary to-primary-light text-white rounded-lg hover:opacity-90 transition-opacity text-center"
+                                    onClick={closeMobileMenu}
+                                >
+                                    Sign In
+                                </Link>
                             )}
                         </nav>
                     </div>

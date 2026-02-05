@@ -1,6 +1,5 @@
 'use client'
 import React, { useState } from "react"
-import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/AuthContext'
 import { Button } from '@/components/ui/neon-button'
@@ -8,7 +7,6 @@ import {
     Card,
     CardContent,
     CardDescription,
-    CardFooter,
     CardHeader,
     CardTitle,
 } from '@/components/ui/card'
@@ -31,8 +29,8 @@ function SignInPage() {
         try {
             await login(email, password)
             router.push("/")
-        } catch (err: any) {
-            setError(err.message || "Failed to sign in")
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : "Failed to sign in")
         } finally {
             setLoading(false)
         }
@@ -80,16 +78,6 @@ function SignInPage() {
                         </Button>
                     </form>
                 </CardContent>
-
-                <CardFooter>
-                    <div className="grid w-full gap-y-4">
-                        <Button variant="link" size="sm" asChild className="text-gray-400 hover:text-white">
-                            <Link href="/register">
-                                Don&apos;t have an account? Sign up
-                            </Link>
-                        </Button>
-                    </div>
-                </CardFooter>
             </Card>
         </div>
     )

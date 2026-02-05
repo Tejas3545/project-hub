@@ -26,13 +26,22 @@ export interface Project {
     minTime: number;
     maxTime: number;
     skillFocus: string[];
+    
+    // Real-World Solution Framework Fields
+    caseStudy?: string;  // The Story (3-4 sentences about persona & situation)
+    problemStatement: string;  // Core technical/logical gap
+    solutionDescription?: string;  // High-level explanation of what project builds
+    techStack: string[];  // Recommended technologies
+    supposedDeadline?: string;  // Realistic timeframe (e.g., "1-2 Weeks")
+    
+    // Legacy fields (keeping for backwards compatibility)
     industryContext: string;
-    problemStatement: string;
     scope: string;
     prerequisites: string[];
     deliverables: string[];
     advancedExtensions?: string;
     evaluationCriteria?: string;
+    
     isPublished: boolean;
     createdAt: Date;
     updatedAt: Date;
@@ -89,6 +98,14 @@ export interface GitHubProject {
     technicalSkills: string[];  // Languages, concepts, algorithms, frameworks
     toolsUsed: string[];  // IDEs, platforms, databases, third-party tools
     conceptsUsed: string[];  // Programming concepts applied
+    
+    // Real-World Solution Framework Fields (Same as regular Projects)
+    caseStudy?: string;  // The Story (3-4 sentences about persona & situation)
+    problemStatement?: string;  // Core technical/logical gap
+    solutionDescription?: string;  // High-level explanation of what project builds
+    prerequisites?: string[];  // Fundamental concepts student must know
+    deliverables?: string[];  // Specific items student must submit
+    supposedDeadline?: string;  // Realistic timeframe (e.g., "1 Week")
     
     createdAt: Date;
     updatedAt: Date;

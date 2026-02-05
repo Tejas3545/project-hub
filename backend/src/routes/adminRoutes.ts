@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import prisma from '../utils/prisma';
 import { githubUpdateService } from '../services/githubUpdateService';
+import bcrypt from 'bcryptjs';
 
 const router = Router();
 
@@ -230,6 +231,124 @@ router.get('/project-stats', async (req, res) => {
   } catch (error) {
     console.error('Stats error:', error);
     res.status(500).json({ error: 'Failed to fetch stats' });
+  }
+});
+
+/**
+ * POST /api/admin/create-user
+ * Create a new user (Admin only)
+ */
+router.post('/create-user', async (req, res) => {
+  try {
+    const adminKey = req.headers['x-admin-key'];
+    if (adminKey !== 'supersecret123') {
+      return res.status(403).json({ error: 'Unauthorized' });
+    }
+
+    const { email, password, firstName, lastName, role = 'STUDENT' } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email and password are required' });
+    }
+
+    // Check if user already exists
+    const existingUser = await prisma.user.findUnique({
+      where: { email }
+    });
+
+    if (existingUser) {
+      return res.status(400).json({ error: 'User with this email already exists' });
+    }
+
+    // Hash password
+    const passwordHash = await bcrypt.hash(password, 10);
+
+    // Create user
+    const user = await prisma.user.create({
+      data: {
+        email,
+        passwordHash,
+        firstName: firstName || null,
+        lastName: lastName || null,
+        role: role as 'STUDENT' | 'ADMIN',
+        isVerified: true,
+      },
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        role: true,
+        isVerified: true,
+        createdAt: true,
+      }
+    });
+
+    res.status(201).json({
+      message: 'User created successfully',
+      user,
+    });
+  } catch (error) {
+    console.error('Create user error:', error);
+    res.status(500).json({ error: 'Failed to create user' });
+  }
+});
+
+/**
+ * GET /api/admin/users
+ * Get all users (Admin only)
+ */
+router.get('/users', async (req, res) => {
+  try {
+    const adminKey = req.headers['x-admin-key'];
+    if (adminKey !== 'supersecret123') {
+      return res.status(403).json({ error: 'Unauthorized' });
+    }
+
+    const users = await prisma.user.findMany({
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        role: true,
+        isVerified: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
+
+    res.json({ users, total: users.length });
+  } catch (error) {
+    console.error('Get users error:', error);
+    res.status(500).json({ error: 'Failed to fetch users' });
+  }
+});
+
+/**
+ * DELETE /api/admin/users/:id
+ * Delete a user (Admin only)
+ */
+router.delete('/users/:id', async (req, res) => {
+  try {
+    const adminKey = req.headers['x-admin-key'];
+    if (adminKey !== 'supersecret123') {
+      return res.status(403).json({ error: 'Unauthorized' });
+    }
+
+    const { id } = req.params;
+
+    await prisma.user.delete({
+      where: { id }
+    });
+
+    res.json({ message: 'User deleted successfully' });
+  } catch (error) {
+    console.error('Delete user error:', error);
+    res.status(500).json({ error: 'Failed to delete user' });
   }
 });
 

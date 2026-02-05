@@ -21,6 +21,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
     const [isBookmarked, setIsBookmarked] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
 
+
     useEffect(() => {
         if (user) {
             checkBookmarkStatus();

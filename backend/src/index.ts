@@ -165,7 +165,7 @@ app.use(cors({
     },
     credentials: true, // Required for cookies/auth headers
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'x-admin-key'],
     exposedHeaders: ['X-Total-Count', 'X-Page-Count'], // Allow frontend to read pagination headers
     maxAge: 86400, // 24 hours - cache preflight requests
 }));
