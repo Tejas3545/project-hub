@@ -11,15 +11,18 @@ export default function HomePage() {
   const [domains, setDomains] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     async function fetchDomains() {
       try {
+        setError('');
         const data = await domainApi.getAll();
         setDomains(data);
         setLastUpdated(new Date());
       } catch (error) {
         console.error('Failed to fetch domains:', error);
+        setError('Failed to load domains. Please try again later.');
       } finally {
         setLoading(false);
       }
@@ -98,6 +101,12 @@ export default function HomePage() {
 
           {loading ? (
             <div className="text-center text-white">Loading domains...</div>
+          ) : error ? (
+            <div className="text-center text-red-400">{error}</div>
+          ) : domains.length === 0 ? (
+            <div className="text-center text-white/60 py-12">
+              No domains available yet. Check back soon!
+            </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 mb-16 sm:mb-20 lg:mb-24">
               {domains.map((domain, index) => (
@@ -109,12 +118,6 @@ export default function HomePage() {
                   <DomainCard domain={domain} />
                 </div>
               ))}
-            </div>
-          )}
-
-          {!loading && domains.length === 0 && (
-            <div className="text-center text-white/60 py-12">
-              No domains available yet. Check back soon!
             </div>
           )}
         </section>

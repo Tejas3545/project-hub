@@ -12,8 +12,10 @@
  */
 
 import { PrismaClient, Difficulty } from '@prisma/client';
+import { fileURLToPath } from 'url';
 
 const prisma = new PrismaClient();
+const __filename = fileURLToPath(import.meta.url);
 
 // Content generation templates based on project characteristics
 const contentGenerators = {
@@ -71,8 +73,10 @@ const contentGenerators = {
   generateSolutionDescription: (project: any): string => {
     const techStack = (project.techStack || []).join(', ');
     const title = project.title;
+    const safeStars = project.stars ?? 0;
+    const safeForks = project.forks ?? 0;
     
-    return `${title} is a ${getDifficultyDescription(project.difficulty)} solution that leverages ${techStack || project.language || 'modern technology'} to ${getSolutionApproach(project)}. The project implements ${getKeyFeatures(project)}, providing a comprehensive platform that addresses both immediate needs and long-term scalability. With ${project.stars.toLocaleString()}+ GitHub stars and ${project.forks.toLocaleString()}+ forks, it has proven its value in production environments worldwide.`;
+    return `${title} is a ${getDifficultyDescription(project.difficulty)} solution that leverages ${techStack || project.language || 'modern technology'} to ${getSolutionApproach(project)}. The project implements ${getKeyFeatures(project)}, providing a comprehensive platform that addresses both immediate needs and long-term scalability. With ${safeStars.toLocaleString()}+ GitHub stars and ${safeForks.toLocaleString()}+ forks, it has proven its value in production environments worldwide.`;
   },
 
   /**
@@ -225,8 +229,8 @@ function getImpactScenario(project: any): string {
 }
 
 function getProjectDomain(project: any): string {
-  const title = project.title.toLowerCase();
-  const description = project.description.toLowerCase();
+  const title = (project.title ?? '').toLowerCase();
+  const description = (project.description ?? '').toLowerCase();
   
   if (title.includes('api') || description.includes('api')) return 'API development and management';
   if (title.includes('web') || description.includes('web')) return 'web application development';
@@ -354,7 +358,8 @@ async function generateContentForAllProjects() {
     console.log(`   ⚠️  Skipped: ${skippedCount} projects`);
     console.log('\n📊 Summary:');
     console.log(`   Total projects: ${projects.length}`);
-    console.log(`   Success rate: ${((updatedCount / projects.length) * 100).toFixed(2)}%`);
+    const successRate = projects.length === 0 ? 0 : (updatedCount / projects.length) * 100;
+    console.log(`   Success rate: ${successRate.toFixed(2)}%`);
 
   } catch (error) {
     console.error('❌ Fatal error during content generation:', error);
@@ -365,7 +370,8 @@ async function generateContentForAllProjects() {
 }
 
 // Execute if run directly
-if (require.main === module) {
+const isMainModule = process.argv[1] === __filename;
+if (isMainModule) {
   generateContentForAllProjects()
     .then(() => {
       console.log('\n✨ Process completed successfully!');

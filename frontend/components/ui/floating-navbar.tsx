@@ -11,15 +11,17 @@ import Link from "next/link";
 import { useAuth } from "@/lib/AuthContext";
 import { Button } from "@/components/ui/neon-button"; // Use our fancy new button
 
+type NavItem = {
+    name: string;
+    link: string;
+    icon?: React.ReactNode;
+};
+
 export const FloatingNav = ({
     navItems,
     className,
 }: {
-    navItems: {
-        name: string;
-        link: string;
-        icon?: React.ReactNode;
-    }[];
+    navItems: NavItem[];
     className?: string;
 }) => {
     const { scrollYProgress } = useScroll();
@@ -27,18 +29,17 @@ export const FloatingNav = ({
     const [visible, setVisible] = useState(true);
 
     useMotionValueEvent(scrollYProgress, "change", (current) => {
-        // Check if current is not undefined and is a number
         if (typeof current === "number") {
-            let direction = current! - scrollYProgress.getPrevious()!;
+            const previous = scrollYProgress.getPrevious();
+            if (typeof previous !== "number") {
+                return;
+            }
 
+            const direction = current - previous;
             if (scrollYProgress.get() < 0.05) {
                 setVisible(true);
             } else {
-                if (direction < 0) {
-                    setVisible(true);
-                } else {
-                    setVisible(false);
-                }
+                setVisible(direction < 0);
             }
         }
     });
@@ -71,7 +72,7 @@ export const FloatingNav = ({
                     className
                 )}
             >
-                {displayNavItems.map((navItem: any, idx: number) => (
+                {displayNavItems.map((navItem: NavItem, idx: number) => (
                     <Link
                         key={`link=${idx}`}
                         href={navItem.link}

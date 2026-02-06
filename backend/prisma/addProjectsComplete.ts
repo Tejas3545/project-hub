@@ -12,6 +12,11 @@
 
 import { execSync } from 'child_process';
 import { PrismaClient } from '@prisma/client';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const prisma = new PrismaClient();
 
@@ -91,9 +96,16 @@ async function main() {
   const totalAfterScraping = afterScrapingCounts.reduce((sum, d) => sum + d._count.githubProjects, 0);
   const projectsAdded = totalAfterScraping - totalBefore;
   
+  // Build a map from beforeCounts by domain name for safe lookup
+  const beforeCountsMap = new Map<string, { id: string; name: string; _count: { githubProjects: number } }>();
+  beforeCounts.forEach(domain => {
+    beforeCountsMap.set(domain.name, domain);
+  });
+  
   console.log('📁 Updated Project Distribution:');
-  afterScrapingCounts.forEach((domain, idx) => {
-    const before = beforeCounts[idx]._count.githubProjects;
+  afterScrapingCounts.forEach((domain) => {
+    const beforeDomain = beforeCountsMap.get(domain.name);
+    const before = beforeDomain?._count.githubProjects || 0;
     const after = domain._count.githubProjects;
     const added = after - before;
     console.log(`   ${domain.name}: ${after} projects (+${added})`);
@@ -158,12 +170,13 @@ ${finalCounts.map(d => `   • ${d.name}: ${d._count.githubProjects} projects`).
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   `);
-  
-  await prisma.$disconnect();
 }
 
 main()
   .catch((error) => {
     console.error('Pipeline error:', error);
-    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+    process.exit(0);
   });

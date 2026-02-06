@@ -582,7 +582,8 @@ async function scrapeQualityProjects() {
     console.log(`\n📊 Final Statistics:`);
     console.log(`   Total Repositories Processed: ${totalProcessed}`);
     console.log(`   Total Projects Added: ${totalAdded}`);
-    console.log(`   Success Rate: ${((totalAdded / totalProcessed) * 100).toFixed(2)}%\n`);
+    const successRate = totalProcessed === 0 ? 0 : (totalAdded / totalProcessed) * 100;
+    console.log(`   Success Rate: ${successRate.toFixed(2)}%\n`);
     
     if (totalAdded > 0) {
       console.log('━'.repeat(70));

@@ -112,16 +112,24 @@ export default function Header() {
                                 className="text-text-secondary hover:text-primary-light transition-colors font-medium px-2 py-2"
                                 onClick={closeMobileMenu}
                             >
-                                Domains
+                                Home
+                            </Link>
+
+                            <Link
+                                href="/projects"
+                                className="text-text-secondary hover:text-primary-light transition-colors font-medium px-2 py-2"
+                                onClick={closeMobileMenu}
+                            >
+                                Projects
                             </Link>
 
                             {user && (
                                 <Link
-                                    href="/dashboard"
+                                    href="/profile"
                                     className="text-text-secondary hover:text-primary-light transition-colors font-medium px-2 py-2"
                                     onClick={closeMobileMenu}
                                 >
-                                    Dashboard
+                                    Profile
                                 </Link>
                             )}
 
@@ -136,31 +144,12 @@ export default function Header() {
                             )}
 
                             {user ? (
-                                <>
-                                    <Link
-                                        href="/profile"
-                                        className="flex items-center gap-3 px-2 py-2 hover:bg-white/5 rounded-lg transition-colors"
-                                        onClick={closeMobileMenu}
-                                    >
-                                        <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-sm border border-primary/20">
-                                            {user.firstName?.[0]?.toUpperCase() || user.email[0].toUpperCase()}
-                                        </div>
-                                        <div className="text-left">
-                                            <div className="text-sm font-medium text-text-primary">
-                                                {user.firstName || user.email}
-                                            </div>
-                                            <div className="text-xs uppercase tracking-wider text-text-muted">
-                                                {user.role}
-                                            </div>
-                                        </div>
-                                    </Link>
-                                    <button
-                                        onClick={handleLogout}
-                                        className="text-left px-2 py-2 text-sm font-medium text-text-secondary hover:text-text-primary transition-colors"
-                                    >
-                                        Sign Out
-                                    </button>
-                                </>
+                                <button
+                                    onClick={handleLogout}
+                                    className="text-left px-2 py-2 text-sm font-medium text-text-secondary hover:text-text-primary transition-colors"
+                                >
+                                    Logout
+                                </button>
                             ) : (
                                 <Link
                                     href="/login"

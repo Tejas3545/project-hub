@@ -3,7 +3,11 @@ const prisma = new PrismaClient();
 
 async function addTestFrameworkData() {
     try {
-        // Find the first GitHub project (TensorFlow or any)
+        // NOTE: This script currently selects the top-starred project for testing purposes.
+        // In production, consider filtering for specific project types (e.g., ML/fraud-detection related)
+        // by adding a where clause on topics, techStack, or project tags to ensure the selected
+        // project is relevant before overwriting with framework data.
+        // Alternatively, add explicit user confirmation before updating the chosen project.
         const project = await prisma.gitHubProject.findFirst({
             orderBy: { stars: 'desc' }
         });
@@ -63,6 +67,7 @@ async function addTestFrameworkData() {
 
     } catch (error) {
         console.error('Error:', error);
+        process.exit(1);
     } finally {
         await prisma.$disconnect();
     }

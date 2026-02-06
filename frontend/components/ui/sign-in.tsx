@@ -70,7 +70,7 @@ function SignInPage() {
                         </div>
 
                         {error && (
-                            <div className="text-sm text-red-500 font-medium">{error}</div>
+                            <div className="text-sm text-red-500 font-medium" role="alert" aria-atomic="true">{error}</div>
                         )}
 
                         <Button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-500 text-white" disabled={loading}>

@@ -29,10 +29,22 @@ export default function GitHubProjectCard({ project }: GitHubProjectCardProps) {
     try {
       setIsDownloading(true);
 
-      // Track download analytics
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/github-projects/${project.id}/track-download`, {
-        method: 'POST',
-      });
+      // Track download analytics (non-blocking)
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      if (!apiUrl) {
+        console.error('NEXT_PUBLIC_API_URL is not configured for download tracking');
+      } else {
+        try {
+          const trackingResponse = await fetch(`${apiUrl}/github-projects/${project.id}/track-download`, {
+            method: 'POST',
+          });
+          if (!trackingResponse.ok) {
+            console.error(`Download tracking failed with status ${trackingResponse.status} for project ${project.id}`);
+          }
+        } catch (trackingError) {
+          console.error(`Download tracking error for project ${project.id}:`, trackingError);
+        }
+      }
 
       // Trigger download using the real GitHub ZIP URL
       const link = document.createElement('a');
@@ -55,9 +67,9 @@ export default function GitHubProjectCard({ project }: GitHubProjectCardProps) {
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
-      case 'EASY': return 'difficulty-easy';
-      case 'MEDIUM': return 'difficulty-medium';
-      case 'HARD': return 'difficulty-hard';
+      case 'EASY': return 'bg-green-500/20 text-green-400 border border-green-500/50';
+      case 'MEDIUM': return 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/50';
+      case 'HARD': return 'bg-red-500/20 text-red-400 border border-red-500/50';
       default: return 'badge-secondary';
     }
   };
@@ -78,13 +90,7 @@ export default function GitHubProjectCard({ project }: GitHubProjectCardProps) {
                   {project.title}
                 </h3>
               </div>
-              <span className={`ml-4 px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${
-                project.difficulty === 'EASY' 
-                  ? 'bg-green-500/20 text-green-400 border border-green-500/50' 
-                  : project.difficulty === 'MEDIUM'
-                  ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/50'
-                  : 'bg-red-500/20 text-red-400 border border-red-500/50'
-              }`}>
+              <span className={`ml-4 px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${getDifficultyColor(project.difficulty)}`}>
                 {project.difficulty === 'EASY' ? 'BEGINNER' : project.difficulty === 'MEDIUM' ? 'INTERMEDIATE' : 'ADVANCED'}
               </span>
             </div>

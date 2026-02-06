@@ -25,7 +25,7 @@ export default function DomainCard({ domain }: DomainCardProps) {
                         </h3>
                         <div className="flex items-center gap-1.5 px-3 py-1.5 bg-primary-dark/20 rounded-lg shrink-0">
                             <span className="text-lg font-bold text-primary-light">{projectCount}</span>
-<span className="text-xs text-gray-400 uppercase tracking-wider">Projects</span>
+                            <span className="text-xs text-gray-400 uppercase tracking-wider">Projects</span>
                         </div>
                     </div>
 

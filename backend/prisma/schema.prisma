@@ -7,7 +7,8 @@ datasource db {
 }
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
 }
 
 model User {
@@ -139,8 +140,8 @@ model GitHubProject {
   slug          String?    @unique // URL-friendly identifier (optional during migration)
   description   String     @db.Text
   repoUrl       String
-  repoOwner     String     @default("unknown") // GitHub username/org (e.g., "OWASP")
-  repoName      String     @default("unknown") // Repository name (e.g., "NodeGoat")
+  repoOwner     String?    // GitHub username/org (e.g., "OWASP")
+  repoName      String?    // Repository name (e.g., "NodeGoat")
   defaultBranch String     @default("main") // main, master, etc.
   downloadUrl   String     @default("") // Direct ZIP download URL from GitHub
   liveUrl       String?    // Live demo/deployed application URL
