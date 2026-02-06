@@ -6,7 +6,10 @@ interface DomainCardProps {
 }
 
 export default function DomainCard({ domain }: DomainCardProps) {
-    const projectCount = domain._count?.githubProjects || 0;
+    // Combine both GitHub projects and regular projects
+    const githubCount = domain._count?.githubProjects || 0;
+    const regularCount = domain._count?.projects || 0;
+    const projectCount = githubCount + regularCount;
 
     return (
         <Link href={`/domains/${domain.slug}/github`} className="block group h-full">

@@ -32,6 +32,8 @@ export const githubProjectController = {
         }
       );
 
+      // Short cache for project listings (30 seconds) for near real-time updates
+      res.set('Cache-Control', 'public, max-age=30, s-maxage=30, stale-while-revalidate=300');
       res.json(result);
     } catch (error: any) {
       res.status(500).json({ error: error.message });
@@ -48,6 +50,8 @@ export const githubProjectController = {
         return res.status(404).json({ error: 'GitHub project not found' });
       }
 
+      // Add aggressive caching for individual projects
+      res.set('Cache-Control', 'public, max-age=600, s-maxage=1200, stale-while-revalidate=86400');
       res.json(project);
     } catch (error: any) {
       res.status(500).json({ error: error.message });

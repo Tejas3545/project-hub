@@ -85,7 +85,7 @@ export default function GitHubProjectCard({ project }: GitHubProjectCardProps) {
                   ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/50'
                   : 'bg-red-500/20 text-red-400 border border-red-500/50'
               }`}>
-                {project.difficulty}
+                {project.difficulty === 'EASY' ? 'BEGINNER' : project.difficulty === 'MEDIUM' ? 'INTERMEDIATE' : 'ADVANCED'}
               </span>
             </div>
 

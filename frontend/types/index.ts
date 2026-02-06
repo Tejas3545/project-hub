@@ -6,6 +6,7 @@ export interface Domain {
     projects?: Project[];
     _count?: {
         projects: number;
+        githubProjects: number;
     };
     projectCountsByDifficulty?: {
         EASY: number;

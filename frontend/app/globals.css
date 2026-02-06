@@ -188,19 +188,57 @@ input:focus {
 
 /* Mobile-specific improvements */
 @media (max-width: 640px) {
-  /* Ensure touch targets are large enough */
-  button, a {
+  /* Ensure touch targets are large enough (Apple and Google guidelines) */
+  button, a, input, select {
     min-height: 44px;
+    min-width: 44px;
   }
   
   /* Prevent text from being too small on mobile */
   body {
     font-size: 16px; /* Prevents zoom on iOS */
+    line-height: 1.6;
   }
   
   /* Better spacing for cards on mobile */
   .glass-card, .pro-card {
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.75rem;
+    padding: 1rem !important;
+  }
+  
+  /* Optimize headings for mobile */
+  h1 { font-size: 1.875rem !important; } /* 30px */
+  h2 { font-size: 1.5rem !important; }   /* 24px */
+  h3 { font-size: 1.25rem !important; }  /* 20px */
+  
+  /* Reduce padding for mobile containers */
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  /* Stack elements vertically on mobile */
+  .flex-wrap {
+    flex-direction: column;
+  }
+  
+  /* Better button sizing */
+  .btn-primary, .btn-secondary {
+    padding: 0.875rem 1.25rem;
+    font-size: 1rem;
+    width: 100%;
+  }
+  
+  /* Optimize badges for mobile */
+  .badge {
+    padding: 0.25rem 0.6rem;
+    font-size: 0.75rem;
+  }
+  
+  /* Better modal/dialog on mobile */
+  .modal, .dialog {
+    width: 95vw;
+    max-width: 95vw;
   }
 }
 
@@ -210,12 +248,37 @@ input:focus {
     padding-left: 1.5rem;
     padding-right: 1.5rem;
   }
+  
+  /* Better grid layouts for tablets */
+  .grid-cols-1 {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  }
+  
+  /* Optimize card sizing */
+  .glass-card, .pro-card {
+    padding: 1.5rem !important;
+  }
 }
 
-/* Prevent horizontal scroll */
+/* Desktop optimizations */
+@media (min-width: 1025px) {
+  /* Allow hover effects on desktop only */
+  .glass-card:hover, .pro-card:hover {
+    background-color: #171717;
+    transform: translateY(-2px);
+  }
+  
+  /* Optimize max-width for readability */
+  .container {
+    max-width: 1400px;
+  }
+}
+
+/* Prevent horizontal scroll on all devices */
 html, body {
   overflow-x: hidden;
   width: 100%;
+  max-width: 100vw;
 }
 
 /* Smooth scrolling */
@@ -228,10 +291,122 @@ html {
   /* Larger touch targets on touch devices */
   button, a, input, select {
     min-height: 48px;
+    min-width: 48px;
   }
   
   /* Remove hover effects on touch devices */
   .glass-card:hover, .pro-card:hover {
     transform: none;
+  }
+  
+  /* Better tap feedback */
+  button:active, a:active {
+    opacity: 0.7;
+    transform: scale(0.98);
+  }
+}
+
+/* Landscape mobile orientation */
+@media (max-width: 900px) and (orientation: landscape) {
+  /* Reduce vertical spacing in landscape */
+  .py-8, .py-12 {
+    padding-top: 1rem !important;
+    padding-bottom: 1rem !important;
+  }
+  
+  /* Compact headers in landscape */
+  h1 { font-size: 1.5rem !important; }
+  h2 { font-size: 1.25rem !important; }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .glass-card, .pro-card {
+    border: 2px solid var(--border-subtle) !important;
+  }
+  
+  .btn-primary {
+    border: 2px solid #ffffff;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* Dark mode support (already dark, but prepare for future) */
+@media (prefers-color-scheme: dark) {
+  /* Already optimized for dark */
+}
+
+/* Print styles */
+@media print {
+  .glass-card, .pro-card {
+    box-shadow: none;
+    border: 1px solid #ccc;
+  }
+  
+  /* Hide navigation and non-essential elements */
+  nav, footer, .floating-nav {
+    display: none;
+  }
+}
+
+/* Custom utility for section content indentation */
+.pl-21 {
+  padding-left: 5.25rem;
+}
+
+/* Enhanced typography for project sections */
+@layer utilities {
+  .tracking-tight {
+    letter-spacing: -0.025em;
+  }
+  
+  .tracking-wider {
+    letter-spacing: 0.05em;
+  }
+}
+
+/* Improved text rendering for better readability */
+.text-lg {
+  font-size: 1.125rem;
+  line-height: 1.8;
+}
+
+.text-4xl {
+  font-size: 2.25rem;
+  line-height: 1.2;
+}
+
+/* Professional shadow effects for section cards */
+.shadow-2xl {
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+/* Smooth hover transitions for interactive elements */
+.transition-all {
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 300ms;
+}
+
+/* Responsive padding adjustments */
+@media (max-width: 768px) {
+  .pl-21 {
+    padding-left: 0;
+  }
+  
+  .text-4xl {
+    font-size: 1.875rem;
   }
 }

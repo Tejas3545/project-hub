@@ -120,12 +120,11 @@ export default function GitHubProjectDetailPage({ params }: { params: Promise<{ 
             <div className="glass-card p-10 mb-8 glow">
                 <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
                     <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-4">
-                            <span className="badge badge-primary">GitHub Project</span>
-                            {project.author && (
+                        {project.author && (
+                            <div className="mb-4">
                                 <span className="text-sm text-text-muted">by {project.author}</span>
-                            )}
-                        </div>
+                            </div>
+                        )}
                         <h1 className="text-3xl md:text-4xl font-display font-bold text-text-primary mb-4">
                             {project.title}
                         </h1>
@@ -221,90 +220,96 @@ export default function GitHubProjectDetailPage({ params }: { params: Promise<{ 
 
             {/* Real-World Solution Framework - Case Study */}
             {project.caseStudy && (
-                <section className="mb-8">
-                    <div className="glass-card p-8 border-2 border-primary/20 glow">
-                        <div className="flex items-center gap-3 mb-6">
-                            <div className="w-10 h-10 bg-gradient-to-br from-primary-light/20 to-primary/20 border border-primary/30 rounded-lg flex items-center justify-center">
-                                <svg className="w-6 h-6 text-primary-light" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <section className="mb-10">
+                    <div className="glass-card p-10 border-l-4 border-primary shadow-2xl hover:shadow-primary/20 transition-all duration-300">
+                        <div className="flex items-start gap-5 mb-8">
+                            <div className="w-16 h-16 bg-gradient-to-br from-primary-light to-primary rounded-2xl flex items-center justify-center shadow-lg shrink-0">
+                                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                                 </svg>
                             </div>
-                            <div>
-                                <h2 className="text-2xl font-display font-bold text-text-primary">The Case Study</h2>
-                                <p className="text-sm text-text-muted">Real-World Story</p>
+                            <div className="flex-1">
+                                <h2 className="text-4xl font-display font-bold text-text-primary mb-3 tracking-tight">The Case Study</h2>
+                                <p className="text-base text-primary-light font-medium uppercase tracking-wider">Real-World Story</p>
                             </div>
                         </div>
-                        <p className="text-text-secondary leading-relaxed whitespace-pre-wrap">
-                            {project.caseStudy}
-                        </p>
+                        <div className="pl-21">
+                            <p className="text-lg text-text-secondary leading-[1.8] whitespace-pre-wrap font-light">
+                                {project.caseStudy}
+                            </p>
+                        </div>
                     </div>
                 </section>
             )}
 
             {/* Problem Statement */}
             {project.problemStatement && (
-                <section className="mb-8">
-                    <div className="glass-card p-8">
-                        <div className="flex items-center gap-3 mb-6">
-                            <div className="w-10 h-10 bg-gradient-to-br from-accent-warm/20 to-primary/20 border border-accent-warm/30 rounded-lg flex items-center justify-center">
-                                <svg className="w-6 h-6 text-accent-warm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <section className="mb-10">
+                    <div className="glass-card p-10 border-l-4 border-accent-warm shadow-2xl hover:shadow-accent-warm/20 transition-all duration-300">
+                        <div className="flex items-start gap-5 mb-8">
+                            <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl flex items-center justify-center shadow-lg shrink-0">
+                                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                                 </svg>
                             </div>
-                            <div>
-                                <h2 className="text-2xl font-display font-bold text-text-primary">Problem Statement</h2>
-                                <p className="text-sm text-text-muted">The Challenge to Solve</p>
+                            <div className="flex-1">
+                                <h2 className="text-4xl font-display font-bold text-text-primary mb-3 tracking-tight">Problem Statement</h2>
+                                <p className="text-base text-orange-400 font-medium uppercase tracking-wider">The Challenge to Solve</p>
                             </div>
                         </div>
-                        <p className="text-text-secondary leading-relaxed whitespace-pre-wrap">
-                            {project.problemStatement}
-                        </p>
+                        <div className="pl-21">
+                            <p className="text-lg text-text-secondary leading-[1.8] whitespace-pre-wrap font-light">
+                                {project.problemStatement}
+                            </p>
+                        </div>
                     </div>
                 </section>
             )}
 
             {/* Solution Description */}
             {project.solutionDescription && (
-                <section className="mb-8">
-                    <div className="glass-card p-8 bg-gradient-to-br from-primary/5 to-transparent">
-                        <div className="flex items-center gap-3 mb-6">
-                            <div className="w-10 h-10 bg-gradient-to-br from-green-500/20 to-primary/20 border border-green-500/30 rounded-lg flex items-center justify-center">
-                                <svg className="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <section className="mb-10">
+                    <div className="glass-card p-10 border-l-4 border-green-500 shadow-2xl hover:shadow-green-500/20 transition-all duration-300 bg-gradient-to-br from-green-500/5 via-transparent to-transparent">
+                        <div className="flex items-start gap-5 mb-8">
+                            <div className="w-16 h-16 bg-gradient-to-br from-green-400 to-emerald-600 rounded-2xl flex items-center justify-center shadow-lg shrink-0">
+                                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                             </div>
-                            <div>
-                                <h2 className="text-2xl font-display font-bold text-text-primary">Solution Description</h2>
-                                <p className="text-sm text-text-muted">How This Project Solves It</p>
+                            <div className="flex-1">
+                                <h2 className="text-4xl font-display font-bold text-text-primary mb-3 tracking-tight">Solution Description</h2>
+                                <p className="text-base text-green-400 font-medium uppercase tracking-wider">How This Project Solves It</p>
                             </div>
                         </div>
-                        <p className="text-text-secondary leading-relaxed whitespace-pre-wrap">
-                            {project.solutionDescription}
-                        </p>
+                        <div className="pl-21">
+                            <p className="text-lg text-text-secondary leading-[1.8] whitespace-pre-wrap font-light">
+                                {project.solutionDescription}
+                            </p>
+                        </div>
                     </div>
                 </section>
             )}
 
             {/* Tech Stack */}
             {project.techStack && project.techStack.length > 0 && (
-                <section className="mb-8">
-                    <div className="glass-card p-8 bg-gradient-to-br from-purple-500/5 to-transparent">
-                        <div className="flex items-center gap-3 mb-6">
-                            <div className="w-10 h-10 bg-gradient-to-br from-purple-500/20 to-primary/20 border border-purple-500/30 rounded-lg flex items-center justify-center">
-                                <svg className="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <section className="mb-10">
+                    <div className="glass-card p-10 border-l-4 border-purple-500 shadow-2xl hover:shadow-purple-500/20 transition-all duration-300 bg-gradient-to-br from-purple-500/5 via-transparent to-transparent">
+                        <div className="flex items-start gap-5 mb-8">
+                            <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shrink-0">
+                                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
                                 </svg>
                             </div>
-                            <div>
-                                <h2 className="text-2xl font-display font-bold text-text-primary">Tech Stack</h2>
-                                <p className="text-sm text-text-muted">Technologies Used</p>
+                            <div className="flex-1">
+                                <h2 className="text-4xl font-display font-bold text-text-primary mb-3 tracking-tight">Tech Stack</h2>
+                                <p className="text-base text-purple-400 font-medium uppercase tracking-wider">Technologies Used</p>
                             </div>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pl-21">
                             {project.techStack.map((tech: string, idx: number) => (
-                                <div key={idx} className="flex items-center gap-3 p-4 bg-white/5 rounded-lg border border-white/10">
-                                    <div className="w-2 h-2 rounded-full bg-purple-400"></div>
-                                    <span className="text-text-secondary font-medium">{tech}</span>
+                                <div key={idx} className="group flex items-center gap-4 p-5 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 hover:border-purple-500/50 transition-all duration-200">
+                                    <div className="w-3 h-3 rounded-full bg-gradient-to-r from-purple-400 to-pink-500 shrink-0 group-hover:scale-125 transition-transform"></div>
+                                    <span className="text-text-primary text-base font-medium group-hover:text-purple-300 transition-colors">{tech}</span>
                                 </div>
                             ))}
                         </div>
@@ -314,21 +319,28 @@ export default function GitHubProjectDetailPage({ params }: { params: Promise<{ 
 
             {/* Prerequisites */}
             {user && project.prerequisites && project.prerequisites.length > 0 && (
-                <section className="mb-8">
-                    <div className="glass-card p-8">
-                        <div className="flex items-center gap-3 mb-6">
-                            <svg className="w-6 h-6 text-primary-light" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                            </svg>
-                            <h2 className="text-2xl font-display font-bold text-text-primary">Prerequisites</h2>
+                <section className="mb-10">
+                    <div className="glass-card p-10 border-l-4 border-blue-500 shadow-2xl hover:shadow-blue-500/20 transition-all duration-300">
+                        <div className="flex items-start gap-5 mb-8">
+                            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-2xl flex items-center justify-center shadow-lg shrink-0">
+                                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                                </svg>
+                            </div>
+                            <div className="flex-1">
+                                <h2 className="text-4xl font-display font-bold text-text-primary mb-3 tracking-tight">Prerequisites</h2>
+                                <p className="text-base text-blue-400 font-medium uppercase tracking-wider">What You Need to Know</p>
+                            </div>
                         </div>
-                        <ul className="space-y-3">
+                        <ul className="space-y-4 pl-21">
                             {project.prerequisites.map((prereq: string, idx: number) => (
-                                <li key={idx} className="flex items-start gap-3 text-text-secondary">
-                                    <svg className="w-5 h-5 text-primary-light mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                    <span>{prereq}</span>
+                                <li key={idx} className="flex items-start gap-4 group">
+                                    <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-500/20 to-cyan-500/20 border-2 border-blue-500/40 flex items-center justify-center shrink-0 mt-1 group-hover:scale-110 group-hover:border-blue-400 transition-all">
+                                        <svg className="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                                        </svg>
+                                    </div>
+                                    <span className="text-text-secondary text-base leading-[1.7] font-light group-hover:text-text-primary transition-colors">{prereq}</span>
                                 </li>
                             ))}
                         </ul>
@@ -338,26 +350,26 @@ export default function GitHubProjectDetailPage({ params }: { params: Promise<{ 
 
             {/* Deliverables */}
             {user && project.deliverables && project.deliverables.length > 0 && (
-                <section className="mb-8">
-                    <div className="glass-card p-8">
-                        <div className="flex items-center gap-3 mb-6">
-                            <div className="w-10 h-10 bg-gradient-to-br from-blue-500/20 to-primary/20 border border-blue-500/30 rounded-lg flex items-center justify-center">
-                                <svg className="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <section className="mb-10">
+                    <div className="glass-card p-10 border-l-4 border-indigo-500 shadow-2xl hover:shadow-indigo-500/20 transition-all duration-300">
+                        <div className="flex items-start gap-5 mb-8">
+                            <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg shrink-0">
+                                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                 </svg>
                             </div>
-                            <div>
-                                <h2 className="text-2xl font-display font-bold text-text-primary">Project Deliverables</h2>
-                                <p className="text-sm text-text-muted">What You&apos;ll Submit</p>
+                            <div className="flex-1">
+                                <h2 className="text-4xl font-display font-bold text-text-primary mb-3 tracking-tight">Project Deliverables</h2>
+                                <p className="text-base text-indigo-400 font-medium uppercase tracking-wider">What You&apos;ll Submit</p>
                             </div>
                         </div>
-                        <ul className="space-y-4">
+                        <ul className="space-y-5 pl-21">
                             {project.deliverables.map((deliverable: string, idx: number) => (
-                                <li key={idx} className="flex items-start gap-4">
-                                    <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-primary-light/20 to-primary/20 border border-primary/30 flex items-center justify-center shrink-0 mt-0.5">
-                                        <span className="text-sm font-bold text-primary-light">{idx + 1}</span>
+                                <li key={idx} className="flex items-start gap-5 group">
+                                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shrink-0 shadow-md group-hover:shadow-lg group-hover:scale-105 transition-all">
+                                        <span className="text-lg font-bold text-white">{idx + 1}</span>
                                     </div>
-                                    <span className="text-text-secondary leading-relaxed">{deliverable}</span>
+                                    <span className="text-text-secondary text-base leading-[1.7] font-light flex-1 pt-2 group-hover:text-text-primary transition-colors">{deliverable}</span>
                                 </li>
                             ))}
                         </ul>
@@ -367,22 +379,24 @@ export default function GitHubProjectDetailPage({ params }: { params: Promise<{ 
 
             {/* Supposed Deadline */}
             {user && project.supposedDeadline && (
-                <section className="mb-8">
-                    <div className="glass-card p-8 border-2 border-yellow-500/20 bg-gradient-to-br from-yellow-500/5 to-transparent">
-                        <div className="flex items-center gap-3 mb-4">
-                            <div className="w-10 h-10 bg-gradient-to-br from-yellow-500/20 to-orange-500/20 border border-yellow-500/30 rounded-lg flex items-center justify-center">
-                                <svg className="w-6 h-6 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <section className="mb-10">
+                    <div className="glass-card p-10 border-l-4 border-yellow-500 shadow-2xl hover:shadow-yellow-500/20 transition-all duration-300 bg-gradient-to-br from-yellow-500/5 via-orange-500/5 to-transparent">
+                        <div className="flex items-start gap-5 mb-6">
+                            <div className="w-16 h-16 bg-gradient-to-br from-yellow-500 to-orange-600 rounded-2xl flex items-center justify-center shadow-lg shrink-0">
+                                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                             </div>
-                            <div>
-                                <h2 className="text-2xl font-display font-bold text-text-primary">Supposed Deadline</h2>
-                                <p className="text-sm text-text-muted">Realistic Completion Timeframe</p>
+                            <div className="flex-1">
+                                <h2 className="text-4xl font-display font-bold text-text-primary mb-3 tracking-tight">Supposed Deadline</h2>
+                                <p className="text-base text-yellow-400 font-medium uppercase tracking-wider">Realistic Completion Timeframe</p>
                             </div>
                         </div>
-                        <p className="text-text-secondary text-lg font-medium">
-                            {project.supposedDeadline}
-                        </p>
+                        <div className="pl-21">
+                            <p className="text-2xl text-text-primary font-semibold tracking-wide">
+                                {project.supposedDeadline}
+                            </p>
+                        </div>
                     </div>
                 </section>
             )}

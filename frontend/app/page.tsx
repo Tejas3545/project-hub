@@ -10,19 +10,31 @@ import { useEffect, useState } from 'react';
 export default function HomePage() {
   const [domains, setDomains] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
   useEffect(() => {
     async function fetchDomains() {
       try {
         const data = await domainApi.getAll();
         setDomains(data);
+        setLastUpdated(new Date());
       } catch (error) {
         console.error('Failed to fetch domains:', error);
       } finally {
         setLoading(false);
       }
     }
+    
+    // Initial fetch
     fetchDomains();
+    
+    // Auto-refresh every 30 seconds for real-time updates
+    const interval = setInterval(() => {
+      fetchDomains();
+    }, 30000);
+    
+    // Cleanup interval on unmount
+    return () => clearInterval(interval);
   }, []);
 
   return (
@@ -72,9 +84,16 @@ export default function HomePage() {
             <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-display font-bold text-text-primary mb-4 sm:mb-6 px-4">
               Choose Your Domain
             </h2>
-            <p className="text-base sm:text-lg lg:text-xl text-text-secondary max-w-2xl mx-auto px-4">
+            <p className="text-base sm:text-lg lg:text-xl text-text-secondary max-w-2xl mx-auto px-4 mb-4">
               Select a domain to explore structured project challenges designed by industry professionals
             </p>
+            {/* Live Update Indicator */}
+            {lastUpdated && (
+              <div className="flex items-center justify-center gap-2 text-xs text-gray-400">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <span>Live Updates • Auto-refreshes every 30s</span>
+              </div>
+            )}
           </div>
 
           {loading ? (

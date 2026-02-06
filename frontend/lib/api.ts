@@ -125,7 +125,8 @@ export const authApi = {
 // Domain API
 export const domainApi = {
     getAll: async (): Promise<Domain[]> => {
-        return api.get<Domain[]>('/domains');
+        // Add timestamp to bypass any caching layers
+        return api.get<Domain[]>(`/domains?_t=${Date.now()}`);
     },
 
     getById: async (id: string): Promise<Domain> => {
@@ -244,7 +245,7 @@ export const githubProjectApi = {
 
 // General API client for authenticated requests
 export const api = {
-    get: async <T = any>(endpoint: string, options?: { params?: Record<string, any> }): Promise<T> => {
+    get: async <T = any>(endpoint: string, options?: { params?: Record<string, any>; cache?: RequestCache }): Promise<T> => {
         const params = new URLSearchParams();
         if (options?.params) {
             Object.entries(options.params).forEach(([key, value]) => {
@@ -261,6 +262,7 @@ export const api = {
             const res = await fetch(url, {
                 method: 'GET',
                 headers: getAuthHeaders(),
+                cache: options?.cache || 'no-store', // Default to no-store for fresh data
             });
 
             console.log('Response status:', res.status, res.statusText);

@@ -5,8 +5,12 @@ export const getAllDomains = async () => {
         include: {
             _count: {
                 select: { 
-                    projects: true,
-                    githubProjects: true 
+                    projects: {
+                        where: { isPublished: true }
+                    },
+                    githubProjects: {
+                        where: { isActive: true }
+                    }
                 },
             },
         },

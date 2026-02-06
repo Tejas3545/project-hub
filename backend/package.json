@@ -14,7 +14,11 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "scrape-github": "ts-node prisma/githubScraper.ts",
-    "seed-github": "ts-node prisma/seedGitHubProjects.ts"
+    "seed-github": "ts-node prisma/seedGitHubProjects.ts",
+    "generate-content": "ts-node prisma/generateUniqueProjectContent.ts",
+    "scrape-quality": "ts-node prisma/advancedGitHubScraper.ts",
+    "test-counts": "ts-node prisma/testDomainCounts.ts",
+    "add-projects-complete": "ts-node prisma/addProjectsComplete.ts"
   },
   "keywords": [],
   "author": "",

@@ -4,6 +4,10 @@ import * as domainService from '../services/domainService';
 export const getAllDomains = async (req: Request, res: Response) => {
     try {
         const domains = await domainService.getAllDomains();
+        // Real-time updates: no caching for domain counts
+        res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+        res.set('Pragma', 'no-cache');
+        res.set('Expires', '0');
         res.json(domains);
     } catch (error: any) {
         res.status(500).json({ error: error.message });
@@ -34,6 +38,10 @@ export const getDomainBySlug = async (req: Request, res: Response) => {
             return res.status(404).json({ error: 'Domain not found' });
         }
 
+        // Real-time updates: no caching for domain data
+        res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+        res.set('Pragma', 'no-cache');
+        res.set('Expires', '0');
         res.json(domain);
     } catch (error: any) {
         res.status(500).json({ error: error.message });
