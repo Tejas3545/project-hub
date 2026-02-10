@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { projectApi, domainApi } from '@/lib/api';
+import CloudinaryUpload from '@/components/CloudinaryUpload';
 import Link from 'next/link';
 
 interface Domain {
@@ -29,6 +30,7 @@ export default function NewProjectPage() {
         advancedExtensions: '',
         evaluationCriteria: '',
         isPublished: false,
+        screenshots: [] as string[],
     });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
@@ -74,6 +76,7 @@ export default function NewProjectPage() {
                 deliverables: formData.deliverables.split(',').map(s => s.trim()).filter(Boolean),
                 advancedExtensions: formData.advancedExtensions || undefined,
                 evaluationCriteria: formData.evaluationCriteria || undefined,
+                screenshots: formData.screenshots,
             };
 
             await projectApi.create(projectData);
@@ -139,6 +142,7 @@ export default function NewProjectPage() {
                                     <select
                                         name="domainId"
                                         required
+                                        aria-label="Domain"
                                         value={formData.domainId}
                                         onChange={handleChange}
                                         className="w-full px-4 py-3 bg-dark-card border border-dark-lighter rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary"
@@ -158,6 +162,7 @@ export default function NewProjectPage() {
                                     <select
                                         name="difficulty"
                                         required
+                                        aria-label="Difficulty"
                                         value={formData.difficulty}
                                         onChange={handleChange}
                                         className="w-full px-4 py-3 bg-dark-card border border-dark-lighter rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary"
@@ -197,6 +202,7 @@ export default function NewProjectPage() {
                                         required
                                         min="1"
                                         max="1000"
+                                        aria-label="Min Time (hours)"
                                         value={formData.minTime}
                                         onChange={handleChange}
                                         className="w-full px-4 py-3 bg-dark-card border border-dark-lighter rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary"
@@ -212,6 +218,7 @@ export default function NewProjectPage() {
                                         required
                                         min="1"
                                         max="1000"
+                                        aria-label="Max Time (hours)"
                                         value={formData.maxTime}
                                         onChange={handleChange}
                                         className="w-full px-4 py-3 bg-dark-card border border-dark-lighter rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary"
@@ -344,20 +351,42 @@ export default function NewProjectPage() {
                                     placeholder="How the project will be evaluated..."
                                 />
                             </div>
+                        </div>
+                    </div>
 
-                            <div className="flex items-center gap-3">
-                                <input
-                                    type="checkbox"
-                                    id="isPublished"
-                                    name="isPublished"
-                                    checked={formData.isPublished}
-                                    onChange={handleChange}
-                                    className="w-4 h-4 rounded border-dark-lighter text-primary focus:ring-primary"
-                                />
-                                <label htmlFor="isPublished" className="text-sm text-text-primary cursor-pointer">
-                                    Publish immediately (make visible to students)
-                                </label>
-                            </div>
+                    {/* Project Screenshots */}
+                    <div className="glass-card p-6">
+                        <h2 className="text-xl font-display font-bold text-text-primary mb-6">
+                            Project Screenshots
+                        </h2>
+                        <div className="space-y-4">
+                            <CloudinaryUpload
+                                onUploadComplete={(urls) => {
+                                    setFormData(prev => ({ ...prev, screenshots: urls }));
+                                }}
+                                maxFiles={5}
+                                existingImages={formData.screenshots}
+                            />
+                            <p className="text-xs text-text-muted">
+                                Upload up to 5 screenshots to showcase the project. These will be displayed on the project detail page.
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* Publish Settings */}
+                    <div className="glass-card p-6">
+                        <div className="flex items-center gap-3">
+                            <input
+                                type="checkbox"
+                                id="isPublished"
+                                name="isPublished"
+                                checked={formData.isPublished}
+                                onChange={handleChange}
+                                className="w-4 h-4 rounded border-dark-lighter text-primary focus:ring-primary"
+                            />
+                            <label htmlFor="isPublished" className="text-sm text-text-primary cursor-pointer">
+                                Publish immediately (make visible to students)
+                            </label>
                         </div>
                     </div>
 

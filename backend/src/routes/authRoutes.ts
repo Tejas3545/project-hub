@@ -18,6 +18,8 @@ const router = Router();
 router.post('/register', registerLimiter, validate(userRegisterSchema), authController.register);
 router.post('/login', authLimiter, validate(userLoginSchema), authController.login);
 router.post('/refresh', authLimiter, authController.refresh);
+router.post('/google-auth', authLimiter, authController.googleAuth);
+router.post('/google-user', authLimiter, authController.googleUser);
 
 // Protected routes
 router.get('/me', authenticate, authController.getMe);

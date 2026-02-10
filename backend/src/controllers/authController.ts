@@ -93,8 +93,8 @@ export const updateProfile = async (req: AuthRequest, res: Response, next: NextF
             return res.status(401).json({ error: 'Authentication required' });
         }
 
-        const { firstName, lastName } = req.body;
-        const user = await authService.updateUserProfile(req.user.id, { firstName, lastName });
+        const { firstName, lastName, profileImage, bio } = req.body;
+        const user = await authService.updateUserProfile(req.user.id, { firstName, lastName, profileImage, bio });
 
         logSecurityEvent('Profile Updated', {
             userId: req.user.id,
@@ -106,6 +106,58 @@ export const updateProfile = async (req: AuthRequest, res: Response, next: NextF
             message: 'Profile updated successfully',
             user,
         });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { email, firstName, lastName, profileImage } = req.body;
+
+        if (!email) {
+            return res.status(400).json({ error: 'Email is required' });
+        }
+
+        const user = await authService.googleAuthUser({
+            email,
+            firstName,
+            lastName,
+            profileImage,
+        });
+
+        logSecurityEvent('Google OAuth Login', {
+            userId: user.id,
+            email: user.email,
+            ip: req.ip,
+        });
+
+        res.json(user);
+    } catch (error) {
+        logSecurityEvent('Failed Google OAuth Attempt', {
+            email: req.body.email,
+            ip: req.ip,
+        });
+        next(error);
+    }
+};
+
+export const googleUser = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { email, id } = req.body;
+
+        if (!email && !id) {
+            return res.status(400).json({ error: 'Email or ID is required' });
+        }
+
+        // Fetch user from database by email or id
+        const user = await authService.getUserByEmailOrId(email, id);
+
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        res.json(user);
     } catch (error) {
         next(error);
     }

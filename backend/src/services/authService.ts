@@ -67,6 +67,10 @@ export const loginUser = async (email: string, password: string) => {
     }
 
     // Verify password
+    if (!user.passwordHash) {
+        throw new AppError('Invalid credentials', 401);
+    }
+
     const isValidPassword = await bcrypt.compare(password, user.passwordHash);
 
     if (!isValidPassword) {
@@ -92,6 +96,8 @@ export const loginUser = async (email: string, password: string) => {
             email: user.email,
             firstName: user.firstName,
             lastName: user.lastName,
+            profileImage: user.profileImage,
+            bio: user.bio,
             role: user.role,
             isVerified: user.isVerified,
         },
@@ -128,6 +134,8 @@ export const getUserProfile = async (userId: string) => {
             email: true,
             firstName: true,
             lastName: true,
+            profileImage: true,
+            bio: true,
             role: true,
             isVerified: true,
             createdAt: true,
@@ -141,18 +149,25 @@ export const getUserProfile = async (userId: string) => {
     return user;
 };
 
-export const updateUserProfile = async (userId: string, data: { firstName?: string; lastName?: string }) => {
+export const updateUserProfile = async (
+    userId: string,
+    data: { firstName?: string; lastName?: string; profileImage?: string; bio?: string }
+) => {
     const user = await prisma.user.update({
         where: { id: userId },
         data: {
             firstName: data.firstName,
             lastName: data.lastName,
+            profileImage: data.profileImage,
+            bio: data.bio,
         },
         select: {
             id: true,
             email: true,
             firstName: true,
             lastName: true,
+            profileImage: true,
+            bio: true,
             role: true,
             isVerified: true,
             createdAt: true,
@@ -173,4 +188,127 @@ const generateRefreshToken = (payload: { id: string; email: string; role: string
     return jwt.sign(payload, authConfig.jwtRefreshSecret, {
         expiresIn: authConfig.jwtRefreshExpiresIn,
     } as jwt.SignOptions);
+};
+
+export const googleAuthUser = async (data: {
+    email: string;
+    firstName?: string;
+    lastName?: string;
+    profileImage?: string;
+    bio?: string;
+}) => {
+    try {
+        // Check if user exists
+        let user = await prisma.user.findUnique({
+            where: { email: data.email.toLowerCase() },
+            select: {
+                id: true,
+                email: true,
+                firstName: true,
+                lastName: true,
+                profileImage: true,
+                bio: true,
+                role: true,
+                isVerified: true,
+                createdAt: true,
+            },
+        });
+
+        // If user doesn't exist, create them
+        if (!user) {
+            user = await prisma.user.create({
+                data: {
+                    email: data.email.toLowerCase(),
+                    passwordHash: '', // Google OAuth users don't need password
+                    firstName: data.firstName,
+                    lastName: data.lastName,
+                    profileImage: data.profileImage,
+                    bio: data.bio,
+                    role: 'STUDENT',
+                    isVerified: true, // Auto-verify Google users
+                    lastLogin: new Date(),
+                },
+                select: {
+                    id: true,
+                    email: true,
+                    firstName: true,
+                    lastName: true,
+                    profileImage: true,
+                    bio: true,
+                    role: true,
+                    isVerified: true,
+                    createdAt: true,
+                },
+            });
+        } else {
+            // Update last login and profile image if changed
+            user = await prisma.user.update({
+                where: { id: user.id },
+                data: {
+                    lastLogin: new Date(),
+                    profileImage: data.profileImage || user.profileImage,
+                    bio: data.bio || user.bio,
+                },
+                select: {
+                    id: true,
+                    email: true,
+                    firstName: true,
+                    lastName: true,
+                    profileImage: true,
+                    bio: true,
+                    role: true,
+                    isVerified: true,
+                    createdAt: true,
+                },
+            });
+        }
+
+        return user;
+    } catch (error) {
+        console.error('Google Auth Error:', error);
+        throw new AppError('Failed to authenticate with Google', 500);
+    }
+};
+
+export const getUserByEmailOrId = async (email?: string, id?: string) => {
+    try {
+        if (id) {
+            return await prisma.user.findUnique({
+                where: { id },
+                select: {
+                    id: true,
+                    email: true,
+                    firstName: true,
+                    lastName: true,
+                    profileImage: true,
+                    bio: true,
+                    role: true,
+                    isVerified: true,
+                    createdAt: true,
+                },
+            });
+        }
+
+        if (email) {
+            return await prisma.user.findUnique({
+                where: { email: email.toLowerCase() },
+                select: {
+                    id: true,
+                    email: true,
+                    firstName: true,
+                    lastName: true,
+                    profileImage: true,
+                    bio: true,
+                    role: true,
+                    isVerified: true,
+                    createdAt: true,
+                },
+            });
+        }
+
+        return null;
+    } catch (error) {
+        console.error('Get User Error:', error);
+        throw new AppError('Failed to fetch user', 500);
+    }
 };

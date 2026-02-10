@@ -26,4 +26,13 @@ router.get('/progress', authenticate, generalLimiter, userController.getUserProg
 router.put('/progress/:projectId', authenticate, writeLimiter, validateParams(z.object({ projectId: z.string().uuid() })), validate(projectProgressUpdateSchema), userController.updateProgress);
 router.get('/progress/:projectId', authenticate, generalLimiter, validateParams(z.object({ projectId: z.string().uuid() })), userController.getProjectProgress);
 
+// GitHub Project Progress routes - all require authentication
+router.get('/github-progress', authenticate, generalLimiter, userController.getGithubProjectProgress);
+router.put('/github-progress/:projectId', authenticate, writeLimiter, validateParams(z.object({ projectId: z.string().uuid() })), userController.upsertGithubProjectProgress);
+router.get('/github-progress/:projectId', authenticate, generalLimiter, validateParams(z.object({ projectId: z.string().uuid() })), userController.getGithubSingleProgress);
+
+// Profile stats and activity
+router.get('/profile-stats', authenticate, generalLimiter, userController.getProfileStats);
+router.get('/activity', authenticate, generalLimiter, userController.getActivity);
+
 export default router;

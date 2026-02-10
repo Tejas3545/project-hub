@@ -54,19 +54,37 @@ export const getDomainBySlug = async (slug: string) => {
                     subDomain: true,
                 },
             },
+            githubProjects: {
+                where: { isActive: true },
+                select: {
+                    id: true,
+                    title: true,
+                    difficulty: true,
+                    subDomain: true,
+                    estimatedMinTime: true,
+                    estimatedMaxTime: true,
+                },
+            },
             _count: {
-                select: { projects: true },
+                select: {
+                    projects: { where: { isPublished: true } },
+                    githubProjects: { where: { isActive: true } },
+                },
             },
         },
     });
 
     if (!domain) return null;
 
-    // Calculate project counts by difficulty
+    // Calculate project counts by difficulty (combine both Project and GitHubProject)
+    const allDifficulties = [
+        ...domain.projects.map((p: any) => p.difficulty),
+        ...domain.githubProjects.map((p: any) => p.difficulty),
+    ];
     const projectCountsByDifficulty = {
-        EASY: domain.projects.filter((p: any) => p.difficulty === 'EASY').length,
-        MEDIUM: domain.projects.filter((p: any) => p.difficulty === 'MEDIUM').length,
-        HARD: domain.projects.filter((p: any) => p.difficulty === 'HARD').length,
+        EASY: allDifficulties.filter((d: string) => d === 'EASY').length,
+        MEDIUM: allDifficulties.filter((d: string) => d === 'MEDIUM').length,
+        HARD: allDifficulties.filter((d: string) => d === 'HARD').length,
     };
 
     return {

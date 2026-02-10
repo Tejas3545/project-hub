@@ -148,7 +148,14 @@ export const githubProjectService = {
       OR: [
         { title: { contains: query, mode: 'insensitive' as const } },
         { description: { contains: query, mode: 'insensitive' as const } },
-        { techStack: { has: query } }
+        { techStack: { hasSome: query.split(/\s+/) } },
+        { topics: { hasSome: query.split(/\s+/) } },
+        { language: { contains: query, mode: 'insensitive' as const } },
+        { caseStudy: { contains: query, mode: 'insensitive' as const } },
+        { problemStatement: { contains: query, mode: 'insensitive' as const } },
+        { solutionDescription: { contains: query, mode: 'insensitive' as const } },
+        { author: { contains: query, mode: 'insensitive' as const } },
+        { domain: { name: { contains: query, mode: 'insensitive' as const } } },
       ]
     };
 

@@ -26,10 +26,10 @@ export default function ConfirmModal({
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
             <div className="bg-dark-card border border-dark-lighter rounded-xl max-w-md w-full p-6 shadow-xl animate-scale-in">
-                <h3 className="text-xl font-display font-bold text-text-primary mb-2">
+                <h3 className="text-xl font-bold text-foreground mb-2">
                     {title}
                 </h3>
-                <p className="text-text-secondary mb-6">
+                <p className="text-muted-foreground mb-6">
                     {message}
                 </p>
                 <div className="flex justify-end gap-3">

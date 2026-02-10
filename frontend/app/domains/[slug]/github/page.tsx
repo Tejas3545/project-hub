@@ -49,9 +49,9 @@ export default function GitHubProjectsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background-primary">
+      <div className="min-h-screen bg-background">
         <div className="container mx-auto px-4 py-8">
-          <div className="text-white text-center">Loading...</div>
+          <div className="text-foreground text-center">Loading...</div>
         </div>
       </div>
     );
@@ -59,13 +59,13 @@ export default function GitHubProjectsPage() {
 
   if (!domain) {
     return (
-      <div className="min-h-screen bg-background-primary">
+      <div className="min-h-screen bg-background">
         <div className="container mx-auto px-4 py-8">
-          <div className="bg-surface-card border border-border-default rounded-lg p-8 text-center">
-            <h1 className="text-3xl font-bold text-text-primary mb-4">Domain Not Found</h1>
+          <div className="bg-card border border-border rounded-xl p-8 text-center">
+            <h1 className="text-3xl font-bold text-foreground mb-4">Domain Not Found</h1>
             <Link
               href="/"
-              className="text-primary-light hover:text-primary-DEFAULT transition-colors"
+              className="text-primary hover:text-primary/80 transition-colors"
             >
               Return to Home
             </Link>
@@ -76,23 +76,23 @@ export default function GitHubProjectsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background-primary">
+    <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         <div className="mb-8 sm:mb-12">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-gray-800/50 border border-gray-700 rounded-lg hover:bg-gray-800 hover:border-primary-light/50 transition-all duration-300 mb-6"
+            className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-foreground bg-muted border border-border rounded-lg hover:bg-muted/80 hover:border-primary/50 transition-all duration-300 mb-6"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
             Back to Domains
           </Link>
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-display font-bold text-text-primary mb-4">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-4">
             {domain.name}
           </h1>
           {domain.description && (
-            <p className="text-base sm:text-lg text-text-secondary max-w-3xl">
+            <p className="text-base sm:text-lg text-muted-foreground max-w-3xl">
               {domain.description}
             </p>
           )}

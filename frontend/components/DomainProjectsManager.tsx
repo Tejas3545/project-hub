@@ -51,7 +51,7 @@ export default function DomainProjectsManager({ projects }: DomainProjectsManage
             </aside>
             <div className="flex-1 w-full">
                 <div className="mb-6 flex items-center justify-between">
-                    <h2 className="text-2xl font-display font-bold text-text-primary">
+                    <h2 className="text-2xl font-bold text-foreground">
                         Available Projects
                     </h2>
                     <div className="badge badge-gold">
@@ -62,7 +62,7 @@ export default function DomainProjectsManager({ projects }: DomainProjectsManage
                 {filteredProjects.length > 0 ? (
                     <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
                         {filteredProjects.map((project, index) => (
-                            <div key={project.id} className="fade-in-up" style={{ animationDelay: `${index * 0.1}s` }}>
+                            <div key={project.id} className="fade-in-up stagger-delay" {...{ style: { '--delay': `${index * 0.1}s` } as React.CSSProperties }}>
                                 <ProjectCard project={project} />
                             </div>
                         ))}

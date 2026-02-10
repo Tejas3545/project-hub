@@ -53,6 +53,11 @@ export const getAllProjects = async (filters: ProjectFilters = {}) => {
             { industryContext: { contains: filters.search, mode: 'insensitive' } },
             { problemStatement: { contains: filters.search, mode: 'insensitive' } },
             { scope: { contains: filters.search, mode: 'insensitive' } },
+            { caseStudy: { contains: filters.search, mode: 'insensitive' } },
+            { solutionDescription: { contains: filters.search, mode: 'insensitive' } },
+            { subDomain: { contains: filters.search, mode: 'insensitive' } },
+            { domain: { name: { contains: filters.search, mode: 'insensitive' } } },
+            { skillFocus: { hasSome: filters.search.split(/\s+/) } },
         ];
     }
 

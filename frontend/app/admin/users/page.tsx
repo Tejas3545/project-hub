@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/neon-button';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
 interface User {
   id: string;
@@ -14,6 +16,8 @@ interface User {
 }
 
 export default function AdminUsersPage() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -29,23 +33,40 @@ export default function AdminUsersPage() {
   const [formSuccess, setFormSuccess] = useState('');
 
   useEffect(() => {
+    if (status === 'loading') return;
+
+    if (!session?.accessToken) {
+      router.push('/login');
+      return;
+    }
+
+    // In a real app, you might decode the token to check role here too, 
+    // but the backend will enforce it anyway.
     fetchUsers();
-  }, []);
+  }, [session, status, router]);
 
   const fetchUsers = async () => {
+    if (!session?.accessToken) return;
+
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/users`, {
         headers: {
-          'x-admin-key': 'supersecret123'
+          'Authorization': `Bearer ${session.accessToken}`,
+          'Content-Type': 'application/json'
         }
       });
-      
+
+      if (response.status === 401 || response.status === 403) {
+        throw new Error('Unauthorized: You do not have admin access');
+      }
+
       if (!response.ok) throw new Error('Failed to fetch users');
-      
+
       const data = await response.json();
-      setUsers(data.users);
-    } catch (error) {
+      setUsers(data.users || []);
+    } catch (error: any) {
       console.error('Error fetching users:', error);
+      setFormError(error.message);
     } finally {
       setLoading(false);
     }
@@ -53,6 +74,8 @@ export default function AdminUsersPage() {
 
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!session?.accessToken) return;
+
     setFormLoading(true);
     setFormError('');
     setFormSuccess('');
@@ -62,7 +85,7 @@ export default function AdminUsersPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-admin-key': 'supersecret123'
+          'Authorization': `Bearer ${session.accessToken}`
         },
         body: JSON.stringify(formData)
       });
@@ -91,13 +114,14 @@ export default function AdminUsersPage() {
   };
 
   const handleDeleteUser = async (userId: string) => {
+    if (!session?.accessToken) return;
     if (!confirm('Are you sure you want to delete this user?')) return;
 
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/users/${userId}`, {
         method: 'DELETE',
         headers: {
-          'x-admin-key': 'supersecret123'
+          'Authorization': `Bearer ${session.accessToken}`
         }
       });
 
@@ -137,13 +161,13 @@ export default function AdminUsersPage() {
       {showCreateForm && (
         <div className="bg-gray-800/50 backdrop-blur-lg border border-gray-700/50 rounded-2xl p-6 mb-8">
           <h2 className="text-xl font-bold text-white mb-4">Create New User</h2>
-          
+
           {formError && (
             <div className="bg-red-500/10 border border-red-500/50 text-red-500 px-4 py-3 rounded-lg mb-4">
               {formError}
             </div>
           )}
-          
+
           {formSuccess && (
             <div className="bg-green-500/10 border border-green-500/50 text-green-500 px-4 py-3 rounded-lg mb-4">
               {formSuccess}
@@ -269,20 +293,18 @@ export default function AdminUsersPage() {
                   </td>
                   <td className="px-6 py-4 text-gray-400">{user.email}</td>
                   <td className="px-6 py-4">
-                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                      user.role === 'ADMIN'
+                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${user.role === 'ADMIN'
                         ? 'bg-purple-500/20 text-purple-400 border border-purple-500/50'
                         : 'bg-blue-500/20 text-blue-400 border border-blue-500/50'
-                    }`}>
+                      }`}>
                       {user.role}
                     </span>
                   </td>
                   <td className="px-6 py-4">
-                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                      user.isVerified
+                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${user.isVerified
                         ? 'bg-green-500/20 text-green-400 border border-green-500/50'
                         : 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/50'
-                    }`}>
+                      }`}>
                       {user.isVerified ? 'Verified' : 'Unverified'}
                     </span>
                   </td>

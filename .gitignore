@@ -4,6 +4,7 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+.pnpm-store/
 
 # Environment variables
 .env
@@ -11,26 +12,36 @@ pnpm-debug.log*
 .env.*.local
 .env.production
 .env.development
+*.env.backup
 
-# Production
+# Google OAuth Credentials (SENSITIVE - DO NOT COMMIT)
+client_secret*.json
+**/client_secret*.json
+
+# Production builds
 /dist
 /build
 /.next
 /out
+.next/
+dist/
 
-# IDE
+# IDE & Editors
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
 .DS_Store
+*.sublime-*
 
 # Testing
 /coverage
 /.nyc_output
+*.test.js.snap
 
-# Misc
+# Logs
+logs/
 *.log
 .cache/
 .temp/
@@ -45,3 +56,31 @@ prisma/dev.db-journal
 # OS
 Thumbs.db
 .DS_Store
+*/.DS_Store
+
+# Vercel
+.vercel
+
+# Kombai (unused tool)
+.kombai/
+
+# Backup files
+*.backup
+*.bak
+*~
+
+# TypeScript
+*.tsbuildinfo
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Lock files (keep package-lock.json but ignore others)
+yarn.lock
+pnpm-lock.yaml
+
+# Local development
+.local/

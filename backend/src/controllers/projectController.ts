@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { AuthRequest } from '../middleware/auth';
 import * as projectService from '../services/projectService';
 
 export const getAllProjects = async (req: Request, res: Response) => {
@@ -56,9 +57,22 @@ export const getProjectsByDomain = async (req: Request, res: Response) => {
     }
 };
 
-export const createProject = async (req: Request, res: Response) => {
+export const createProject = async (req: AuthRequest, res: Response) => {
     try {
-        const project = await projectService.createProject(req.body);
+        const userId = req.user?.id;
+        const isAdmin = req.user?.role === 'ADMIN';
+
+        if (!userId) {
+            return res.status(401).json({ error: 'Authentication required' });
+        }
+
+        const data = {
+            ...req.body,
+            createdById: userId,
+            isPublished: isAdmin ? req.body.isPublished : false,
+        };
+
+        const project = await projectService.createProject(data);
         res.status(201).json(project);
     } catch (error: any) {
         res.status(400).json({ error: error.message });

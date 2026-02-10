@@ -8,12 +8,19 @@ import authRoutes from './routes/authRoutes';
 import userRoutes from './routes/userRoutes';
 import githubProjectRoutes from './routes/githubProjectRoutes';
 import adminRoutes from './routes/adminRoutes';
+import socialRoutes from './routes/socialRoutes';
+import workspaceRoutes from './routes/workspaceRoutes';
+import analyticsRoutes from './routes/analyticsRoutes';
+import gamificationRoutes from './routes/gamificationRoutes';
+import learningPathRoutes from './routes/learningPathRoutes';
+import notificationRoutes from './routes/notificationRoutes';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 import { sanitizeInput } from './middleware/validation';
 import { generalLimiter } from './middleware/rateLimiter';
 import { securityConfig } from './config';
 import logger from './utils/logger';
 import { githubUpdateService } from './services/githubUpdateService';
+import path from 'path';
 
 /**
  * OWASP Security Hardening
@@ -28,7 +35,8 @@ import { githubUpdateService } from './services/githubUpdateService';
  */
 
 // Force override of environment variables to fix stale shell values
-const result = dotenv.config({ override: true });
+// Use path relative to this file's compiled location (dist/index.js -> ../.env)
+const result = dotenv.config({ override: true, path: path.resolve(__dirname, '../.env') });
 if (result.error) {
     console.error('Error loading .env file:', result.error);
 } else {
@@ -87,12 +95,12 @@ app.get('/health', (req: Request, res: Response) => {
         ALLOWED_ORIGINS: !!process.env.ALLOWED_ORIGINS,
         NODE_ENV: process.env.NODE_ENV || 'not-set'
     };
-    
-    const allConfigured = envVarsConfigured.DATABASE_URL && 
-                         envVarsConfigured.JWT_SECRET && 
-                         envVarsConfigured.JWT_REFRESH_SECRET;
-    
-    res.status(200).json({ 
+
+    const allConfigured = envVarsConfigured.DATABASE_URL &&
+        envVarsConfigured.JWT_SECRET &&
+        envVarsConfigured.JWT_REFRESH_SECRET;
+
+    res.status(200).json({
         status: allConfigured ? 'OK' : 'DEGRADED',
         message: allConfigured ? 'All systems operational' : 'Missing environment variables - configure in hosting platform',
         timestamp: new Date().toISOString(),
@@ -145,17 +153,18 @@ app.use(helmet({
  */
 app.use(cors({
     origin: (origin, callback) => {
-        // In production, REJECT requests with no origin (prevents CSRF from non-browser clients)
-        // In development, allow for testing with tools like Postman/curl
+        // Strict CORS Policy
+        // 1. Allow requests with no origin ONLY in development (e.g. Postman, mobile apps)
+        // 2. In production, REQUIRE an origin and check against whitelist
+
         if (!origin) {
-            if (securityConfig.allowNoOriginRequests) {
+            if (process.env.NODE_ENV !== 'production' || securityConfig.allowNoOriginRequests) {
                 return callback(null, true);
             }
             logger.warn('CORS blocked request with no origin header');
             return callback(new Error('Origin header required'));
         }
 
-        // Check if origin is explicitly whitelisted
         if (securityConfig.allowedOrigins.includes(origin)) {
             callback(null, true);
         } else {
@@ -163,11 +172,11 @@ app.use(cors({
             callback(new Error('Not allowed by CORS'));
         }
     },
-    credentials: true, // Required for cookies/auth headers
+    credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'x-admin-key'],
-    exposedHeaders: ['X-Total-Count', 'X-Page-Count'], // Allow frontend to read pagination headers
-    maxAge: 86400, // 24 hours - cache preflight requests
+    exposedHeaders: ['X-Total-Count', 'X-Page-Count'],
+    maxAge: 86400, // 24 hours
 }));
 
 /**
@@ -196,6 +205,55 @@ app.use((req: Request, res: Response, next: NextFunction) => {
     next();
 });
 
+// Lightweight request payload logger for debugging failing write operations.
+// Logs safe summaries to backend/logs/recent_requests.log (do NOT log Authorization header value).
+import fs from 'fs';
+
+const LOG_DIR = path.join(__dirname, '..', '..', 'logs');
+const LOG_FILE = path.join(LOG_DIR, 'recent_requests.log');
+try {
+    if (!fs.existsSync(LOG_DIR)) fs.mkdirSync(LOG_DIR, { recursive: true });
+    if (!fs.existsSync(LOG_FILE)) fs.writeFileSync(LOG_FILE, '');
+} catch (e) {
+    console.error('Failed to initialize request log file', e);
+}
+
+app.use((req: Request, res: Response, next: NextFunction) => {
+    try {
+        // Only log write endpoints we care about to avoid noise
+        const writePaths = ['/api/user/progress', '/api/social', '/api/user/bookmarks', '/api/social/projects', '/api/social/projects/'];
+        if (req.method === 'POST' || req.method === 'PUT' || req.method === 'DELETE') {
+            const matched = writePaths.some(p => req.path.startsWith(p));
+            if (matched) {
+                const safeHeaders: Record<string, any> = {};
+                Object.entries(req.headers).forEach(([k, v]) => {
+                    if (k.toLowerCase() === 'authorization') {
+                        safeHeaders[k] = v ? 'REDACTED' : undefined;
+                    } else {
+                        safeHeaders[k] = v;
+                    }
+                });
+
+                const entry = {
+                    ts: new Date().toISOString(),
+                    ip: req.ip,
+                    method: req.method,
+                    path: req.path,
+                    params: req.params,
+                    query: req.query,
+                    headers: safeHeaders,
+                    body: req.body,
+                };
+
+                fs.appendFileSync(LOG_FILE, JSON.stringify(entry) + '\n');
+            }
+        }
+    } catch (e) {
+        // ignore logging errors
+    }
+    next();
+});
+
 // API info endpoint
 app.get('/api', (req: Request, res: Response) => {
     res.json({
@@ -220,6 +278,13 @@ app.use('/api/projects', projectRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/github-projects', githubProjectRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/social', socialRoutes);
+// M3: Workspace & Tracking Routes
+app.use('/api/workspace', workspaceRoutes);
+app.use('/api/analytics', analyticsRoutes);
+app.use('/api/gamification', gamificationRoutes);
+app.use('/api/learning-paths', learningPathRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // Error handling
 app.use(errorHandler);
@@ -232,7 +297,7 @@ app.listen(PORT, () => {
     logger.info(`🚀 Server running on http://localhost:${PORT}`);
     logger.info(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
     logger.info(`🔒 CORS allowed origins: ${securityConfig.allowedOrigins.join(', ')}`);
-    
+
     // Start GitHub project update service
     logger.info(`🔄 Starting GitHub Project Auto-Update Service...`);
     githubUpdateService.startScheduler();

@@ -6,50 +6,82 @@ export default {
         "./components/**/*.{js,ts,jsx,tsx,mdx}",
         "./app/**/*.{js,ts,jsx,tsx,mdx}",
     ],
+    darkMode: 'class',
     theme: {
         extend: {
             colors: {
-                // "Midnight & Bronze" - Professional, Clean, Efficient
-                'bg-primary': '#0F1115',      // Deep charcoal/midnight
-                'bg-secondary': '#161920',    // Slightly lighter for contrast
-                'bg-card': '#1C2028',         // distinct card background
-
-                'primary': '#D4AF37',         // Metallic Gold/Bronze (Professional)
-                'primary-light': '#E5C558',   // Lighter gold
-                'primary-dark': '#AA8C2C',    // Darker gold/bronze
-
-                'accent-warm': '#C88D65',     // Terracotta/Warm accent
-
-                'text-primary': '#F3F4F6',    // Off-white for readability
-                'text-secondary': '#9CA3AF',  // Cool gray
-                'text-muted': '#6B7280',      // Muted gray
-
-                'border-subtle': '#2B303B',   // Subtle border
-                'border-light': '#374151',    // Lighter border
+                brand: "hsl(var(--brand))",
+                "brand-foreground": "hsl(var(--brand-foreground))",
+                background: "hsl(var(--background))",
+                foreground: "hsl(var(--foreground))",
+                muted: "hsl(var(--muted))",
+                "muted-foreground": "hsl(var(--muted-foreground))",
+                card: "hsl(var(--card))",
+                "card-foreground": "hsl(var(--card-foreground))",
+                popover: "hsl(var(--popover))",
+                "popover-foreground": "hsl(var(--popover-foreground))",
+                primary: "hsl(var(--primary))",
+                "primary-foreground": "hsl(var(--primary-foreground))",
+                secondary: "hsl(var(--secondary))",
+                "secondary-foreground": "hsl(var(--secondary-foreground))",
+                destructive: "hsl(var(--destructive))",
+                "destructive-foreground": "hsl(var(--destructive-foreground))",
+                border: "hsl(var(--border))",
+                input: "hsl(var(--input))",
+                ring: "hsl(var(--ring))",
+                sidebar: {
+                    DEFAULT: "hsl(var(--sidebar-background))",
+                    foreground: "hsl(var(--sidebar-foreground))",
+                    primary: "hsl(var(--sidebar-primary))",
+                    "primary-foreground": "hsl(var(--sidebar-primary-foreground))",
+                    accent: "hsl(var(--sidebar-accent))",
+                    "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
+                    border: "hsl(var(--sidebar-border))",
+                    ring: "hsl(var(--sidebar-ring))",
+                },
+                // Simplified colors for student platform
+                'text': {
+                    primary: 'hsl(var(--foreground))',
+                    secondary: 'hsl(var(--muted-foreground))',
+                    muted: 'hsl(var(--muted-foreground))',
+                },
+                'bg': {
+                    card: 'hsl(var(--card))',
+                    secondary: 'hsl(var(--secondary))',
+                },
+                'border-card': 'hsl(var(--border))',
+                'border-subtle': 'hsl(var(--border))',
+                'accent-warm': 'hsl(var(--primary))',
+                'primary-muted': 'hsl(var(--muted))',
+                'primary-light': 'hsl(var(--brand))',
             },
             fontFamily: {
-                // SF Pro / System Stack as primary
-                sans: ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Text"', '"Segoe UI"', 'Roboto', '"Helvetica Neue"', 'Arial', 'sans-serif'],
-                display: ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Display"', '"Segoe UI"', 'Roboto', '"Helvetica Neue"', 'Arial', 'sans-serif'],
+                sans: ['var(--font-sans)', 'system-ui', 'sans-serif'],
+                mono: ['var(--font-mono)', 'monospace'],
+                display: ['var(--font-sans)', 'system-ui', 'sans-serif'],
             },
-            backgroundImage: {
-                'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
-                // Subtle, professional grain or noise can be added here if needed, 
-                // but keeping it clean for now as requested.
+            borderRadius: {
+                'sm': '0.375rem',
+                'md': '0.5rem',
+                'lg': '0.75rem',
+                '2xl': '1rem',
+                '3xl': '1.5rem',
             },
-            animation: {
-                'fade-in': 'fadeIn 0.5s ease-out',
-                'fade-in-up': 'fadeInUp 0.5s ease-out',
+            boxShadow: {
+                'none': 'none',
+                'xs': '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+                'sm': '0 2px 4px 0 rgba(0, 0, 0, 0.08)',
+                'md': '0 4px 12px 0 rgba(0, 0, 0, 0.1)',
+                'lg': '0 10px 24px 0 rgba(0, 0, 0, 0.12)',
+                'xl': '0 20px 40px 0 rgba(0, 0, 0, 0.15)',
             },
-            keyframes: {
-                fadeIn: {
-                    '0%': { opacity: '0' },
-                    '100%': { opacity: '1' },
-                },
-                fadeInUp: {
-                    '0%': { opacity: '0', transform: 'translateY(10px)' },
-                    '100%': { opacity: '1', transform: 'translateY(0)' },
-                },
+            letterSpacing: {
+                'tighter': '-0.05em',
+                'tight': '-0.025em',
+                'normal': '0',
+                'wide': '0.025em',
+                'wider': '0.05em',
+                'widest': '0.1em',
             },
         },
     },

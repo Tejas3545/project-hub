@@ -1,6 +1,9 @@
 import { Router } from 'express';
 import prisma from '../utils/prisma';
 import { githubUpdateService } from '../services/githubUpdateService';
+import { authenticate, requireAdmin } from '../middleware/auth';
+import { validate, validateParams, uuidParamSchema } from '../middleware/validation';
+import { z } from 'zod'; // For custom schemas if needed
 import bcrypt from 'bcryptjs';
 
 const router = Router();
@@ -20,17 +23,13 @@ function extractRepoInfo(repoUrl: string) {
  * POST /api/admin/seed-projects
  * Seeds unique GitHub projects - Admin only
  */
-router.post('/seed-projects', async (req, res) => {
+router.post('/seed-projects', authenticate, requireAdmin, async (req, res) => {
   try {
-    // Simple auth check - only allow if admin key provided
-    const adminKey = req.headers['x-admin-key'];
-    if (adminKey !== 'supersecret123') {
-      return res.status(403).json({ error: 'Unauthorized' });
-    }
+    // Auth handled by middleware
 
     const domains = await prisma.domain.findMany();
     const domainMap = new Map<string, string>();
-    
+
     for (const domain of domains) {
       domainMap.set(domain.slug, domain.id);
     }
@@ -165,20 +164,16 @@ router.post('/seed-projects', async (req, res) => {
  * POST /api/admin/update-github-projects
  * Manually trigger GitHub projects update from real GitHub repos
  */
-router.post('/update-github-projects', async (req, res) => {
+router.post('/update-github-projects', authenticate, requireAdmin, async (req, res) => {
   try {
-    // Simple auth check
-    const adminKey = req.headers['x-admin-key'];
-    if (adminKey !== 'supersecret123') {
-      return res.status(403).json({ error: 'Unauthorized' });
-    }
+    // Auth handled by middleware
 
     // Trigger async update
     githubUpdateService.triggerManualUpdate().catch(console.error);
 
-    res.json({ 
-      success: true, 
-      message: 'GitHub projects update started. Check server logs for progress.' 
+    res.json({
+      success: true,
+      message: 'GitHub projects update started. Check server logs for progress.'
     });
   } catch (error) {
     console.error('Update trigger error:', error);
@@ -190,12 +185,9 @@ router.post('/update-github-projects', async (req, res) => {
  * GET /api/admin/project-stats
  * Get current project statistics by domain
  */
-router.get('/project-stats', async (req, res) => {
+router.get('/project-stats', authenticate, requireAdmin, async (req, res) => {
   try {
-    const adminKey = req.headers['x-admin-key'];
-    if (adminKey !== 'supersecret123') {
-      return res.status(403).json({ error: 'Unauthorized' });
-    }
+    // Auth handled by middleware
 
     const domains = await prisma.domain.findMany({
       include: {
@@ -238,12 +230,9 @@ router.get('/project-stats', async (req, res) => {
  * POST /api/admin/create-user
  * Create a new user (Admin only)
  */
-router.post('/create-user', async (req, res) => {
+router.post('/create-user', authenticate, requireAdmin, async (req, res) => {
   try {
-    const adminKey = req.headers['x-admin-key'];
-    if (adminKey !== 'supersecret123') {
-      return res.status(403).json({ error: 'Unauthorized' });
-    }
+    // Auth handled by middleware
 
     const { email, password, firstName, lastName, role = 'STUDENT' } = req.body;
 
@@ -298,12 +287,9 @@ router.post('/create-user', async (req, res) => {
  * GET /api/admin/users
  * Get all users (Admin only)
  */
-router.get('/users', async (req, res) => {
+router.get('/users', authenticate, requireAdmin, async (req, res) => {
   try {
-    const adminKey = req.headers['x-admin-key'];
-    if (adminKey !== 'supersecret123') {
-      return res.status(403).json({ error: 'Unauthorized' });
-    }
+    // Auth handled by middleware
 
     const users = await prisma.user.findMany({
       select: {
@@ -332,14 +318,11 @@ router.get('/users', async (req, res) => {
  * DELETE /api/admin/users/:id
  * Delete a user (Admin only)
  */
-router.delete('/users/:id', async (req, res) => {
+router.delete('/users/:id', authenticate, requireAdmin, validateParams(uuidParamSchema), async (req, res) => {
   try {
-    const adminKey = req.headers['x-admin-key'];
-    if (adminKey !== 'supersecret123') {
-      return res.status(403).json({ error: 'Unauthorized' });
-    }
+    // Auth handled by middleware
 
-    const { id } = req.params;
+    const id = req.params.id as string;
 
     await prisma.user.delete({
       where: { id }

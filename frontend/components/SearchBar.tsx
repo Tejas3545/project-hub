@@ -14,10 +14,9 @@ export default function SearchBar({
 }: SearchBarProps) {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const [query, setQuery] = useState(searchParams.get('search') || '');
+    const [query, setQuery] = useState(searchParams.get('q') || searchParams.get('search') || '');
     const [debouncedQuery, setDebouncedQuery] = useState(query);
 
-    // Debounce search input
     useEffect(() => {
         const timer = setTimeout(() => {
             setDebouncedQuery(query);
@@ -26,7 +25,6 @@ export default function SearchBar({
         return () => clearTimeout(timer);
     }, [query]);
 
-    // Trigger search when debounced query changes
     useEffect(() => {
         if (onSearch) {
             onSearch(debouncedQuery);
@@ -50,10 +48,10 @@ export default function SearchBar({
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     placeholder={placeholder}
-                    className="w-full px-4 py-3 pl-12 bg-dark-card border border-dark-lighter rounded-lg text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                    className="w-full px-4 py-3 pl-12 bg-card border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                 />
                 <svg
-                    className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-text-muted"
+                    className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -69,7 +67,8 @@ export default function SearchBar({
                     <button
                         type="button"
                         onClick={() => setQuery('')}
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-text-muted hover:text-text-primary transition-colors"
+                        aria-label="Clear search"
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                     >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

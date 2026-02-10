@@ -17,14 +17,21 @@ const projectCreateBaseSchema = z.object({
     title: z.string().min(5, 'Title must be at least 5 characters').max(200, 'Title cannot exceed 200 characters').trim(),
     domainId: z.string().uuid('Invalid domain ID format'),
     difficulty: z.enum(['EASY', 'MEDIUM', 'HARD']),
+    subDomain: z.string().min(1).max(200).trim().optional(),
     minTime: z.number().int('minTime must be an integer').min(1, 'minTime must be at least 1').max(1000, 'minTime cannot exceed 1000'),
     maxTime: z.number().int('maxTime must be an integer').min(1, 'maxTime must be at least 1').max(1000, 'maxTime cannot exceed 1000'),
     skillFocus: z.array(z.string().min(1).max(100)).min(1, 'At least one skill is required').max(20, 'Cannot exceed 20 skills'),
+    caseStudy: z.string().min(20, 'Case study must be at least 20 characters').max(8000, 'Case study cannot exceed 8000 characters').trim().optional(),
     industryContext: z.string().min(50, 'Industry context must be at least 50 characters').max(5000, 'Industry context cannot exceed 5000 characters').trim(),
     problemStatement: z.string().min(50, 'Problem statement must be at least 50 characters').max(5000, 'Problem statement cannot exceed 5000 characters').trim(),
+    solutionDescription: z.string().min(20, 'Solution description must be at least 20 characters').max(8000, 'Solution description cannot exceed 8000 characters').trim().optional(),
     scope: z.string().min(50, 'Scope must be at least 50 characters').max(5000, 'Scope cannot exceed 5000 characters').trim(),
     prerequisites: z.array(z.string().min(1).max(200)).min(1, 'At least one prerequisite is required').max(30, 'Cannot exceed 30 prerequisites'),
     deliverables: z.array(z.string().min(1).max(200)).min(1, 'At least one deliverable is required').max(30, 'Cannot exceed 30 deliverables'),
+    techStack: z.array(z.string().min(1).max(100)).max(30, 'Cannot exceed 30 tech stack items').optional(),
+    supposedDeadline: z.string().min(1).max(100).trim().optional(),
+    screenshots: z.array(z.string().url('Screenshot must be a valid URL')).max(5, 'Cannot exceed 5 screenshots').optional(),
+    initializationGuide: z.string().min(20, 'Initialization guide must be at least 20 characters').max(12000, 'Initialization guide cannot exceed 12000 characters').trim().optional(),
     advancedExtensions: z.string().max(5000, 'Advanced extensions cannot exceed 5000 characters').trim().optional(),
     evaluationCriteria: z.string().max(5000, 'Evaluation criteria cannot exceed 5000 characters').trim().optional(),
     isPublished: z.boolean().optional().default(false),
@@ -70,6 +77,8 @@ export const userLoginSchema = z.object({
 export const userUpdateProfileSchema = z.object({
     firstName: z.string().min(1).max(50, 'First name cannot exceed 50 characters').trim().optional(),
     lastName: z.string().min(1).max(50, 'Last name cannot exceed 50 characters').trim().optional(),
+    bio: z.string().max(500, 'Bio cannot exceed 500 characters').trim().optional(),
+    profileImage: z.string().url('Profile image must be a valid URL').optional(),
 }).strict();
 
 export const projectProgressUpdateSchema = z.object({

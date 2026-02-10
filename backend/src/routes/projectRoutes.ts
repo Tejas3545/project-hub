@@ -20,8 +20,8 @@ router.get('/', generalLimiter, validateQuery(projectQuerySchema), projectContro
 router.get('/:id', generalLimiter, validateParams(uuidParamSchema), projectController.getProjectById);
 router.get('/domain/:domainId', generalLimiter, validateParams(z.object({ domainId: z.string().uuid() })), projectController.getProjectsByDomain);
 
-// Admin-only routes with write rate limiting
-router.post('/', authenticate, requireAdmin, writeLimiter, validate(projectCreateSchema), projectController.createProject);
+// Authenticated create (submissions); admin-only update/delete
+router.post('/', authenticate, writeLimiter, validate(projectCreateSchema), projectController.createProject);
 router.put('/:id', authenticate, requireAdmin, writeLimiter, validateParams(uuidParamSchema), validate(projectUpdateSchema), projectController.updateProject);
 router.delete('/:id', authenticate, requireAdmin, writeLimiter, validateParams(uuidParamSchema), projectController.deleteProject);
 

@@ -1,83 +1,112 @@
-# Project Hub - Real GitHub Projects Platform
+﻿#  Project Hub - Real-World Project Platform
 
 > **Build Real Skills Through Real Projects** - A curated platform featuring 487+ authentic GitHub repositories across 5 professional domains, designed for developers to learn by building industry-grade applications.
 
-![Project Hub](https://img.shields.io/badge/Next.js-15-black?style=for-the-badge&logo=next.js)
+![Next.js](https://img.shields.io/badge/Next.js-15.5-black?style=for-the-badge&logo=next.js)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?style=for-the-badge&logo=typescript)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Supabase-green?style=for-the-badge&logo=postgresql)
-![License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)
+![Vercel](https://img.shields.io/badge/Deployed-Vercel-black?style=for-the-badge&logo=vercel)
 
-## 🚀 Features
+##  Live Demo
 
-### ✨ Real GitHub Projects
-- **487+ Real Repositories**: Curated collection of production-ready projects
-- **5 Professional Domains**: Web Development, AI, Machine Learning, Data Science, Cybersecurity
-- **Direct Downloads**: One-click download of complete source code via GitHub ZIP archives
-- **Live Demos**: Access to deployed applications when available
-- **Technology Stack Info**: View frameworks and libraries used in each project
+- **Frontend**: Deployed on Vercel 
+- **Backend**: Deployed on Render 
+- **Database**: Supabase (PostgreSQL) 
 
-### 🔒 Authentication & Security
-- **Protected Access**: Login required to access domain pages and projects
-- **JWT Authentication**: Secure token-based authentication system
-- **Rate Limiting**: IP-based protection against abuse
-- **Input Sanitization**: XSS and SQL injection prevention
-- **Security Headers**: OWASP-compliant security configuration
+---
 
-### 🎨 Professional UI/UX
-- **Glassmorphism Design**: Modern gradient cards with smooth animations
-- **Responsive Layout**: Optimized for desktop, tablet, and mobile
-- **Color-Coded Difficulty**: Visual badges (Beginner/Intermediate/Advanced)
-- **Search & Filters**: Find projects by technology, difficulty, or keywords
-- **Download Analytics**: Track popular projects and downloads
+##  Key Features
 
-### 📊 Project Features
+###  Real GitHub Projects
+- **487+ Curated Repositories**: Production-ready projects across 5 domains
+- **Direct Downloads**: One-click access to complete source code via GitHub ZIP files  
+- **Live Demos**: Access deployed applications when available
+- **Technology Stack Insights**: View frameworks and libraries used in each project
+
+###  5 Professional Domains
+1. **Web Development** (100 projects) - React, Next.js, Node.js, Express, Vue, Angular
+2. **Artificial Intelligence** (100 projects) - TensorFlow, PyTorch, OpenAI, LangChain
+3. **Machine Learning** (89 projects) - Scikit-learn, XGBoost, Keras, MLflow
+4. **Data Science** (98 projects) - Pandas, NumPy, Jupyter, Matplotlib, SQL
+5. **Cybersecurity** (100 projects) - Python, Kali Linux, Metasploit, OWASP Tools
+
+###  Authentication & Security
+- **JWT Authentication**: Secure token-based access control
+- **Google OAuth**: Single sign-on with Google accounts
+- **Protected Routes**: Login required for domain and project access
+- **Rate Limiting**: IP-based abuse prevention
+- **Security Headers**: OWASP-compliant configuration (Helmet, CORS)
+
+###  Modern UI/UX
+- **Antintern-Inspired Design**: Clean, professional interface with glassmorphism effects
+- **Blue Dark Mode**: Visually rich dark theme with NO orange colors
+- **Fully Responsive**: Optimized for desktop, tablet, and mobile devices
+- **Smooth Animations**: Professional transitions and interactions
+- **Accessibility**: ARIA-compliant components with screen reader support
+
+###  Advanced Features
+- **Project Workspace**: Track time spent, take notes, manage deliverables
+- **Progress Tracking**: Save your work across sessions (auto-save every 30s)
+- **Search & Filters**: Find projects by technology, difficulty, domain, or keywords
 - **Detailed Metadata**: Repository stats, stars, forks, language breakdown
-- **Tech Stack Tags**: Visual representation of technologies used
-- **Difficulty Levels**: Auto-calculated based on code complexity
-- **GitHub Integration**: Real-time sync with GitHub API
-- **Pagination**: Smooth browsing through large project collections
+- **Difficulty Levels**: Visual badges for Beginner, Intermediate, Advanced
+- **Bookmarking**: Save favorite projects for quick access
 
 ---
 
-## 🛠️ Technology Stack
+##  Technology Stack
 
-### Frontend
-- **Framework**: Next.js 15 (App Router)
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS
-- **UI Components**: Custom components with Radix UI primitives
-- **State Management**: React Context API
-- **HTTP Client**: Axios
+### Frontend (Deployed on Vercel)
+```
+Framework:     Next.js 15.5.12 (App Router)
+Language:      TypeScript 5.0
+Styling:       Tailwind CSS v4
+UI Components: Radix UI primitives + Custom components
+State:         React Context API  
+Auth:          NextAuth.js with Google OAuth
+HTTP Client:   Axios
+Fonts:         Inter (display), JetBrains Mono (code)
+Icons:         Lucide React
+```
 
-### Backend
-- **Runtime**: Node.js
-- **Framework**: Express.js
-- **Language**: TypeScript
-- **ORM**: Prisma
-- **Authentication**: JWT (jsonwebtoken)
-- **Security**: Helmet, CORS, Rate Limiting
+### Backend (Deployed on Render)
+```
+Runtime:       Node.js 18+
+Framework:     Express.js 4.x
+Language:      TypeScript
+ORM:           Prisma 5.x
+Database:      PostgreSQL (Supabase)
+Auth:          JWT (jsonwebtoken)
+Security:      Helmet, CORS, Express Rate Limit
+API Style:     RESTful with JWT authentication
+```
 
-### Database
-- **Database**: PostgreSQL (Supabase)
-- **ORM**: Prisma
-- **Schema**: Users, Domains, Projects, GitHubProjects, Bookmarks, Progress
+### Database (Supabase)
+```
+Database:      PostgreSQL 15
+ORM:           Prisma
+Tables:        User, Domain, Project, GitHubProject,
+               Bookmark, UserProgress, GithubProgress
+```
 
-### External APIs
-- **GitHub API**: Repository data fetching
-- **Authentication**: OAuth-compatible (JWT-based)
+### External Services
+- **GitHub API**: Repository data fetching and downloads
+- **Cloudinary**: Image uploads (optional)
+- **Supabase**: PostgreSQL database hosting
+- **Render**: Backend API deployment
+- **Vercel**: Frontend deployment with auto-deploy
 
 ---
 
-## 📦 Installation & Setup
+##  Installation & Local Development
 
 ### Prerequisites
-- Node.js 18+ and npm/yarn
+- Node.js 18+ and npm
 - PostgreSQL database (Supabase recommended)
 - GitHub Personal Access Token
-- Git
+- Google OAuth credentials (optional)
 
 ### 1. Clone Repository
-
 ```bash
 git clone https://github.com/Tejas3545/project-hub.git
 cd project-hub
@@ -90,24 +119,14 @@ cd backend
 npm install
 ```
 
-Create `.env` file in `backend/` directory:
-
+Create `backend/.env`:
 ```env
-# Database
-DATABASE_URL="your-supabase-connection-string"
-
-# Server
+DATABASE_URL="postgresql://user:password@host:5432/database"
 PORT=5000
 NODE_ENV=development
-
-# JWT Secrets
-JWT_SECRET="your-jwt-secret"
-JWT_REFRESH_SECRET="your-refresh-secret"
-
-# GitHub API
-GITHUB_TOKEN="your-github-token"
-
-# CORS
+JWT_SECRET="your-super-secret-jwt-key-change-this"
+JWT_REFRESH_SECRET="your-refresh-secret-change-this"
+GITHUB_TOKEN="ghp_your_github_personal_access_token"
 ALLOWED_ORIGINS="http://localhost:3000"
 ```
 
@@ -116,91 +135,191 @@ ALLOWED_ORIGINS="http://localhost:3000"
 ```bash
 npx prisma generate
 npx prisma db push
-npx tsx prisma/seedRealGitHubProjects.ts
+npx tsx prisma/addProjectsComplete.ts  # Seed data (optional)
 ```
 
 ### 4. Frontend Setup
 
 ```bash
-cd ../frontend
+cd frontend
 npm install
 ```
 
-Create `.env.local` file:
-
+Create `frontend/.env.local`:
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:5000/api
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET="generate-using: openssl rand -base64 32"
+GOOGLE_CLIENT_ID="your-google-client-id"
+GOOGLE_CLIENT_SECRET="your-google-client-secret"
 ```
+
+> ** Note**: See `GOOGLE_OAUTH_SETUP.md` for detailed OAuth setup.
 
 ### 5. Run Development Servers
 
-**Backend:**
+**Terminal 1 - Backend:**
 ```bash
 cd backend
-npm run dev
+npm run dev  # http://localhost:5000
 ```
 
-**Frontend:**
+**Terminal 2 - Frontend:**
 ```bash
 cd frontend
-npm run dev
+npm run dev  # http://localhost:3000
 ```
 
-Access: http://localhost:3000
-
 ---
 
-## 🎯 Domain Coverage
-
-### 1. Web Development (100 projects)
-React, Vue, Angular, Node.js, Next.js, Express, Django, Flask
-
-### 2. Artificial Intelligence (100 projects)
-TensorFlow, PyTorch, OpenAI, Hugging Face, LangChain
-
-### 3. Machine Learning (89 projects)
-Scikit-learn, XGBoost, Keras, AutoML, MLflow
-
-### 4. Data Science (98 projects)
-Pandas, NumPy, Jupyter, Matplotlib, Seaborn, SQL
-
-### 5. Cybersecurity (100 projects)
-Python, Kali Linux, Metasploit, OWASP Tools
-
-**Total: 487 Real GitHub Projects**
-
----
-
-## 🚀 Deployment
-
-### Backend (Render)
-- Connect GitHub repository
-- Deploy from `backend/` directory
-- Add environment variables
-- Live: https://project-hub1.onrender.com
+##  Deployment
 
 ### Frontend (Vercel)
-- Import GitHub repository
-- Framework: Next.js
-- Root directory: `frontend/`
-- Environment: `NEXT_PUBLIC_API_URL`
+
+1. Push code to GitHub
+2. Import project to Vercel
+3. Set root directory: `frontend`
+4. Add environment variables (see below)
+5. Deploy!
+
+**Environment Variables:**
+```
+NEXT_PUBLIC_API_URL=https://your-backend.onrender.com/api
+NEXTAUTH_URL=https://your-app.vercel.app
+NEXTAUTH_SECRET=<production-secret>
+GOOGLE_CLIENT_ID=<your-client-id>
+GOOGLE_CLIENT_SECRET=<your-client-secret>
+```
+
+### Backend (Render)
+
+1. Create Web Service on Render
+2. Set root directory: `backend`
+3. Build command: `npm install && npx prisma generate`
+4. Start command: `npm start`
+5. Add environment variables
+6. Deploy!
+
+**Environment Variables:**
+```
+DATABASE_URL=<supabase-url>
+PORT=5000
+NODE_ENV=production
+JWT_SECRET=<production-secret>
+JWT_REFRESH_SECRET=<production-refresh-secret>
+GITHUB_TOKEN=<your-token>
+ALLOWED_ORIGINS=https://your-app.vercel.app
+```
+
+**Full deployment guide**: See `DEPLOYMENT_GUIDE.md`
 
 ---
 
-## 📝 License
+##  Project Structure
 
-MIT License
+```
+project-hub/
+ frontend/                 # Next.js Frontend
+    app/                 # App Router pages
+    components/          # React components
+    lib/                 # Utilities & API client
+    types/               # TypeScript types
+    public/              # Static assets
+ backend/                  # Express Backend
+    src/                 # Source code
+       routes/         # API routes
+       controllers/    # Request handlers
+       middleware/     # Auth, CORS, etc.
+       services/       # Business logic
+    prisma/             # Database schema & seeds
+ docs/                     # Documentation PDFs
+ GOOGLE_OAUTH_SETUP.md    # OAuth setup guide
+ DEPLOYMENT_GUIDE.md      # Deployment checklist
+ README.md                # This file
+```
 
 ---
 
-## 👨‍💻 Author
+##  Git Push Commands
 
-**Tejas Solanki** - [@Tejas3545](https://github.com/Tejas3545)
+```bash
+# Check status
+git status
+
+# Stage changes
+git add .
+
+# Commit
+git commit -m "feat: Antintern design, accessibility fixes, deployment docs"
+
+# Push to GitHub
+git push origin main
+```
+
+**See `DEPLOYMENT_GUIDE.md` for detailed push instructions and troubleshooting.**
 
 ---
 
-**⭐ If you find this project helpful, please give it a star on GitHub!**
+##  Available Scripts
+
+### Frontend
+```bash
+npm run dev          # Development server
+npm run build        # Production build
+npm start            # Production server
+```
+
+### Backend
+```bash
+npm run dev          # Development (nodemon)
+npm run build        # Compile TypeScript
+npm start            # Production server
+npx prisma studio    # Database GUI
+```
 
 ---
 
-*Last Updated: February 1, 2026*
+##  Documentation
+
+- **[GOOGLE_OAUTH_SETUP.md](./GOOGLE_OAUTH_SETUP.md)** - Google OAuth configuration
+- **[DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md)** - Deployment checklist & troubleshooting
+- **[TECHNICAL_DOCUMENTATION.md](./TECHNICAL_DOCUMENTATION.md)** - API and components
+- **[docs/](./docs/)** - Product specifications and planning documents
+
+---
+
+##  Contributing
+
+1. Fork the repository
+2. Create feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit changes (`git commit -m 'Add AmazingFeature'`)
+4. Push to branch (`git push origin feature/AmazingFeature`)
+5. Open Pull Request
+
+---
+
+##  License
+
+MIT License - see LICENSE file for details
+
+---
+
+##  Author
+
+**Tejas Solanki**  
+GitHub: [@Tejas3545](https://github.com/Tejas3545)
+
+---
+
+##  Acknowledgments
+
+- Design inspiration: [Antintern](https://antintern.com)
+- UI components: [Radix UI](https://www.radix-ui.com/)
+- Icons: [Lucide React](https://lucide.dev/)
+- Deployment: [Vercel](https://vercel.com) & [Render](https://render.com)
+
+---
+
+** Star this repo if you find it helpful!**
+
+*Last Updated: February 10, 2026*

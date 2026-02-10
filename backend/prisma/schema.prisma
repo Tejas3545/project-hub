@@ -2,8 +2,9 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 generator client {
@@ -14,18 +15,85 @@ generator client {
 model User {
   id            String   @id @default(uuid())
   email         String   @unique
-  passwordHash  String
+  name          String?  // Combined name for NextAuth
   firstName     String?
   lastName      String?
+  image         String?  // NextAuth default profile image field
+  profileImage  String?  // Keeping for backward compatibility or custom uploads
+  bio           String?  @db.Text
   role          UserRole @default(STUDENT)
   isVerified    Boolean  @default(false)
+  emailVerified DateTime? // NextAuth field
+  passwordHash  String?   // For credential-based auth (Admin/Backend)
+  
+  // Auth fields
+  accounts      Account[]
+  sessions      Session[]
+  
+  lastLogin     DateTime?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   
+  // M3: Gamification & Analytics
+  totalTimeSpent Int      @default(0) // Total minutes spent on projects
+  currentStreak  Int      @default(0) // Current daily streak
+  longestStreak  Int      @default(0) // Longest daily streak
+  points         Int      @default(0) // Experience points
+  level          Int      @default(1) // User level (based on points)
+  lastActiveDate DateTime? // Last day user was active
+  
   bookmarks     Bookmark[]
   progress      ProjectProgress[]
+  githubProgress GitHubProjectProgress[]
+  createdProjects Project[] @relation("UserProjects")
+  comments      Comment[]
+  likes         Like[]
+  notifications Notification[]
+  timeSessions  TimeSession[]
+  projectNotes  ProjectNote[]
+  deadlines     Deadline[]
+  achievements  UserAchievement[]
 
   @@map("users")
+}
+
+model Account {
+  id                 String  @id @default(uuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?  @db.Text
+  access_token       String?  @db.Text
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?  @db.Text
+  session_state      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(uuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
 }
 
 model Domain {
@@ -44,6 +112,8 @@ model Domain {
 model Project {
   id                    String     @id @default(uuid())
   title                 String
+  createdById           String?
+  createdBy             User?      @relation("UserProjects", fields: [createdById], references: [id], onDelete: SetNull)
   domainId              String
   domain                Domain     @relation(fields: [domainId], references: [id], onDelete: Cascade)
   subDomain             String?    // Sub-domain within the main domain
@@ -58,6 +128,10 @@ model Project {
   solutionDescription   String?    @db.Text  // High-level explanation of what project builds
   techStack             String[]   @default([]) // Recommended technologies
   supposedDeadline      String?    // Realistic timeframe (e.g., "1-2 Weeks")
+  
+  // M2 Enhancement Fields
+  screenshots           String[]   @default([]) // Cloudinary URLs for project screenshots
+  initializationGuide   String?    @db.Text  // Step-by-step setup guide with code snippets
   
   // Legacy fields (keeping for backwards compatibility)
   industryContext       String     @db.Text
@@ -74,8 +148,11 @@ model Project {
   
   bookmarks             Bookmark[]
   progress              ProjectProgress[]
+  comments              Comment[]
+  likes                 Like[]
 
   @@index([domainId])
+  @@index([createdById])
   @@index([difficulty])
   @@index([isPublished])
   @@index([createdAt])
@@ -97,17 +174,21 @@ model Bookmark {
 }
 
 model ProjectProgress {
-  id          String         @id @default(uuid())
-  userId      String
-  projectId   String
-  user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  project     Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  status      ProgressStatus @default(NOT_STARTED)
-  startedAt   DateTime?
-  completedAt DateTime?
-  notes       String?        @db.Text
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
+  id                    String         @id @default(uuid())
+  userId                String
+  projectId             String
+  user                  User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project               Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  status                ProgressStatus @default(NOT_STARTED)
+  startedAt             DateTime?
+  completedAt           DateTime?
+  timeSpent             Int            @default(0) // in minutes
+  isRunning             Boolean        @default(false)
+  lastTimerStart        DateTime?      // M3: When current timer session started
+  targetCompletionDate  DateTime?
+  notes                 String?        @db.Text
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @updatedAt
 
   @@unique([userId, projectId])
   @@index([userId])
@@ -132,6 +213,63 @@ enum Difficulty {
 enum UserRole {
   STUDENT
   ADMIN
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  userId    String
+  projectId String
+  text      String   @db.Text
+  parentId  String?
+  parent    Comment?  @relation("CommentToComment", fields: [parentId], references: [id], onDelete: Cascade)
+  replies   Comment[] @relation("CommentToComment")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  upvotes   Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([projectId])
+  @@index([parentId])
+  @@map("comments")
+}
+
+model Like {
+  id        String   @id @default(uuid())
+  userId    String
+  projectId String?
+  commentId String?
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project   Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, projectId])
+  @@index([userId])
+  @@index([projectId])
+  @@map("likes")
+}
+
+model Notification {
+  id              String   @id @default(uuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  message         String   @db.Text
+  type            NotificationType
+  relatedProjectId String?
+  isRead          Boolean  @default(false)
+  createdAt       DateTime @default(now())
+
+  @@index([userId])
+  @@index([isRead])
+  @@map("notifications")
+}
+
+enum NotificationType {
+  NEW_COMMENT
+  NEW_UPVOTE
+  PROJECT_APPROVED
+  PROJECT_REJECTED
 }
 
 model GitHubProject {
@@ -165,18 +303,48 @@ model GitHubProject {
   toolsUsed          String[]  @default([]) // IDEs, platforms, databases, third-party tools
   conceptsUsed       String[]  @default([]) // Programming concepts applied
   
-  // Real-World Solution Framework Fields (Client Requirement)
+  // Real-World Solution Framework Fields (Client Requirement - 7 Mandatory Sections)
+  // 1. Project Title - (covered by 'title')
+  // 2. Domain & Sub-domain
+  subDomain          String?   // e.g., "Frontend", "Backend", "Full-stack", "Web Scraping", etc.
+  
+  // 3. Difficulty Level - (covered by 'difficulty')
+  // 4. Industry Context / Case Study
   caseStudy          String?   @db.Text // The Story (3-4 sentences about persona & situation)
-  problemStatement   String?   @db.Text // Core technical/logical gap
+  
+  // 5. Problem Statement
+  problemStatement   String?   @db.Text // Core technical/logical gap and challenge
+  
+  // 6. What You Need to Build / Do
   solutionDescription String?  @db.Text // High-level explanation of what project builds
+  
+  // 7. Prerequisites
   prerequisites      String[]  @default([]) // Fundamental concepts student must know
-  deliverables       String[]  @default([]) // Specific items student must submit
-  supposedDeadline   String?   // Realistic timeframe (e.g., "1 Week")
+  
+  // Prerequisites in text format (full description)
+  prerequisitesText  String?   @db.Text // Detailed prerequisites description
+  
+  // Estimated Time Commitment (min/max)
+  estimatedMinTime   Int       @default(10) // in hours
+  estimatedMaxTime   Int       @default(40) // in hours
+  
+  // Deliverables (what student submits)
+  deliverables       String[]  @default([]) // Specific items: code, docs, reports, dashboards, deployments
+  
+  // Project deadline suggestion
+  supposedDeadline   String?   // Realistic timeframe (e.g., "1 Week", "2 weeks")
+  
+  // Optional Extensions (for advanced students)
+  optionalExtensions String?   @db.Text // Advanced features or enhancements students can add
+  
+  // Evaluation Criteria (how student's work is graded)
+  evaluationCriteria String?   @db.Text // Clear success metrics and grading rubric
   
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
   
   sourceCode    ProjectSourceCode?
+  progress      GitHubProjectProgress[]
 
   @@index([domainId])
   @@index([difficulty])
@@ -202,4 +370,161 @@ model ProjectSourceCode {
 
   @@index([githubProjectId])
   @@map("project_source_code")
+}
+
+// ================================
+// GitHub Project Progress Tracking
+// ================================
+
+model GitHubProjectProgress {
+  id                    String         @id @default(uuid())
+  userId                String
+  githubProjectId       String
+  user                  User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  githubProject         GitHubProject  @relation(fields: [githubProjectId], references: [id], onDelete: Cascade)
+  status                ProgressStatus @default(IN_PROGRESS)
+  startedAt             DateTime       @default(now())
+  completedAt           DateTime?
+  timeSpent             Int            @default(0) // in seconds
+  notes                 String?        @db.Text
+  checklist             Boolean[]      @default([])
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @updatedAt
+
+  @@unique([userId, githubProjectId])
+  @@index([userId])
+  @@index([githubProjectId])
+  @@index([status])
+  @@map("github_project_progress")
+}
+
+// ================================
+// M3: Workspace & Tracking Models
+// ================================
+
+// Time tracking sessions for individual work periods
+model TimeSession {
+  id          String   @id @default(uuid())
+  userId      String
+  projectId   String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  startTime   DateTime
+  endTime     DateTime?
+  duration    Int      @default(0) // in minutes (calculated on stop)
+  notes       String?  @db.Text
+  isActive    Boolean  @default(true) // true if timer is running
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@index([projectId])
+  @@index([startTime])
+  @@map("time_sessions")
+}
+
+// Project-specific notes and workspace content
+model ProjectNote {
+  id          String   @id @default(uuid())
+  userId      String
+  projectId   String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title       String   @default("Untitled Note")
+  content     String   @db.Text
+  isPinned    Boolean  @default(false)
+  tags        String[] @default([])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@index([projectId])
+  @@index([isPinned])
+  @@map("project_notes")
+}
+
+// User-defined deadlines for projects
+model Deadline {
+  id           String   @id @default(uuid())
+  userId       String
+  projectId    String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title        String
+  description  String?  @db.Text
+  dueDate      DateTime
+  isCompleted  Boolean  @default(false)
+  priority     DeadlinePriority @default(MEDIUM)
+  reminderSent Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([userId])
+  @@index([projectId])
+  @@index([dueDate])
+  @@index([isCompleted])
+  @@map("deadlines")
+}
+
+enum DeadlinePriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+// Achievement/Badge definitions
+model Achievement {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String   @db.Text
+  icon        String   // Icon name or URL
+  category    AchievementCategory
+  requirement Int      // Points/count needed to unlock
+  points      Int      @default(0) // Points awarded when earned
+  createdAt   DateTime @default(now())
+  
+  users       UserAchievement[]
+
+  @@map("achievements")
+}
+
+enum AchievementCategory {
+  TIME_TRACKING    // Hours logged
+  PROJECTS         // Projects completed
+  STREAK          // Login streaks
+  SOCIAL          // Likes, comments
+  LEARNING        // Skills acquired
+  SPECIAL         // Special events
+}
+
+// User's earned achievements
+model UserAchievement {
+  id            String      @id @default(uuid())
+  userId        String
+  achievementId String
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievement   Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+  earnedAt      DateTime    @default(now())
+
+  @@unique([userId, achievementId])
+  @@index([userId])
+  @@index([achievementId])
+  @@map("user_achievements")
+}
+
+// Learning path recommendations
+model LearningPath {
+  id          String   @id @default(uuid())
+  title       String
+  description String   @db.Text
+  difficulty  Difficulty
+  domains     String[] // Related domains
+  projectIds  String[] // Recommended project sequence
+  estimatedTime Int    // in hours
+  skills      String[] // Skills learned
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([difficulty])
+  @@index([isActive])
+  @@map("learning_paths")
 }

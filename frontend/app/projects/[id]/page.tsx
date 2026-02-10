@@ -2,9 +2,12 @@
 
 import { use, useEffect, useState } from 'react';
 import { useAuth } from '@/lib/AuthContext';
-import { projectApi, userApi } from '@/lib/api';
+import { projectApi, userApi, socialApi } from '@/lib/api';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Project, ProjectProgress } from '@/types';
+import CodeBlock from '@/components/CodeBlock';
+import CommentSection from '@/components/CommentSection';
 
 const difficultyStyles: Record<'EASY' | 'MEDIUM' | 'HARD', string> = {
     EASY: 'difficulty-easy',
@@ -19,6 +22,10 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
     const [progress, setProgress] = useState<ProjectProgress | null>(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+    const [isLiked, setIsLiked] = useState(false);
+    const [likesCount, setLikesCount] = useState(0);
+    const [commentsCount, setCommentsCount] = useState(0);
+    const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
 
     const loadData = async () => {
         try {
@@ -28,6 +35,29 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
             ]);
             setProject(projectData);
             setProgress(progressData);
+            
+            // Load real likes/comments counts from backend
+            try {
+                const [likesResult, commentsResult] = await Promise.all([
+                    socialApi.getProjectLikesCount(id),
+                    socialApi.getComments(id, 1, 1),
+                ]);
+                setLikesCount(likesResult.count || 0);
+                setCommentsCount(commentsResult.total || commentsResult.comments?.length || 0);
+            } catch {
+                setLikesCount(0);
+                setCommentsCount(0);
+            }
+
+            // Load like status for logged-in user
+            if (user) {
+                try {
+                    const likeStatus = await socialApi.getProjectLikeStatus(id);
+                    setIsLiked(likeStatus.liked || false);
+                } catch {
+                    // Not liked by default
+                }
+            }
             
         } catch (error) {
             console.error('Failed to load project:', error);
@@ -54,6 +84,48 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
         }
     };
 
+    const handleLike = async () => {
+        if (!user) return;
+        try {
+            const result = await socialApi.toggleProjectLike(id);
+            setIsLiked(result.liked);
+            setLikesCount(prev => result.liked ? prev + 1 : prev - 1);
+        } catch (error) {
+            console.error('Failed to toggle like:', error);
+        }
+    };
+
+    const parseInitializationGuide = (guide: string) => {
+        // Parse markdown-style code blocks from initialization guide
+        const sections: Array<{ type: 'text' | 'code'; content: string; language?: string }> = [];
+        const codeBlockRegex = /```(\w+)?\n([\s\S]*?)```/g;
+        let lastIndex = 0;
+        let match;
+
+        while ((match = codeBlockRegex.exec(guide)) !== null) {
+            // Add text before code block
+            if (match.index > lastIndex) {
+                const text = guide.substring(lastIndex, match.index).trim();
+                if (text) sections.push({ type: 'text', content: text });
+            }
+            // Add code block
+            sections.push({
+                type: 'code',
+                content: match[2],
+                language: match[1] || 'bash'
+            });
+            lastIndex = match.index + match[0].length;
+        }
+
+        // Add remaining text
+        if (lastIndex < guide.length) {
+            const text = guide.substring(lastIndex).trim();
+            if (text) sections.push({ type: 'text', content: text });
+        }
+
+        return sections;
+    };
+
     if (loading) {
         return (
             <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -68,6 +140,8 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
         return <div className="container mx-auto px-4 py-12">Project not found</div>;
     }
 
+    const initSections = project.initializationGuide ? parseInitializationGuide(project.initializationGuide) : [];
+
     return (
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 max-w-5xl relative">
             {/* Breadcrumb */}
@@ -81,7 +155,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
                 <span className="font-medium">Back to {project.domain?.name || 'Projects'}</span>
             </Link>
 
-            {/* Project Header */}
+            {/* Project Header with Actions */}
             <div className="glass-card p-10 mb-8 glow">
                 <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
                     <div className="flex-1">
@@ -92,31 +166,154 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
                             {project.title}
                         </h1>
                     </div>
-                    <span className={`badge ${difficultyStyles[project.difficulty]}`}>
-                        {project.difficulty}
-                    </span>
+                    <div className="flex items-center gap-3">
+                        <span className={`badge ${difficultyStyles[project.difficulty]}`}>
+                            {project.difficulty}
+                        </span>
+                    </div>
                 </div>
 
-                <div className="flex flex-wrap gap-6 text-text-secondary">
-                    <div className="flex items-center gap-2">
-                        <svg className="w-5 h-5 text-primary-light" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <span className="font-medium">{project.minTime}-{project.maxTime} hours</span>
-                    </div>
-                    {project.domain && (
+                <div className="flex flex-wrap items-center justify-between gap-6">
+                    <div className="flex flex-wrap gap-6 text-text-secondary">
                         <div className="flex items-center gap-2">
-                            <svg className="w-5 h-5 text-accent-warm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                            <svg className="w-5 h-5 text-primary-light" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                            <span className="font-medium">
-                                {project.domain.name}
-                                {project.subDomain && ` • ${project.subDomain}`}
-                            </span>
+                            <span className="font-medium">{project.minTime}-{project.maxTime} hours</span>
                         </div>
+                        {project.domain && (
+                            <div className="flex items-center gap-2">
+                                <svg className="w-5 h-5 text-accent-warm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                                </svg>
+                                <span className="font-medium">
+                                    {project.domain.name}
+                                    {project.subDomain && ` • ${project.subDomain}`}
+                                </span>
+                            </div>
+                        )}
+                        <div className="flex items-center gap-2">
+                            <svg className="w-5 h-5 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                            </svg>
+                            <span className="font-medium">{likesCount} likes</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+                            </svg>
+                            <span className="font-medium">{commentsCount} comments</span>
+                        </div>
+                    </div>
+
+                    {/* Like Button */}
+                    {user && (
+                        <button
+                            onClick={handleLike}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+                                isLiked
+                                    ? 'bg-pink-500/20 text-pink-400 border-2 border-pink-500/50'
+                                    : 'bg-white/5 text-text-muted hover:bg-white/10 border-2 border-transparent hover:border-pink-500/30'
+                            }`}
+                        >
+                            <svg className={`w-5 h-5 ${isLiked ? 'fill-current' : ''}`} fill={isLiked ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                            </svg>
+                            {isLiked ? 'Liked' : 'Like'}
+                        </button>
                     )}
                 </div>
             </div>
+
+            {/* Screenshots Gallery */}
+            {project.screenshots && project.screenshots.length > 0 && (
+                <section className="mb-8">
+                    <div className="glass-card p-8">
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className="w-10 h-10 bg-gradient-to-br from-purple-500/20 to-primary/20 border border-purple-500/30 rounded-lg flex items-center justify-center">
+                                <svg className="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h2 className="text-2xl font-display font-bold text-text-primary">Project Screenshots</h2>
+                                <p className="text-sm text-text-muted">Visual Preview</p>
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {project.screenshots.map((screenshot: string, idx: number) => (
+                                <div
+                                    key={idx}
+                                    className="relative aspect-video rounded-lg overflow-hidden cursor-pointer group border border-white/10 hover:border-primary/50 transition-all"
+                                    onClick={() => setSelectedImageIndex(idx)}
+                                >
+                                    <Image
+                                        src={screenshot}
+                                        alt={`${project.title} screenshot ${idx + 1}`}
+                                        fill
+                                        className="object-cover group-hover:scale-105 transition-transform duration-300"
+                                    />
+                                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
+                                        <svg className="w-12 h-12 text-white opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+                                        </svg>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+            )}
+
+            {/* Image Lightbox Modal */}
+            {selectedImageIndex !== null && project.screenshots && (
+                <div
+                    className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4"
+                    onClick={() => setSelectedImageIndex(null)}
+                >
+                    <button
+                        className="absolute top-4 right-4 text-white hover:text-primary-light transition-colors"
+                        onClick={() => setSelectedImageIndex(null)}
+                        aria-label="Close image viewer"
+                    >
+                        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                    <div className="relative w-full max-w-6xl aspect-video">
+                        <Image
+                            src={project.screenshots[selectedImageIndex]}
+                            alt={`${project.title} screenshot ${selectedImageIndex + 1}`}
+                            fill
+                            className="object-contain"
+                        />
+                    </div>
+                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedImageIndex(prev => 
+                                    prev === null || prev === 0 ? (project.screenshots?.length || 1) - 1 : prev - 1
+                                );
+                            }}
+                            className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors"
+                        >
+                            Previous
+                        </button>
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedImageIndex(prev => 
+                                    prev === null || prev === (project.screenshots?.length || 0) - 1 ? 0 : prev + 1
+                                );
+                            }}
+                            className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors"
+                        >
+                            Next
+                        </button>
+                    </div>
+                </div>
+            )}
 
             {/* Progress Tracker (if logged in) */}
             {user && (
@@ -138,14 +335,14 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
                                         { value: 'IN_PROGRESS', label: 'In Progress', color: 'blue' },
                                         { value: 'COMPLETED', label: 'Completed', color: 'green' },
                                         { value: 'ON_HOLD', label: 'On Hold', color: 'yellow' },
-                                    ].map(({ value, label, color }) => (
+                                    ].map(({ value, label }) => (
                                         <button
                                             key={value}
                                             onClick={() => handleProgressUpdate(value, progress?.notes)}
                                             disabled={saving}
                                             className={`px-4 py-3 rounded-lg font-medium transition-all ${
                                                 progress?.status === value
-                                                    ? `bg-${color}-500/20 text-${color}-400 border-2 border-${color}-500/50`
+                                                    ? 'bg-primary/20 text-primary-light border-2 border-primary/50'
                                                     : 'bg-white/5 text-text-muted hover:bg-white/10 border-2 border-transparent'
                                             } ${saving ? 'opacity-50 cursor-not-allowed' : ''}`}
                                         >
@@ -213,7 +410,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
                 </section>
             )}
 
-            {/* Real-World Solution Framework - Case Study */}
+            {/* Case Study */}
             {project.caseStudy && (
                 <section className="mb-8">
                     <div className="glass-card p-8 border-2 border-primary/20 glow">
@@ -235,7 +432,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
                 </section>
             )}
 
-            {/* Problem Statement (Enhanced with Real-World Framework) */}
+            {/* Problem Statement */}
             {project.problemStatement && (
                 <section className="mb-8">
                     <div className="glass-card p-8">
@@ -257,7 +454,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
                 </section>
             )}
 
-            {/* Solution Description (Real-World Framework) */}
+            {/* Solution Description */}
             {project.solutionDescription && (
                 <section className="mb-8">
                     <div className="glass-card p-8 bg-gradient-to-br from-primary/5 to-transparent">
@@ -279,36 +476,39 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
                 </section>
             )}
 
-            {/* Industry Context (Fallback for projects without new framework) */}
-            {project.industryContext && !project.caseStudy && (
+            {/* Initialization Guide */}
+            {project.initializationGuide && (
                 <section className="mb-8">
-                    <div className="glass-card p-8">
-                        <h2 className="text-2xl font-display font-bold mb-6 flex items-center gap-3">
-                            <div className="w-1 h-8 bg-gradient-to-b from-primary-light to-primary rounded-full"></div>
-                            <span className="text-text-primary">Industry Context</span>
-                        </h2>
-                        <p className="text-text-secondary leading-relaxed whitespace-pre-wrap">
-                            {project.industryContext}
-                        </p>
+                    <div className="glass-card p-8 border-2 border-green-500/20 bg-gradient-to-br from-green-500/5 to-transparent">
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className="w-10 h-10 bg-gradient-to-br from-green-500/20 to-emerald-500/20 border border-green-500/30 rounded-lg flex items-center justify-center">
+                                <svg className="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h2 className="text-2xl font-display font-bold text-text-primary">Initialization Guide</h2>
+                                <p className="text-sm text-text-muted">Step-by-Step Setup</p>
+                            </div>
+                        </div>
+                        <div className="space-y-6">
+                            {initSections.map((section, idx) => (
+                                <div key={idx}>
+                                    {section.type === 'text' ? (
+                                        <p className="text-text-secondary leading-relaxed whitespace-pre-wrap mb-4">
+                                            {section.content}
+                                        </p>
+                                    ) : (
+                                        <CodeBlock code={section.content} language={section.language} />
+                                    )}
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 </section>
             )}
 
-            {/* Project Scope */}
-            {project.scope && (
-                <section className="mb-8">
-                    <div className="glass-card p-8">
-                        <h2 className="text-2xl font-display font-bold mb-6 text-text-primary">
-                            What You&apos;ll Build
-                        </h2>
-                        <p className="text-text-secondary leading-relaxed whitespace-pre-wrap">
-                            {project.scope}
-                        </p>
-                    </div>
-                </section>
-            )}
-
-            {/* Tech Stack (Real-World Framework) */}
+            {/* Tech Stack */}
             {project.techStack && project.techStack.length > 0 && (
                 <section className="mb-8">
                     <div className="glass-card p-8 bg-gradient-to-br from-purple-500/5 to-transparent">
@@ -338,7 +538,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
             {/* Prerequisites & Skills */}
             {(project.prerequisites?.length || project.skillFocus?.length) && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                    {project.prerequisites?.length && (
+                    {project.prerequisites?.length > 0 && (
                         <div className="glass-card p-8">
                             <div className="flex items-center gap-3 mb-6">
                                 <svg className="w-6 h-6 text-primary-light" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -361,7 +561,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
                         </div>
                     )}
 
-                    {project.skillFocus?.length && (
+                    {project.skillFocus?.length > 0 && (
                         <div className="glass-card p-8">
                             <div className="flex items-center gap-3 mb-6">
                                 <svg className="w-6 h-6 text-accent-warm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -404,7 +604,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
                                     <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-primary-light/20 to-primary/20 border border-primary/30 flex items-center justify-center shrink-0 mt-0.5">
                                         <span className="text-sm font-bold text-primary-light">{idx + 1}</span>
                                     </div>
-                                    <span className="text-text-secondary leading-relaxed">{deliverable}</span>
+                                    <span className="text-text-secondary leadingrelaxed">{deliverable}</span>
                                 </li>
                             ))}
                         </ul>
@@ -412,7 +612,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
                 </section>
             )}
 
-            {/* Supposed Deadline (Real-World Framework) */}
+            {/* Supposed Deadline */}
             {project.supposedDeadline && (
                 <section className="mb-8">
                     <div className="glass-card p-8 border-2 border-yellow-500/20 bg-gradient-to-br from-yellow-500/5 to-transparent">
@@ -453,19 +653,8 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
                 </section>
             )}
 
-            {/* Evaluation Criteria */}
-            {project.evaluationCriteria && (
-                <section>
-                    <div className="glass-card p-8">
-                        <h2 className="text-2xl font-display font-bold mb-6 text-text-primary">
-                            Evaluation Criteria
-                        </h2>
-                        <p className="text-text-secondary leading-relaxed whitespace-pre-wrap">
-                            {project.evaluationCriteria}
-                        </p>
-                    </div>
-                </section>
-            )}
+            {/* Comment Section */}
+            <CommentSection projectId={id} />
         </div>
     );
 }

@@ -20,6 +20,7 @@ export interface Domain {
 export interface Project {
     id: string;
     title: string;
+    createdById?: string | null;
     domainId: string;
     domain?: Domain;
     subDomain?: string;
@@ -34,6 +35,10 @@ export interface Project {
     solutionDescription?: string;  // High-level explanation of what project builds
     techStack: string[];  // Recommended technologies
     supposedDeadline?: string;  // Realistic timeframe (e.g., "1-2 Weeks")
+    
+    // M2 Enhancement Fields
+    screenshots?: string[];  // Cloudinary URLs for project screenshots
+    initializationGuide?: string;  // Step-by-step setup guide with code snippets
     
     // Legacy fields (keeping for backwards compatibility)
     industryContext: string;

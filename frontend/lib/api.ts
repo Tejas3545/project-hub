@@ -2,6 +2,11 @@ import { Domain, Project } from '@/types';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
+// Simple in-memory GET cache to deduplicate frequent GET requests and reduce rate-limit pressure.
+// Safety: cache key includes the auth token when present to avoid leaking authenticated responses
+// between users. TTL is short to favour freshness while preventing duplicate requests.
+const getCache = new Map<string, { timestamp: number; data: any }>();
+const GET_CACHE_TTL = parseInt(process.env.NEXT_PUBLIC_GET_CACHE_TTL_MS || '5000'); // default 5s
 // Helper to get auth token from localStorage
 const getAuthToken = (): string | null => {
     if (typeof window !== 'undefined') {
@@ -11,12 +16,72 @@ const getAuthToken = (): string | null => {
 };
 
 // Helper to create authenticated fetch options
-const getAuthHeaders = (): HeadersInit => {
-    const token = getAuthToken();
+const getAuthHeaders = (token?: string): HeadersInit => {
+    const authToken = token || getAuthToken();
     return {
         'Content-Type': 'application/json',
-        ...(token && { Authorization: `Bearer ${token}` }),
+        ...(authToken && { Authorization: `Bearer ${authToken}` }),
     };
+};
+
+// Helper to refresh the access token
+const refreshAccessToken = async (): Promise<string | null> => {
+    const refreshToken = typeof window !== 'undefined'
+        ? localStorage.getItem('refreshToken')
+        : null;
+
+    if (!refreshToken) {
+        return null;
+    }
+
+    try {
+        const res = await fetch(`${API_URL}/auth/refresh`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ refreshToken }),
+        });
+
+        if (!res.ok) {
+            // Refresh failed, clear tokens
+            if (typeof window !== 'undefined') {
+                localStorage.removeItem('accessToken');
+                localStorage.removeItem('refreshToken');
+            }
+            return null;
+        }
+
+        const data = await res.json();
+        if (typeof window !== 'undefined' && data.accessToken) {
+            localStorage.setItem('accessToken', data.accessToken);
+        }
+        return data.accessToken;
+    } catch {
+        return null;
+    }
+};
+
+// Fetch wrapper with automatic token refresh
+const fetchWithAutoRefresh = async (
+    url: string,
+    options: RequestInit,
+    retried = false
+): Promise<Response> => {
+    const res = await fetch(url, options);
+
+    // If unauthorized and haven't retried yet, try refreshing the token
+    if (res.status === 401 && !retried) {
+        const newToken = await refreshAccessToken();
+        if (newToken) {
+            // Retry with new token
+            const newHeaders = {
+                ...options.headers,
+                Authorization: `Bearer ${newToken}`,
+            };
+            return fetchWithAutoRefresh(url, { ...options, headers: newHeaders }, true);
+        }
+    }
+
+    return res;
 };
 
 // Authentication API
@@ -120,6 +185,37 @@ export const authApi = {
 
         return data;
     },
+
+    googleAuth: async (data: {
+        email: string;
+        firstName?: string;
+        lastName?: string;
+        profileImage?: string;
+    }) => {
+        const res = await fetch(`${API_URL}/auth/google-auth`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+        });
+        if (!res.ok) {
+            const error = await res.json();
+            throw new Error(error.error || 'Google authentication failed');
+        }
+        return res.json();
+    },
+
+    updateProfile: async (data: { firstName?: string; lastName?: string; profileImage?: string; bio?: string }) => {
+        const res = await fetch(`${API_URL}/auth/update-profile`, {
+            method: 'PUT',
+            headers: getAuthHeaders(),
+            body: JSON.stringify(data),
+        });
+        if (!res.ok) {
+            const error = await res.json();
+            throw new Error(error.error || 'Profile update failed');
+        }
+        return res.json();
+    },
 };
 
 // Domain API
@@ -221,6 +317,32 @@ export const userApi = {
             return { status: 'NOT_STARTED' };
         }
     },
+
+    // Profile stats and activity
+    getProfileStats: async () => {
+        return api.get('/user/profile-stats');
+    },
+
+    getActivity: async () => {
+        return api.get('/user/activity');
+    },
+
+    // GitHub Project Progress
+    getGithubProgress: async () => {
+        return api.get('/user/github-progress');
+    },
+
+    updateGithubProgress: async (projectId: string, data: { status?: string; notes?: string; timeSpent?: number; checklist?: boolean[] }) => {
+        return api.put(`/user/github-progress/${projectId}`, data);
+    },
+
+    getGithubSingleProgress: async (projectId: string) => {
+        try {
+            return api.get(`/user/github-progress/${projectId}`);
+        } catch {
+            return { status: 'NOT_STARTED' };
+        }
+    },
 };
 
 // GitHub Projects API
@@ -241,11 +363,19 @@ export const githubProjectApi = {
     getByDomain: async (domainId: string) => {
         return api.get(`/github-projects/domain/${domainId}`);
     },
+
+    search: async (query: string, page: number = 1, limit: number = 50) => {
+        const params = new URLSearchParams();
+        params.append('q', query);
+        params.append('page', String(page));
+        params.append('limit', String(limit));
+        return api.get<{ projects: any[]; pagination: { total: number; page: number; limit: number; totalPages: number } }>(`/github-projects/search?${params}`);
+    },
 };
 
 // General API client for authenticated requests
 export const api = {
-    get: async <T = any>(endpoint: string, options?: { params?: Record<string, any>; cache?: RequestCache }): Promise<T> => {
+    get: async <T = any>(endpoint: string, options?: { params?: Record<string, any>; cache?: RequestCache; token?: string }): Promise<T> => {
         const params = new URLSearchParams();
         if (options?.params) {
             Object.entries(options.params).forEach(([key, value]) => {
@@ -256,25 +386,48 @@ export const api = {
         }
 
         const url = params.toString() ? `${API_URL}${endpoint}?${params}` : `${API_URL}${endpoint}`;
-        
+
+        // Determine token to include in cache key (if any)
+        const tokenForKey = options?.token || getAuthToken() || '';
+        const cacheKey = `${url}::${tokenForKey}`;
+
+        // Only use in-memory cache when request cache isn't explicitly disabled
+        const skipCache = options?.cache === 'no-store';
+
+        if (!skipCache) {
+            const cached = getCache.get(cacheKey);
+            if (cached && Date.now() - cached.timestamp < GET_CACHE_TTL) {
+                return cached.data as T;
+            }
+        }
+
         try {
             console.log('Fetching from URL:', url);
-            const res = await fetch(url, {
+            const res = await fetchWithAutoRefresh(url, {
                 method: 'GET',
-                headers: getAuthHeaders(),
+                headers: getAuthHeaders(options?.token),
                 cache: options?.cache || 'no-store', // Default to no-store for fresh data
             });
 
             console.log('Response status:', res.status, res.statusText);
-            
+
             if (!res.ok) {
                 const errorText = await res.text();
-                console.error('Error response:', errorText);
                 const error = JSON.parse(errorText || '{}');
                 throw new Error(error.error || `Request failed with status ${res.status}`);
             }
 
-            return res.json();
+            const json = await res.json();
+
+            if (!skipCache) {
+                try {
+                    getCache.set(cacheKey, { timestamp: Date.now(), data: json });
+                } catch {
+                    // ignore cache set errors
+                }
+            }
+
+            return json;
         } catch (error) {
             console.error('Fetch error:', error);
             throw error;
@@ -282,7 +435,7 @@ export const api = {
     },
 
     post: async <T = any>(endpoint: string, body?: any): Promise<T> => {
-        const res = await fetch(`${API_URL}${endpoint}`, {
+        const res = await fetchWithAutoRefresh(`${API_URL}${endpoint}`, {
             method: 'POST',
             headers: getAuthHeaders(),
             body: body ? JSON.stringify(body) : undefined,
@@ -296,10 +449,10 @@ export const api = {
         return res.json();
     },
 
-    put: async <T = any>(endpoint: string, body?: any): Promise<T> => {
-        const res = await fetch(`${API_URL}${endpoint}`, {
+    put: async <T = any>(endpoint: string, body?: any, token?: string): Promise<T> => {
+        const res = await fetchWithAutoRefresh(`${API_URL}${endpoint}`, {
             method: 'PUT',
-            headers: getAuthHeaders(),
+            headers: getAuthHeaders(token),
             body: body ? JSON.stringify(body) : undefined,
         });
 
@@ -312,7 +465,7 @@ export const api = {
     },
 
     delete: async <T = any>(endpoint: string): Promise<T> => {
-        const res = await fetch(`${API_URL}${endpoint}`, {
+        const res = await fetchWithAutoRefresh(`${API_URL}${endpoint}`, {
             method: 'DELETE',
             headers: getAuthHeaders(),
         });
@@ -328,4 +481,54 @@ export const api = {
     },
 };
 
-export default api;
+// Social API (likes, comments)
+export const socialApi = {
+    // Project likes
+    toggleProjectLike: async (projectId: string) => {
+        return api.post(`/social/projects/${projectId}/like`, {});
+    },
+
+    getProjectLikeStatus: async (projectId: string) => {
+        return api.get(`/social/projects/${projectId}/like/status`);
+    },
+
+    getProjectLikesCount: async (projectId: string) => {
+        return api.get(`/social/projects/${projectId}/like/count`);
+    },
+
+    // Project comments
+    addComment: async (projectId: string, text: string, parentId?: string) => {
+        return api.post(`/social/projects/${projectId}/comments`, { text, parentId });
+    },
+
+    getComments: async (projectId: string, page = 1, limit = 10) => {
+        return api.get(`/social/projects/${projectId}/comments?page=${page}&limit=${limit}`);
+    },
+
+    deleteComment: async (commentId: string) => {
+        return api.delete(`/social/comments/${commentId}`);
+    },
+
+    upvoteComment: async (commentId: string) => {
+        return api.post(`/social/comments/${commentId}/upvote`, {});
+    },
+};
+
+// Notification API
+export const notificationApi = {
+    getNotifications: async (page = 1, limit = 20, token?: string) => {
+        return api.get(`/notifications?page=${page}&limit=${limit}`, { token });
+    },
+
+    getUnreadCount: async (token?: string) => {
+        return api.get('/notifications/unread-count', { token });
+    },
+
+    markAsRead: async (notificationId: string, token?: string) => {
+        return api.put(`/notifications/${notificationId}/read`, {}, token);
+    },
+
+    markAllAsRead: async (token?: string) => {
+        return api.put('/notifications/read-all', {}, token);
+    },
+};

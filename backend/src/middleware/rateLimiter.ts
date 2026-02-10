@@ -16,16 +16,19 @@
  */
 
 import rateLimit from 'express-rate-limit';
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { AuthRequest } from './auth';
 
+// Development mode bypass - skip all rate limiting
+const IS_DEVELOPMENT = process.env.NODE_ENV !== 'production';
+
 // Environment-based configuration with secure defaults
-const RATE_LIMIT_WINDOW = parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000'); // 15 minutes
-const RATE_LIMIT_MAX_GENERAL = parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '10000'); // Very high for development
-const RATE_LIMIT_MAX_AUTH = parseInt(process.env.RATE_LIMIT_AUTH_MAX || '100'); // Increased for development
-const RATE_LIMIT_MAX_REGISTER = parseInt(process.env.RATE_LIMIT_REGISTER_MAX || '20'); // Increased for development
-const RATE_LIMIT_MAX_WRITE = parseInt(process.env.RATE_LIMIT_WRITE_MAX || '1000'); // Increased for development
-const RATE_LIMIT_MAX_SEARCH = parseInt(process.env.RATE_LIMIT_SEARCH_MAX || '1000'); // Increased for development
+const RATE_LIMIT_WINDOW = parseInt(process.env.RATE_LIMIT_WINDOW_MS || '60000'); // 1 minute for development, 15 for prod
+const RATE_LIMIT_MAX_GENERAL = parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '50000'); // Very high for development
+const RATE_LIMIT_MAX_AUTH = parseInt(process.env.RATE_LIMIT_AUTH_MAX || '5000'); // Increased for development with multiple tabs
+const RATE_LIMIT_MAX_REGISTER = parseInt(process.env.RATE_LIMIT_REGISTER_MAX || '100'); // Increased for development
+const RATE_LIMIT_MAX_WRITE = parseInt(process.env.RATE_LIMIT_WRITE_MAX || '5000'); // Increased for development
+const RATE_LIMIT_MAX_SEARCH = parseInt(process.env.RATE_LIMIT_SEARCH_MAX || '5000'); // Increased for development
 
 /**
  * Standard rate limiter for general API endpoints
@@ -43,8 +46,9 @@ export const generalLimiter = rateLimit({
     },
     standardHeaders: true, // Return rate limit info in `RateLimit-*` headers
     legacyHeaders: false, // Disable legacy `X-RateLimit-*` headers
-    // Skip authenticated users for general limiter (they have user-specific limits)
+    // Skip in development mode or for authenticated users
     skip: (req: Request) => {
+        if (IS_DEVELOPMENT) return true;
         const authReq = req as AuthRequest;
         return !!authReq.user;
     },
@@ -71,8 +75,8 @@ export const authLimiter = rateLimit({
     max: RATE_LIMIT_MAX_AUTH,
     skipSuccessfulRequests: true, // Don't count successful logins
     skipFailedRequests: false, // Count failed attempts
-    // Skip rate limiting for /me endpoint (auth check only)
-    skip: (req: Request) => req.path === '/me',
+    // Skip in development mode or for /me endpoint (auth check only)
+    skip: (req: Request) => IS_DEVELOPMENT || req.path === '/me',
     message: {
         status: 429,
         error: 'Too Many Login Attempts',
@@ -101,6 +105,7 @@ export const authLimiter = rateLimit({
 export const registerLimiter = rateLimit({
     windowMs: 60 * 60 * 1000, // 1 hour
     max: RATE_LIMIT_MAX_REGISTER,
+    skip: () => IS_DEVELOPMENT, // Skip in development mode
     message: {
         status: 429,
         error: 'Too Many Registration Attempts',
@@ -129,6 +134,7 @@ export const registerLimiter = rateLimit({
 export const writeLimiter = rateLimit({
     windowMs: RATE_LIMIT_WINDOW,
     max: RATE_LIMIT_MAX_WRITE,
+    skip: () => IS_DEVELOPMENT, // Skip in development mode
     message: {
         status: 429,
         error: 'Too Many Write Operations',
@@ -157,6 +163,7 @@ export const writeLimiter = rateLimit({
 export const searchLimiter = rateLimit({
     windowMs: 1 * 60 * 1000, // 1 minute
     max: RATE_LIMIT_MAX_SEARCH,
+    skip: () => IS_DEVELOPMENT, // Skip in development mode
     message: {
         status: 429,
         error: 'Too Many Search Requests',

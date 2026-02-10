@@ -94,9 +94,9 @@ export default function GitHubProjectsList({
   return (
     <div className="space-y-6">
       {/* Filters Section */}
-      <div className="glass-card p-6">
+      <div className="bg-card border border-border rounded-lg p-6">
         <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between mb-4">
-          <h2 className="text-xl font-display font-bold text-text-primary">
+        <h2 className="text-xl font-bold text-foreground">
             {total} Projects Available
           </h2>
           
@@ -106,8 +106,8 @@ export default function GitHubProjectsList({
               onClick={() => setViewMode('grid')}
               className={`p-2 rounded-lg border transition-all ${
                 viewMode === 'grid'
-                  ? 'bg-primary text-white border-primary'
-                  : 'bg-white/5 text-text-secondary border-white/10 hover:border-primary-light'
+                  ? 'bg-primary text-primary-foreground border-primary'
+                  : 'bg-muted text-muted-foreground border-border hover:border-primary'
               }`}
               title="Grid view"
             >
@@ -119,8 +119,8 @@ export default function GitHubProjectsList({
               onClick={() => setViewMode('list')}
               className={`p-2 rounded-lg border transition-all ${
                 viewMode === 'list'
-                  ? 'bg-primary text-white border-primary'
-                  : 'bg-white/5 text-text-secondary border-white/10 hover:border-primary-light'
+                  ? 'bg-primary text-primary-foreground border-primary'
+                  : 'bg-muted text-muted-foreground border-border hover:border-primary'
               }`}
               title="List view"
             >
@@ -135,7 +135,7 @@ export default function GitHubProjectsList({
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Search */}
           <div>
-            <label className="block text-sm font-medium text-text-secondary mb-2">
+            <label className="block text-sm font-medium text-muted-foreground mb-2">
               Search
             </label>
             <input
@@ -143,65 +143,86 @@ export default function GitHubProjectsList({
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search projects..."
-              className="w-full px-4 py-2 bg-[#0F0F0F] border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-primary-light transition-colors"
+              className="w-full px-4 py-2.5 bg-card border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
             />
           </div>
 
           {/* Difficulty */}
           <div>
-            <label htmlFor="difficulty-filter" className="block text-sm font-medium text-text-secondary mb-2">
+            <label htmlFor="difficulty-filter" className="block text-sm font-medium text-muted-foreground mb-2">
               Difficulty
             </label>
-            <select
-              id="difficulty-filter"
-              value={difficulty}
-              onChange={(e) => setDifficulty(e.target.value)}
-              className="w-full px-4 py-2 bg-[#0F0F0F] border border-white/10 rounded-lg text-white focus:outline-none focus:border-primary-light transition-colors [&>option]:bg-[#0F0F0F] [&>option]:text-white"
-            >
-              <option value="">All Levels</option>
-              <option value="EASY">Easy</option>
-              <option value="MEDIUM">Medium</option>
-              <option value="HARD">Hard</option>
-            </select>
+            <div className="relative">
+              <select
+                id="difficulty-filter"
+                value={difficulty}
+                onChange={(e) => setDifficulty(e.target.value)}
+                className="w-full appearance-none px-4 py-2.5 pr-10 bg-card border border-border rounded-lg text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors cursor-pointer"
+              >
+                <option value="" className="bg-card text-foreground">All Levels</option>
+                <option value="EASY" className="bg-card text-foreground">Easy</option>
+                <option value="MEDIUM" className="bg-card text-foreground">Medium</option>
+                <option value="HARD" className="bg-card text-foreground">Hard</option>
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                <svg className="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
           </div>
 
           {/* Language */}
           <div>
-            <label htmlFor="language-filter" className="block text-sm font-medium text-text-secondary mb-2">
+            <label htmlFor="language-filter" className="block text-sm font-medium text-muted-foreground mb-2">
               Language
             </label>
-            <select
-              id="language-filter"
-              value={language}
-              onChange={(e) => setLanguage(e.target.value)}
-              className="w-full px-4 py-2 bg-[#0F0F0F] border border-white/10 rounded-lg text-white focus:outline-none focus:border-primary-light transition-colors [&>option]:bg-[#0F0F0F] [&>option]:text-white"
-            >
-              <option value="">All Languages</option>
-              {availableLanguages.map((lang) => (
-                <option key={lang} value={lang}>
-                  {lang}
-                </option>
-              ))}
-            </select>
+            <div className="relative">
+              <select
+                id="language-filter"
+                value={language}
+                onChange={(e) => setLanguage(e.target.value)}
+                className="w-full appearance-none px-4 py-2.5 pr-10 bg-card border border-border rounded-lg text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors cursor-pointer"
+              >
+                <option value="" className="bg-card text-foreground">All Languages</option>
+                {availableLanguages.map((lang) => (
+                  <option key={lang} value={lang} className="bg-card text-foreground">
+                    {lang}
+                  </option>
+                ))}
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                <svg className="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
           </div>
 
           {/* Sort By */}
           <div>
-            <label htmlFor="sort-filter" className="block text-sm font-medium text-text-secondary mb-2">
+            <label htmlFor="sort-filter" className="block text-sm font-medium text-muted-foreground mb-2">
               Sort By
             </label>
-            <select
-              id="sort-filter"
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="w-full px-4 py-2 bg-[#0F0F0F] border border-white/10 rounded-lg text-white focus:outline-none focus:border-primary-light transition-colors [&>option]:bg-[#0F0F0F] [&>option]:text-white"
-            >
-              <option value="stars">Most Stars</option>
-              <option value="forks">Most Forks</option>
-              <option value="downloadCount">Most Downloaded</option>
-              <option value="lastUpdated">Recently Updated</option>
-              <option value="createdAt">Recently Added</option>
-            </select>
+            <div className="relative">
+              <select
+                id="sort-filter"
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="w-full appearance-none px-4 py-2.5 pr-10 bg-card border border-border rounded-lg text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors cursor-pointer"
+              >
+                <option value="stars" className="bg-card text-foreground">Most Stars</option>
+                <option value="forks" className="bg-card text-foreground">Most Forks</option>
+                <option value="downloadCount" className="bg-card text-foreground">Most Downloaded</option>
+                <option value="lastUpdated" className="bg-card text-foreground">Recently Updated</option>
+                <option value="createdAt" className="bg-card text-foreground">Recently Added</option>
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                <svg className="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -211,7 +232,7 @@ export default function GitHubProjectsList({
             {difficulty && (
               <button
                 onClick={() => setDifficulty('')}
-                className="flex items-center gap-2 px-3 py-1 bg-primary/20 text-primary-light rounded-full text-sm hover:bg-primary/30 transition-colors"
+                className="flex items-center gap-2 px-3 py-1 bg-primary/15 text-primary border border-primary/30 rounded-full text-sm hover:bg-primary/25 transition-colors"
               >
                 <span>Difficulty: {difficulty}</span>
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -222,7 +243,7 @@ export default function GitHubProjectsList({
             {language && (
               <button
                 onClick={() => setLanguage('')}
-                className="flex items-center gap-2 px-3 py-1 bg-primary/20 text-primary-light rounded-full text-sm hover:bg-primary/30 transition-colors"
+                className="flex items-center gap-2 px-3 py-1 bg-primary/15 text-primary border border-primary/30 rounded-full text-sm hover:bg-primary/25 transition-colors"
               >
                 <span>Language: {language}</span>
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -233,7 +254,7 @@ export default function GitHubProjectsList({
             {search && (
               <button
                 onClick={() => setSearch('')}
-                className="flex items-center gap-2 px-3 py-1 bg-primary/20 text-primary-light rounded-full text-sm hover:bg-primary/30 transition-colors"
+                className="flex items-center gap-2 px-3 py-1 bg-primary/15 text-primary border border-primary/30 rounded-full text-sm hover:bg-primary/25 transition-colors"
               >
                 <span>Search: {search}</span>
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -263,12 +284,12 @@ export default function GitHubProjectsList({
 
       {/* No Results */}
       {!loading && projects.length === 0 && (
-        <div className="glass-card p-12 text-center">
-          <svg className="w-16 h-16 mx-auto mb-4 text-text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="bg-card border border-border rounded-lg p-12 text-center">
+          <svg className="w-16 h-16 mx-auto mb-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
-          <h3 className="text-xl font-bold text-text-primary mb-2">No Projects Found</h3>
-          <p className="text-text-secondary">Try adjusting your filters or search term</p>
+          <h3 className="text-xl font-bold text-foreground mb-2">No Projects Found</h3>
+          <p className="text-muted-foreground">Try adjusting your filters or search term</p>
         </div>
       )}
 
@@ -278,7 +299,7 @@ export default function GitHubProjectsList({
           <button
             onClick={() => handlePageChange(currentPage - 1)}
             disabled={currentPage === 1}
-            className="px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-text-primary hover:bg-white/10 hover:border-primary-light transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 py-2 bg-muted border border-border rounded-lg text-foreground hover:bg-muted/80 hover:border-primary transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Previous
           </button>
@@ -302,8 +323,8 @@ export default function GitHubProjectsList({
                   onClick={() => handlePageChange(pageNum)}
                   className={`px-4 py-2 rounded-lg font-medium transition-all ${
                     currentPage === pageNum
-                      ? 'bg-primary text-white'
-                      : 'bg-white/5 border border-white/10 text-text-primary hover:bg-white/10 hover:border-primary-light'
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-muted border border-border text-foreground hover:bg-muted/80 hover:border-primary'
                   }`}
                 >
                   {pageNum}
@@ -315,7 +336,7 @@ export default function GitHubProjectsList({
           <button
             onClick={() => handlePageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
-            className="px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-text-primary hover:bg-white/10 hover:border-primary-light transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 py-2 bg-muted border border-border rounded-lg text-foreground hover:bg-muted/80 hover:border-primary transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Next
           </button>

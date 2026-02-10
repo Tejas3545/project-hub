@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { useSession, signOut } from 'next-auth/react';
 import { authApi } from '@/lib/api';
 
 interface User {
@@ -8,6 +9,8 @@ interface User {
     email: string;
     firstName?: string;
     lastName?: string;
+    profileImage?: string;
+    bio?: string;
     role: 'STUDENT' | 'ADMIN';
     isVerified: boolean;
 }
@@ -15,7 +18,7 @@ interface User {
 interface AuthContextType {
     user: User | null;
     loading: boolean;
-    login: (email: string, password: string) => Promise<void>;
+    login: () => Promise<void>;
     logout: () => Promise<void>;
     isAdmin: boolean;
 }
@@ -23,44 +26,84 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+    const { data: session, status } = useSession();
     const [user, setUser] = useState<User | null>(null);
-    const [loading, setLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(true);
 
-    // Load user on mount
     useEffect(() => {
-        loadUser();
-    }, []);
-
-    const loadUser = async () => {
-        try {
-            const token = localStorage.getItem('accessToken');
-            if (token) {
-                const userData = await authApi.getCurrentUser();
-                setUser(userData);
-            }
-        } catch (error) {
-            // Token might be expired, clear it
-            localStorage.removeItem('accessToken');
-            localStorage.removeItem('refreshToken');
-        } finally {
-            setLoading(false);
+        if (status === 'loading') {
+            setIsLoading(true);
+            return;
         }
-    };
 
-    const login = async (email: string, password: string) => {
-        const data = await authApi.login(email, password);
-        setUser(data.user);
+        if (status === 'authenticated' && session?.user) {
+            // @ts-ignore
+            const mappedUser: User = {
+                // @ts-ignore
+                id: session.user.id,
+                email: session.user.email!,
+                // @ts-ignore
+                firstName: session.user.firstName || session.user.name?.split(' ')[0],
+                // @ts-ignore
+                lastName: session.user.lastName || session.user.name?.split(' ').slice(1).join(' '),
+                // @ts-ignore
+                profileImage: session.user.profileImage || session.user.image,
+                // @ts-ignore
+                bio: session.user.bio,
+                // @ts-ignore
+                role: (session.user.role as 'STUDENT' | 'ADMIN') || 'STUDENT',
+                // @ts-ignore
+                isVerified: session.user.isVerified || false,
+            };
+            setUser(mappedUser);
+            // Persist backend-compatible access token (if provided by next-auth callbacks)
+            // so the API client can attach the Authorization header.
+            // Note: accessToken is injected into the session via `auth.ts` callbacks.
+            // Store it in localStorage only on the client.
+            // @ts-ignore
+            const accessToken = (session as any).accessToken;
+            if (typeof window !== 'undefined' && accessToken) {
+                try {
+                    localStorage.setItem('accessToken', accessToken);
+                } catch {
+                    // ignore storage errors
+                }
+            }
+        } else if (status === 'unauthenticated') {
+            setUser(null);
+            if (typeof window !== 'undefined') {
+                try {
+                    localStorage.removeItem('accessToken');
+                    localStorage.removeItem('refreshToken');
+                } catch {
+                    // ignore
+                }
+            }
+        }
+        setIsLoading(false);
+    }, [session, status]);
+
+    const login = async () => {
+        await window.location.assign('/login');
     };
 
     const logout = async () => {
-        await authApi.logout();
+        await signOut({ callbackUrl: '/' });
         setUser(null);
+        if (typeof window !== 'undefined') {
+            try {
+                localStorage.removeItem('accessToken');
+                localStorage.removeItem('refreshToken');
+            } catch {
+                // ignore
+            }
+        }
     };
 
     const isAdmin = user?.role === 'ADMIN';
 
     return (
-        <AuthContext.Provider value={{ user, loading, login, logout, isAdmin }}>
+        <AuthContext.Provider value={{ user, loading: isLoading, login, logout, isAdmin }}>
             {children}
         </AuthContext.Provider>
     );
