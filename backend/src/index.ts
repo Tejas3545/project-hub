@@ -165,12 +165,19 @@ app.use(cors({
             return callback(new Error('Origin header required'));
         }
 
+        // Check if origin is in whitelist
         if (securityConfig.allowedOrigins.includes(origin)) {
-            callback(null, true);
-        } else {
-            logger.warn(`CORS blocked request from unauthorized origin: ${origin}`);
-            callback(new Error('Not allowed by CORS'));
+            return callback(null, true);
         }
+
+        // Allow all Vercel preview deployments (*.vercel.app)
+        if (origin.endsWith('.vercel.app')) {
+            return callback(null, true);
+        }
+
+        // Block unauthorized origins
+        logger.warn(`CORS blocked request from unauthorized origin: ${origin}`);
+        callback(new Error('Not allowed by CORS'));
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
