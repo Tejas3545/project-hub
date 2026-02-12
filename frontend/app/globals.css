@@ -381,6 +381,10 @@
     animation: pulse 6s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }
 
+  .animate-duration-5000 {
+    animation-duration: 5s;
+  }
+
   .hero-grid-bg {
     background-image: linear-gradient(to right, currentColor 1px, transparent 1px), linear-gradient(to bottom, currentColor 1px, transparent 1px);
     background-size: 4rem 4rem;
@@ -417,6 +421,26 @@
   /* Floating animation for decorative elements */
   .animate-float {
     animation: float 6s ease-in-out infinite;
+  }
+
+  .animation-delay-500 {
+    animation-delay: 0.5s;
+  }
+
+  .animation-delay-1000 {
+    animation-delay: 1s;
+  }
+
+  .animation-delay-1500 {
+    animation-delay: 1.5s;
+  }
+
+  .animation-delay-2000 {
+    animation-delay: 2s;
+  }
+
+  .animation-delay-2500 {
+    animation-delay: 2.5s;
   }
 
   @keyframes float {

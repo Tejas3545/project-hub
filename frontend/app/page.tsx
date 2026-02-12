@@ -6,9 +6,10 @@ import DomainCard from '@/components/DomainCard';
 import { Button } from '@/components/ui/button';
 import { useEffect, useState } from 'react';
 import { ArrowRight, BookOpen, Rocket, Target, CheckCircle2, ChevronDown, Code, Layers, Shield, Zap } from 'lucide-react';
+import type { Domain } from '@/types';
 
 export default function HomePage() {
-  const [domains, setDomains] = useState<any[]>([]);
+  const [domains, setDomains] = useState<Domain[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -44,32 +45,33 @@ export default function HomePage() {
           {/* Colorful Animated Glows */}
           <div className="absolute top-20 left-10 w-96 h-96 bg-blue-accent rounded-full blur-3xl animate-pulse-slow"></div>
           <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-accent rounded-full blur-3xl animate-pulse-slower"></div>
-          <div className="absolute top-40 right-20 w-72 h-72 bg-cyan-accent rounded-full blur-3xl animate-pulse" style={{ animationDuration: '5s' }}></div>
+          <div className="absolute top-40 right-20 w-72 h-72 bg-cyan-accent rounded-full blur-3xl animate-pulse animate-duration-5000"></div>
           
           {/* Floating Code Snippets */}
           <div className="absolute top-[15%] left-[8%] text-primary/40 font-mono text-sm animate-float hidden lg:block">
             const learn = () =&gt; {"{...}"}
           </div>
-          <div className="absolute top-[35%] left-[5%] text-cyan-500/40 font-mono text-sm animate-float hidden lg:block" style={{ animationDelay: '1s' }}>
+          <div className="absolute top-[35%] left-[5%] text-cyan-500/40 font-mono text-sm animate-float animation-delay-1000 hidden lg:block">
             function build() {"{}"}
           </div>
-          <div className="absolute bottom-[30%] left-[10%] text-purple-500/40 font-mono text-sm animate-float hidden lg:block" style={{ animationDelay: '2s' }}>
+          <div className="absolute bottom-[30%] left-[10%] text-purple-500/40 font-mono text-sm animate-float animation-delay-2000 hidden lg:block">
             if (project === awesome)
           </div>
-          <div className="absolute top-[18%] right-[12%] text-primary/40 font-mono text-sm animate-float hidden lg:block" style={{ animationDelay: '1.5s' }}>
+          <div className="absolute top-[18%] right-[12%] text-primary/40 font-mono text-sm animate-float animation-delay-1500 hidden lg:block">
             while (building) {"{...}"}
           </div>
-          <div className="absolute top-[48%] right-[6%] text-cyan-500/40 font-mono text-sm animate-float hidden lg:block" style={{ animationDelay: '0.5s' }}>
+          <div className="absolute top-[48%] right-[6%] text-cyan-500/40 font-mono text-sm animate-float animation-delay-500 hidden lg:block">
             return success;
           </div>
-          <div className="absolute bottom-[22%] right-[15%] text-purple-500/40 font-mono text-sm animate-float hidden lg:block" style={{ animationDelay: '2.5s' }}>
+          <div className="absolute bottom-[22%] right-[15%] text-purple-500/40 font-mono text-sm animate-float animation-delay-2500 hidden lg:block">
             deploy &amp;&amp; celebrate
           </div>
           
           <div className="absolute inset-0 opacity-[0.03] hero-grid-bg"></div>
         </div>
 
-        <div className="relative z-10 max-w-5xl mx-auto px-6 sm:px-8">\n          {/* Student Pill */}
+        <div className="relative z-10 max-w-5xl mx-auto px-6 sm:px-8">
+          {/* Student Pill */}
           <div className="flex justify-center mb-8">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-accent border border-primary/20 backdrop-blur-sm text-primary text-xs sm:text-sm font-medium">
               <span className="relative flex h-2 w-2 shrink-0">
