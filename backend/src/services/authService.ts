@@ -151,15 +151,26 @@ export const getUserProfile = async (userId: string) => {
 
 export const updateUserProfile = async (
     userId: string,
-    data: { firstName?: string; lastName?: string; profileImage?: string; bio?: string }
+    data: { firstName?: string; lastName?: string; profileImage?: string; bio?: string },
+    authContext: { email: string; role: 'STUDENT' | 'ADMIN' }
 ) => {
-    const user = await prisma.user.update({
+    const user = await prisma.user.upsert({
         where: { id: userId },
-        data: {
+        update: {
             firstName: data.firstName,
             lastName: data.lastName,
             profileImage: data.profileImage,
             bio: data.bio,
+        },
+        create: {
+            id: userId,
+            email: authContext.email.toLowerCase(),
+            firstName: data.firstName,
+            lastName: data.lastName,
+            profileImage: data.profileImage,
+            bio: data.bio,
+            role: authContext.role,
+            isVerified: authContext.role === 'ADMIN',
         },
         select: {
             id: true,

@@ -102,14 +102,15 @@ export const authOptions: NextAuthOptions = {
 
                 // Generate Backend-Compatible JWT
                 // This token is signed with the SAME secret as the backend uses
-                if (process.env.JWT_SECRET) {
+                const backendJwtSecret = process.env.JWT_SECRET || process.env.NEXTAUTH_SECRET;
+                if (backendJwtSecret) {
                     const backendToken = sign(
                         {
                             id: user.id,
                             email: user.email,
                             role: (user as any).role || 'STUDENT'
                         },
-                        process.env.JWT_SECRET,
+                        backendJwtSecret,
                         { expiresIn: '7d' }
                     );
                     token.accessToken = backendToken;

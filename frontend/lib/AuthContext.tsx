@@ -13,12 +13,13 @@ interface User {
     bio?: string;
     role: 'STUDENT' | 'ADMIN';
     isVerified: boolean;
+    currentStreak?: number;
 }
 
 interface AuthContextType {
     user: User | null;
     loading: boolean;
-    login: () => Promise<void>;
+    login: (email: string, password: string) => Promise<void>;
     logout: () => Promise<void>;
     isAdmin: boolean;
 }
@@ -83,7 +84,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setIsLoading(false);
     }, [session, status]);
 
-    const login = async () => {
+    const login = async (email: string, password: string) => {
+        // Sign in logic handled by next-auth or external auth provider
+        // This is a placeholder that redirects to login page
         await window.location.assign('/login');
     };
 

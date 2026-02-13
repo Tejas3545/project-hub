@@ -2,6 +2,7 @@ import express, { Express, Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
+import fs from 'fs';
 import domainRoutes from './routes/domainRoutes';
 import projectRoutes from './routes/projectRoutes';
 import authRoutes from './routes/authRoutes';
@@ -36,18 +37,23 @@ import path from 'path';
 
 // Force override of environment variables to fix stale shell values
 // Use path relative to this file's compiled location (dist/index.js -> ../.env)
-const result = dotenv.config({ override: true, path: path.resolve(__dirname, '../.env') });
-if (result.error) {
-    console.error('Error loading .env file:', result.error);
-} else {
-    console.log('Environment variables loaded successfully');
-    // Log DB URL for debugging (masked)
-    const dbUrl = process.env.DATABASE_URL;
-    if (dbUrl) {
-        console.log(`Database URL loaded: ${dbUrl.replace(/:[^:]*@/, ':****@')}`);
+const envPath = path.resolve(__dirname, '../.env');
+if (fs.existsSync(envPath)) {
+    const result = dotenv.config({ override: true, path: envPath });
+    if (result.error) {
+        console.error('Error loading .env file:', result.error);
     } else {
-        console.error('❌ DATABASE_URL is not defined!');
+        console.log('Environment variables loaded successfully');
+        // Log DB URL for debugging (masked)
+        const dbUrl = process.env.DATABASE_URL;
+        if (dbUrl) {
+            console.log(`Database URL loaded: ${dbUrl.replace(/:[^:]*@/, ':****@')}`);
+        } else {
+            console.error('❌ DATABASE_URL is not defined!');
+        }
     }
+} else {
+    console.log('No .env file found; using environment variables from the host.');
 }
 
 // Log environment variable status for debugging
@@ -214,7 +220,6 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
 // Lightweight request payload logger for debugging failing write operations.
 // Logs safe summaries to backend/logs/recent_requests.log (do NOT log Authorization header value).
-import fs from 'fs';
 
 const LOG_DIR = path.join(__dirname, '..', '..', 'logs');
 const LOG_FILE = path.join(LOG_DIR, 'recent_requests.log');

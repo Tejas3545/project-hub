@@ -22,6 +22,7 @@ export default function NewProjectPage() {
         minTime: 10,
         maxTime: 20,
         skillFocus: '',
+        techStack: '',
         industryContext: '',
         problemStatement: '',
         scope: '',
@@ -71,9 +72,10 @@ export default function NewProjectPage() {
                 ...formData,
                 difficulty: formData.difficulty as 'EASY' | 'MEDIUM' | 'HARD',
                 subDomain: formData.subDomain || undefined,
-                skillFocus: formData.skillFocus.split(',').map(s => s.trim()).filter(Boolean),
-                prerequisites: formData.prerequisites.split(',').map(s => s.trim()).filter(Boolean),
-                deliverables: formData.deliverables.split(',').map(s => s.trim()).filter(Boolean),
+                skillFocus: formData.skillFocus.split(',').map((s: string) => s.trim()).filter(Boolean),
+                techStack: formData.techStack ? formData.techStack.split(',').map((s: string) => s.trim()).filter(Boolean) : [],
+                prerequisites: formData.prerequisites.split(',').map((s: string) => s.trim()).filter(Boolean),
+                deliverables: formData.deliverables.split(',').map((s: string) => s.trim()).filter(Boolean),
                 advancedExtensions: formData.advancedExtensions || undefined,
                 evaluationCriteria: formData.evaluationCriteria || undefined,
                 screenshots: formData.screenshots,
@@ -361,7 +363,7 @@ export default function NewProjectPage() {
                         </h2>
                         <div className="space-y-4">
                             <CloudinaryUpload
-                                onUploadComplete={(urls) => {
+                                onUploadSuccess={(urls: string[]) => {
                                     setFormData(prev => ({ ...prev, screenshots: urls }));
                                 }}
                                 maxFiles={5}

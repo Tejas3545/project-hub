@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { useAuth } from '@/lib/AuthContext';
@@ -30,6 +31,7 @@ type ActivityTab = 'all' | 'uploads' | 'likes' | 'comments';
 
 export default function ProfilePage() {
   const { user } = useAuth();
+  const { data: session } = useSession();
   const [stats, setStats] = useState<UserStats>({
     uploadedProjects: 0,
     projectsSaved: 0,
@@ -97,12 +99,15 @@ export default function ProfilePage() {
     setIsSaving(true);
     setMessage(null);
     try {
-      await authApi.updateProfile({
+      await authApi.updateProfile(
+        {
         firstName: formData.firstName,
         lastName: formData.lastName,
         profileImage: formData.profileImage || undefined,
         bio: formData.bio || undefined,
-      });
+        },
+        (session as { accessToken?: string } | null)?.accessToken
+      );
       setMessage('Profile updated successfully.');
       setIsEditing(false);
     } catch (error: unknown) {

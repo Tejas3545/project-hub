@@ -204,10 +204,13 @@ export const authApi = {
         return res.json();
     },
 
-    updateProfile: async (data: { firstName?: string; lastName?: string; profileImage?: string; bio?: string }) => {
+    updateProfile: async (
+        data: { firstName?: string; lastName?: string; profileImage?: string; bio?: string },
+        token?: string
+    ) => {
         const res = await fetch(`${API_URL}/auth/update-profile`, {
             method: 'PUT',
-            headers: getAuthHeaders(),
+            headers: getAuthHeaders(token),
             body: JSON.stringify(data),
         });
         if (!res.ok) {

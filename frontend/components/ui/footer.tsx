@@ -1,3 +1,7 @@
+'use client';
+
+import React, { useState } from 'react';
+
 interface MenuItem {
     title: string;
     links: {
@@ -15,8 +19,6 @@ interface FooterProps {
         url: string;
     }[];
 }
-
-import React from 'react';
 
 const Footer = ({
     tagline = "Built for students who build things.",
@@ -42,6 +44,33 @@ const Footer = ({
         { text: "Privacy", url: "/privacy" },
     ],
 }: FooterProps) => {
+    const [email, setEmail] = useState('');
+    const [status, setStatus] = useState<'idle' | 'invalid' | 'submitting' | 'success'>('idle');
+
+    const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        const trimmed = email.trim();
+        const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed);
+
+        if (!isValid) {
+            setStatus('invalid');
+            return;
+        }
+
+        setStatus('submitting');
+        setTimeout(() => {
+            setStatus('success');
+            setEmail('');
+        }, 500);
+    };
+
+    const feedbackMessage =
+        status === 'success'
+            ? 'Thanks! You are on the list.'
+            : status === 'invalid'
+                ? 'Enter a valid email address.'
+                : '';
+
     return (
         <footer className="w-full bg-background border-t border-border pt-16 pb-8 px-4 sm:px-6 lg:px-8">
             <div className="max-w-7xl mx-auto">
@@ -67,18 +96,37 @@ const Footer = ({
                                 <h4 className="font-bold text-foreground text-sm uppercase tracking-wider">Stay Updated</h4>
                                 <div className="h-[2px] w-8 bg-primary/30 rounded-full" />
                             </div>
-                            <div className="flex gap-2 max-w-sm">
+                            <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-2 w-full sm:max-w-sm">
                                 <input
                                     type="email"
+                                    inputMode="email"
+                                    autoComplete="email"
                                     placeholder="Enter your email"
+                                    value={email}
+                                    onChange={(event) => {
+                                        setEmail(event.target.value);
+                                        if (status !== 'idle') {
+                                            setStatus('idle');
+                                        }
+                                    }}
                                     className="flex-1 bg-muted border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                                 />
-                                <button aria-label="Subscribe to newsletter" className="bg-primary hover:bg-primary/90 text-primary-foreground p-3 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-primary/30 active:scale-95 shadow-xs">
+                                <button
+                                    type="submit"
+                                    aria-label="Subscribe to newsletter"
+                                    disabled={status === 'submitting' || email.trim().length === 0}
+                                    className="bg-primary hover:bg-primary/90 text-primary-foreground p-3 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-primary/30 active:scale-95 shadow-xs disabled:opacity-60 disabled:cursor-not-allowed"
+                                >
                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
                                     </svg>
                                 </button>
-                            </div>
+                            </form>
+                            {feedbackMessage ? (
+                                <p aria-live="polite" className="text-xs text-muted-foreground">
+                                    {feedbackMessage}
+                                </p>
+                            ) : null}
                         </div>
                     </div>
 

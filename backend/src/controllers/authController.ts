@@ -94,7 +94,11 @@ export const updateProfile = async (req: AuthRequest, res: Response, next: NextF
         }
 
         const { firstName, lastName, profileImage, bio } = req.body;
-        const user = await authService.updateUserProfile(req.user.id, { firstName, lastName, profileImage, bio });
+        const user = await authService.updateUserProfile(
+            req.user.id,
+            { firstName, lastName, profileImage, bio },
+            { email: req.user.email, role: req.user.role }
+        );
 
         logSecurityEvent('Profile Updated', {
             userId: req.user.id,

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const adminSecret = process.env.ADMIN_SECRET;
     if (!adminSecret) {
@@ -10,7 +10,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
       );
     }
 
-    const { id } = params;
+    const { id } = await params;
 
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/users/${id}`, {
       method: 'DELETE',

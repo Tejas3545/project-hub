@@ -335,7 +335,7 @@ export const getProfileStats = async (req: AuthRequest, res: Response, next: Nex
 
         const userId = req.user.id;
 
-        const [uploadedProjects, projectsSaved, projectsStarted, projectsCompleted, likesReceived, upvotesAgg] = await Promise.all([
+        const [uploadedProjects, projectsSaved, projectsStarted, projectsCompleted, likesReceived, upvotesAgg] = await prisma.$transaction([
             prisma.project.count({ where: { createdById: userId } }),
             prisma.bookmark.count({ where: { userId } }),
             prisma.projectProgress.count({ where: { userId, status: 'IN_PROGRESS' } }),
@@ -366,7 +366,7 @@ export const getActivity = async (req: AuthRequest, res: Response, next: NextFun
 
         const userId = req.user.id;
 
-        const [uploads, likes, comments, progress] = await Promise.all([
+        const [uploads, likes, comments, progress] = await prisma.$transaction([
             prisma.project.findMany({
                 where: { createdById: userId },
                 select: { id: true, title: true, createdAt: true },
