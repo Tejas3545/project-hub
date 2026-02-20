@@ -5,9 +5,8 @@ services:
     runtime: node
     region: oregon
     plan: free
-    rootDir: backend
-    buildCommand: npm install && npm run build
-    startCommand: npm run start:migrate
+    buildCommand: cd backend && npm install && npm run build
+    startCommand: cd backend && npm run start:migrate
     envVars:
       - key: NODE_VERSION
         value: 22.22.0
