@@ -322,8 +322,8 @@ import { connectDB } from './utils/prisma';
 
 connectDB()
   .then(() => {
-    app.listen(PORT, () => {
-      logger.info(`🚀 Server running on http://localhost:${PORT}`);
+    app.listen(PORT, '0.0.0.0', () => {
+      logger.info(`🚀 Server running on port ${PORT}`);
       logger.info(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
       logger.info(`🔒 CORS allowed origins: ${securityConfig.allowedOrigins.join(', ')}`);
 

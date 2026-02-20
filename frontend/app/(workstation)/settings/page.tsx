@@ -249,7 +249,7 @@ export default function SettingsPage() {
             </div>
           )}
 
-          {/* Security Settings */
+          {/* Security Settings */}
           {activeTab === 'security' && (
             <div className="space-y-6">
               <div>
