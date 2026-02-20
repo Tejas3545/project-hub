@@ -149,14 +149,6 @@ export default function LoginPage() {
             </form>
           </div>
         </div>
-
-        {/* Footer */}
-        <p className="text-center text-sm text-[#64748b] mt-8">
-          Don&apos;t have an account?{' '}
-          <Link href="/login" className="text-primary font-medium hover:text-primary-dark transition-colors">
-            Sign up
-          </Link>
-        </p>
       </div>
     </div>
   );

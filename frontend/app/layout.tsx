@@ -22,10 +22,9 @@ export const metadata: Metadata = {
   description: "Discover curated projects, track your progress, and build a portfolio that stands out.",
   icons: {
     icon: [
-      { url: "/favicon.ico" },
-      { url: "/icon.png", type: "image/png" }
+      { url: "/icon.svg", type: "image/svg+xml" }
     ],
-    apple: "/apple-icon.png",
+    apple: "/apple-icon.svg",
   },
 };
 
