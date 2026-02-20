@@ -151,7 +151,16 @@ export const getUserProfile = async (userId: string) => {
 
 export const updateUserProfile = async (
     userId: string,
-    data: { firstName?: string; lastName?: string; profileImage?: string; bio?: string },
+    data: { 
+        firstName?: string; 
+        lastName?: string; 
+        profileImage?: string; 
+        bio?: string;
+        headline?: string;
+        location?: string;
+        githubUrl?: string;
+        portfolioUrl?: string;
+    },
     authContext: { email: string; role: 'STUDENT' | 'ADMIN' }
 ) => {
     const user = await prisma.user.upsert({
@@ -161,6 +170,10 @@ export const updateUserProfile = async (
             lastName: data.lastName,
             profileImage: data.profileImage,
             bio: data.bio,
+            headline: data.headline,
+            location: data.location,
+            githubUrl: data.githubUrl,
+            portfolioUrl: data.portfolioUrl,
         },
         create: {
             id: userId,
@@ -169,6 +182,10 @@ export const updateUserProfile = async (
             lastName: data.lastName,
             profileImage: data.profileImage,
             bio: data.bio,
+            headline: data.headline,
+            location: data.location,
+            githubUrl: data.githubUrl,
+            portfolioUrl: data.portfolioUrl,
             role: authContext.role,
             isVerified: authContext.role === 'ADMIN',
         },
@@ -179,6 +196,10 @@ export const updateUserProfile = async (
             lastName: true,
             profileImage: true,
             bio: true,
+            headline: true,
+            location: true,
+            githubUrl: true,
+            portfolioUrl: true,
             role: true,
             isVerified: true,
             createdAt: true,

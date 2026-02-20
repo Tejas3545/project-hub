@@ -93,10 +93,10 @@ export const updateProfile = async (req: AuthRequest, res: Response, next: NextF
             return res.status(401).json({ error: 'Authentication required' });
         }
 
-        const { firstName, lastName, profileImage, bio } = req.body;
+        const { firstName, lastName, profileImage, bio, headline, location, githubUrl, portfolioUrl } = req.body;
         const user = await authService.updateUserProfile(
             req.user.id,
-            { firstName, lastName, profileImage, bio },
+            { firstName, lastName, profileImage, bio, headline, location, githubUrl, portfolioUrl },
             { email: req.user.email, role: req.user.role }
         );
 

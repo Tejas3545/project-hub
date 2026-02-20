@@ -79,6 +79,10 @@ export const userUpdateProfileSchema = z.object({
     lastName: z.string().min(1).max(50, 'Last name cannot exceed 50 characters').trim().optional(),
     bio: z.string().max(500, 'Bio cannot exceed 500 characters').trim().optional(),
     profileImage: z.string().url('Profile image must be a valid URL').optional(),
+    headline: z.string().max(100, 'Headline cannot exceed 100 characters').trim().optional(),
+    location: z.string().max(100, 'Location cannot exceed 100 characters').trim().optional(),
+    githubUrl: z.string().url('GitHub URL must be a valid URL').optional().or(z.literal('')),
+    portfolioUrl: z.string().url('Portfolio URL must be a valid URL').optional().or(z.literal('')),
 }).strict();
 
 export const projectProgressUpdateSchema = z.object({

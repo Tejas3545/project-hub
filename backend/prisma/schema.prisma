@@ -21,6 +21,10 @@ model User {
   image         String?  // NextAuth default profile image field
   profileImage  String?  // Keeping for backward compatibility or custom uploads
   bio           String?  @db.Text
+  headline      String?  // Professional headline
+  location      String?  // User location
+  githubUrl     String?  // GitHub profile URL
+  portfolioUrl  String?  // Portfolio website URL
   role          UserRole @default(STUDENT)
   isVerified    Boolean  @default(false)
   emailVerified DateTime? // NextAuth field

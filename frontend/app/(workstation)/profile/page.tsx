@@ -371,9 +371,15 @@ export default function ProfilePage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div className="w-full max-w-lg bg-white rounded-2xl shadow-2xl overflow-hidden border border-border animate-in zoom-in-95 duration-200">
             <div className="px-6 py-4 border-b border-border flex justify-between items-center bg-secondary/30">
-              <h3 className="font-bold text-foreground">Edit Profile</h3>
-              <button onClick={() => setIsEditModalOpen(false)} className="p-2 hover:bg-secondary rounded-full" aria-label="Close modal">
-                <Shield size={20} className="text-muted-foreground" />
+              <h3 className="font-bold text-foreground flex items-center gap-2">
+                <Shield size={18} className="text-primary" />
+                Edit Profile
+              </h3>
+              <button onClick={() => setIsEditModalOpen(false)} className="p-2 hover:bg-secondary rounded-full transition-colors" aria-label="Close modal">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-muted-foreground hover:text-foreground">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
               </button>
             </div>
             

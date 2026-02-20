@@ -220,7 +220,16 @@ export const authApi = {
     },
 
     updateProfile: async (
-        data: { firstName?: string; lastName?: string; profileImage?: string; bio?: string },
+        data: { 
+            firstName?: string; 
+            lastName?: string; 
+            profileImage?: string; 
+            bio?: string;
+            headline?: string;
+            location?: string;
+            githubUrl?: string;
+            portfolioUrl?: string;
+        },
         token?: string
     ) => {
         const res = await fetch(`${API_URL}/auth/update-profile`, {
