@@ -82,7 +82,7 @@ export default function AdminDomainsPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {domains.map((domain) => (
-                    <div key={domain.id} className="bg-white rounded-xl border border-border shadow-sm p-6 hover:shadow-md transition-all">
+                    <div key={domain.id} className="bg-background rounded-xl border border-border shadow-sm p-6 hover:shadow-md transition-all">
                         <h3 className="text-xl font-bold text-foreground mb-2">
                             {domain.name}
                         </h3>
@@ -121,7 +121,7 @@ export default function AdminDomainsPage() {
             </div>
 
             {domains.length === 0 && (
-                <div className="bg-white rounded-xl border border-border shadow-sm p-12 text-center">
+                <div className="bg-background rounded-xl border border-border shadow-sm p-12 text-center">
                     <p className="text-muted-foreground mb-4">No domains found</p>
                     <Link
                         href="/admin/domains/new"

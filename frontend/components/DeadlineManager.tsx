@@ -141,7 +141,7 @@ export default function DeadlineManager({ projectId }: DeadlineManagerProps) {
   };
 
   return (
-    <Card className="p-6 bg-white">
+    <Card className="p-6 bg-background">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Calendar className="w-5 h-5 text-primary" />
@@ -166,20 +166,20 @@ export default function DeadlineManager({ projectId }: DeadlineManagerProps) {
             placeholder="Deadline title"
             value={newDeadline.title}
             onChange={e => setNewDeadline({ ...newDeadline, title: e.target.value })}
-            className="w-full mb-2 p-2 border border-border rounded bg-white text-foreground"
+            className="w-full mb-2 p-2 border border-border rounded bg-background text-foreground"
           />
           <input
             type="date"
             value={newDeadline.dueDate}
             onChange={e => setNewDeadline({ ...newDeadline, dueDate: e.target.value })}
             aria-label="Due date"
-            className="w-full mb-2 p-2 border border-border rounded bg-white text-foreground"
+            className="w-full mb-2 p-2 border border-border rounded bg-background text-foreground"
           />
           <select
             value={newDeadline.priority}
             onChange={e => setNewDeadline({ ...newDeadline, priority: e.target.value as 'LOW' | 'MEDIUM' | 'HIGH' })}
             aria-label="Priority"
-            className="w-full mb-2 p-2 border border-border rounded bg-white text-foreground"
+            className="w-full mb-2 p-2 border border-border rounded bg-background text-foreground"
           >
             <option value="LOW">Low Priority</option>
             <option value="MEDIUM">Medium Priority</option>

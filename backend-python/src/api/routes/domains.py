@@ -18,7 +18,7 @@ async def get_domains(db: AsyncSession = Depends(get_db)):
     domains = result.scalars().all()
     return domains
 
-@router.get("/{domain_slug}", response_model=DomainResponse)
+@router.get("/slug/{domain_slug}", response_model=DomainResponse)
 async def get_domain_by_slug(domain_slug: str, db: AsyncSession = Depends(get_db)):
     """
     Get a single domain by its slug.

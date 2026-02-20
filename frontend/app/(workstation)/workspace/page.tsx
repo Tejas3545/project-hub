@@ -6,6 +6,7 @@ import { userApi, projectApi, socialApi } from '@/lib/api';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { ProjectProgress, Bookmark } from '@/types';
 
 interface UnifiedProject {
     id: string;
@@ -194,8 +195,8 @@ export default function WorkspacePage() {
                                 key={status.id}
                                 onClick={() => setFilterStatus(status.id)}
                                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${filterStatus === status.id
-                                        ? 'bg-primary text-white shadow-sm'
-                                        : 'bg-white text-muted-foreground border border-border hover:bg-secondary'
+                                    ? 'bg-primary text-white shadow-sm'
+                                    : 'bg-background text-muted-foreground border border-border hover:bg-secondary'
                                     }`}
                             >
                                 {status.label}
@@ -206,7 +207,7 @@ export default function WorkspacePage() {
                         aria-label="Sort projects"
                         value={sortBy}
                         onChange={(e) => setSortBy(e.target.value as 'recent' | 'title')}
-                        className="bg-white border border-border rounded-lg text-foreground text-sm px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                        className="bg-background border border-border rounded-lg text-foreground text-sm px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary/20"
                     >
                         <option value="recent">Recently Accesssed</option>
                         <option value="title">Alphabetical</option>
@@ -216,7 +217,7 @@ export default function WorkspacePage() {
                 {/* Project List */}
                 <div className="space-y-4">
                     {sortedProjects.length === 0 ? (
-                        <div className="bg-white p-12 text-center rounded-2xl border border-dashed border-border shadow-sm">
+                        <div className="bg-background p-12 text-center rounded-2xl border border-dashed border-border shadow-sm">
                             <span className="material-symbols-outlined text-4xl text-muted-foreground/50 mb-4">inventory_2</span>
                             <p className="text-muted-foreground font-medium mb-6">No projects found.</p>
                             <Link href="/projects" className="btn-primary inline-block">
@@ -225,7 +226,7 @@ export default function WorkspacePage() {
                         </div>
                     ) : (
                         sortedProjects.map((item) => (
-                            <div key={item.id} className="bg-white p-6 rounded-xl border border-border shadow-sm hover:shadow-md transition-shadow flex flex-col md:flex-row gap-6 items-start">
+                            <div key={item.id} className="bg-background p-6 rounded-xl border border-border shadow-sm hover:shadow-md transition-shadow flex flex-col md:flex-row gap-6 items-start">
 
                                 <div className="size-20 rounded-lg overflow-hidden bg-muted flex-shrink-0 relative">
                                     {item.screenshots?.[0] ? (
@@ -254,8 +255,8 @@ export default function WorkspacePage() {
                                             value={item.status}
                                             onChange={(e) => updateProjectStatus(item, e.target.value)}
                                             className={`px-3 py-1.5 rounded-lg text-xs font-semibold border cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-1 ${item.status === 'COMPLETED' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
-                                                    item.status === 'IN_PROGRESS' ? 'bg-accent text-primary border-primary/20' :
-                                                        'bg-secondary text-muted-foreground border-border'
+                                                item.status === 'IN_PROGRESS' ? 'bg-accent text-primary border-primary/20' :
+                                                    'bg-secondary text-muted-foreground border-border'
                                                 }`}
                                         >
                                             <option value="NOT_STARTED">Not Started</option>
@@ -282,7 +283,7 @@ export default function WorkspacePage() {
 
             {/* Sidebar Stats */}
             <aside className="w-full xl:w-80 space-y-8">
-                <div className="bg-white p-6 rounded-2xl border border-border shadow-sm sticky top-8">
+                <div className="bg-background p-6 rounded-2xl border border-border shadow-sm sticky top-8">
                     <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-6">Overview</h3>
                     <div className="space-y-6">
                         {[

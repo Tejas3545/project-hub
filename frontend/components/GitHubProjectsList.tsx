@@ -34,10 +34,15 @@ export default function GitHubProjectsList({
   const fetchLanguages = async () => {
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/github-projects/languages`);
+      if (!response.ok) {
+        setAvailableLanguages([]);
+        return;
+      }
       const data = await response.json();
-      setAvailableLanguages(data);
+      setAvailableLanguages(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Error fetching languages:', error);
+      setAvailableLanguages([]);
     }
   };
 
@@ -92,7 +97,7 @@ export default function GitHubProjectsList({
   return (
     <div className="space-y-8">
       {/* Filters Section */}
-      <div className="bg-white rounded-xl p-8 border border-border shadow-sm">
+      <div className="bg-background rounded-xl p-8 border border-border shadow-sm">
         <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between mb-8">
           <div>
             <h2 className="text-2xl font-bold text-foreground mb-1">
@@ -302,7 +307,7 @@ export default function GitHubProjectsList({
 
       {/* No Results */}
       {!loading && projects.length === 0 && (
-        <div className="bg-white rounded-xl p-16 text-center border border-dashed border-border shadow-sm">
+        <div className="bg-background rounded-xl p-16 text-center border border-dashed border-border shadow-sm">
           <div className="bg-secondary w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 border border-border">
             <svg className="w-8 h-8 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
@@ -343,7 +348,7 @@ export default function GitHubProjectsList({
                   onClick={() => handlePageChange(pageNum)}
                   className={`w-10 h-10 rounded-lg font-bold transition-all flex items-center justify-center ${currentPage === pageNum
                     ? 'bg-primary text-white shadow-md'
-                    : 'bg-white border border-border text-muted-foreground hover:bg-secondary hover:text-foreground'
+                    : 'bg-background border border-border text-muted-foreground hover:bg-secondary hover:text-foreground'
                     }`}
                 >
                   {pageNum}

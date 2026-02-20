@@ -119,7 +119,7 @@ export default function NewProjectPage() {
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     {/* Basic Information */}
-                    <div className="bg-white rounded-xl border border-border shadow-sm p-6">
+                    <div className="bg-background rounded-xl border border-border shadow-sm p-6">
                         <h2 className="text-xl font-bold text-foreground mb-6">
                             Basic Information
                         </h2>
@@ -134,7 +134,7 @@ export default function NewProjectPage() {
                                     required
                                     value={formData.title}
                                     onChange={handleChange}
-                                    className="w-full px-4 py-3 bg-white border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                                    className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                                     placeholder="e.g., Customer Churn Prediction Engine"
                                 />
                             </div>
@@ -150,7 +150,7 @@ export default function NewProjectPage() {
                                         aria-label="Domain"
                                         value={formData.domainId}
                                         onChange={handleChange}
-                                        className="w-full px-4 py-3 bg-white border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                                        className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                                     >
                                         {domains.map(domain => (
                                             <option key={domain.id} value={domain.id}>
@@ -170,7 +170,7 @@ export default function NewProjectPage() {
                                         aria-label="Difficulty"
                                         value={formData.difficulty}
                                         onChange={handleChange}
-                                        className="w-full px-4 py-3 bg-white border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                                        className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                                     >
                                         <option value="EASY">Easy</option>
                                         <option value="MEDIUM">Medium</option>
@@ -188,7 +188,7 @@ export default function NewProjectPage() {
                                     name="subDomain"
                                     value={formData.subDomain}
                                     onChange={handleChange}
-                                    className="w-full px-4 py-3 bg-white border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                                    className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                                     placeholder="e.g., Natural Language Processing, Frontend Development, Network Security"
                                 />
                                 <p className="text-xs text-muted-foreground mt-1">
@@ -210,7 +210,7 @@ export default function NewProjectPage() {
                                         aria-label="Min Time (hours)"
                                         value={formData.minTime}
                                         onChange={handleChange}
-                                        className="w-full px-4 py-3 bg-white border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                                        className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                                     />
                                 </div>
                                 <div>
@@ -226,7 +226,7 @@ export default function NewProjectPage() {
                                         aria-label="Max Time (hours)"
                                         value={formData.maxTime}
                                         onChange={handleChange}
-                                        className="w-full px-4 py-3 bg-white border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                                        className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                                     />
                                 </div>
                             </div>
@@ -241,7 +241,7 @@ export default function NewProjectPage() {
                                     required
                                     value={formData.skillFocus}
                                     onChange={handleChange}
-                                    className="w-full px-4 py-3 bg-white border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                                    className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                                     placeholder="Python, Machine Learning, Pandas, Scikit-learn"
                                 />
                             </div>
@@ -249,7 +249,7 @@ export default function NewProjectPage() {
                     </div>
 
                     {/* Project Details */}
-                    <div className="bg-white rounded-xl border border-border shadow-sm p-6">
+                    <div className="bg-background rounded-xl border border-border shadow-sm p-6">
                         <h2 className="text-xl font-bold text-foreground mb-6">
                             Project Details
                         </h2>
@@ -264,7 +264,7 @@ export default function NewProjectPage() {
                                     rows={4}
                                     value={formData.caseStudy}
                                     onChange={handleChange}
-                                    className="w-full px-4 py-3 bg-white border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+                                    className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none"
                                     placeholder="Describe the 3-4 sentence narrative about the persona and situation..."
                                 />
                             </div>
@@ -279,7 +279,7 @@ export default function NewProjectPage() {
                                     rows={4}
                                     value={formData.problemStatement}
                                     onChange={handleChange}
-                                    className="w-full px-4 py-3 bg-white border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+                                    className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none"
                                     placeholder="Clearly state the problem this project solves..."
                                 />
                             </div>
@@ -294,7 +294,7 @@ export default function NewProjectPage() {
                                     rows={6}
                                     value={formData.scope}
                                     onChange={handleChange}
-                                    className="w-full px-4 py-3 bg-white border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+                                    className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none"
                                     placeholder="Define what will be built, key features, high-level architecture..."
                                 />
                             </div>
@@ -308,7 +308,7 @@ export default function NewProjectPage() {
                                     rows={4}
                                     value={formData.requirementsText}
                                     onChange={handleChange}
-                                    className="w-full px-4 py-3 bg-white border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+                                    className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none"
                                     placeholder="Detailed breakdown of technical requirements..."
                                 />
                             </div>
@@ -323,7 +323,7 @@ export default function NewProjectPage() {
                                     required
                                     value={formData.requirements}
                                     onChange={handleChange}
-                                    className="w-full px-4 py-3 bg-white border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                                    className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                                     placeholder="User Auth, Payment Integration, Real-time sync"
                                 />
                                 <p className="text-xs text-muted-foreground mt-1">Comma-separated list of mandatory features/technical requirements</p>
@@ -339,7 +339,7 @@ export default function NewProjectPage() {
                                     required
                                     value={formData.prerequisites}
                                     onChange={handleChange}
-                                    className="w-full px-4 py-3 bg-white border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                                    className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                                     placeholder="Python, Basic ML knowledge, Statistics"
                                 />
                             </div>
@@ -354,7 +354,7 @@ export default function NewProjectPage() {
                                     required
                                     value={formData.deliverables}
                                     onChange={handleChange}
-                                    className="w-full px-4 py-3 bg-white border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                                    className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                                     placeholder="Trained model, API endpoint, Documentation, Test suite"
                                 />
                             </div>
@@ -368,7 +368,7 @@ export default function NewProjectPage() {
                                     rows={4}
                                     value={formData.advancedExtensions}
                                     onChange={handleChange}
-                                    className="w-full px-4 py-3 bg-white border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+                                    className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none"
                                     placeholder="Additional features for advanced learners..."
                                 />
                             </div>
@@ -382,7 +382,7 @@ export default function NewProjectPage() {
                                     rows={4}
                                     value={formData.evaluationCriteria}
                                     onChange={handleChange}
-                                    className="w-full px-4 py-3 bg-white border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+                                    className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none"
                                     placeholder="How the project will be evaluated..."
                                 />
                             </div>
@@ -390,7 +390,7 @@ export default function NewProjectPage() {
                     </div>
 
                     {/* Project Screenshots */}
-                    <div className="bg-white rounded-xl border border-border shadow-sm p-6">
+                    <div className="bg-background rounded-xl border border-border shadow-sm p-6">
                         <h2 className="text-xl font-bold text-foreground mb-6">
                             Project Screenshots
                         </h2>
@@ -409,7 +409,7 @@ export default function NewProjectPage() {
                     </div>
 
                     {/* Publish Settings */}
-                    <div className="bg-white rounded-xl border border-border shadow-sm p-6">
+                    <div className="bg-background rounded-xl border border-border shadow-sm p-6">
                         <div className="flex items-center gap-3">
                             <input
                                 type="checkbox"

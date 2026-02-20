@@ -228,7 +228,7 @@ export default function NotificationsPage() {
             {/* Notifications List */}
             <div className="space-y-4">
                 {filteredNotifications.length === 0 ? (
-                    <div className="bg-white border border-border p-20 text-center rounded-xl">
+                    <div className="bg-background border border-border p-20 text-center rounded-xl">
                         <div className="w-20 h-20 bg-secondary rounded-full flex items-center justify-center mx-auto mb-6 border border-border">
                             <span className="material-symbols-outlined text-muted-foreground text-4xl">notifications_off</span>
                         </div>
@@ -245,8 +245,8 @@ export default function NotificationsPage() {
                             key={notification.id}
                             onClick={() => !notification.isRead && markAsRead(notification.id)}
                             className={`relative group p-6 rounded-2xl border transition-all duration-300 cursor-pointer ${notification.isRead
-                                ? 'bg-white border-border bg-transparent opacity-60 hover:opacity-100 hover:bg-secondary'
-                                : 'bg-white border-primary/20 bg-primary/5 hover:border-primary/30'
+                                ? 'bg-background border-border bg-transparent opacity-60 hover:opacity-100 hover:bg-secondary'
+                                : 'bg-background border-primary/20 bg-primary/5 hover:border-primary/30'
                                 }`}
                         >
                             <div className="flex gap-5">

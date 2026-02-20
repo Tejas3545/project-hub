@@ -17,7 +17,7 @@ export default function AdminPage() {
                 </div>
 
                 <div className="space-y-4 sm:space-y-6">
-                    <div className="bg-white rounded-xl border border-border shadow-sm p-6 sm:p-8">
+                    <div className="bg-background rounded-xl border border-border shadow-sm p-6 sm:p-8">
                         <div className="flex flex-col sm:flex-row items-start gap-4 mb-6">
                             <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center shrink-0">
                                 <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -38,7 +38,7 @@ export default function AdminPage() {
                         </div>
                     </div>
 
-                    <div className="bg-white rounded-xl border border-border shadow-sm p-6 sm:p-8">
+                    <div className="bg-background rounded-xl border border-border shadow-sm p-6 sm:p-8">
                         <div className="flex flex-col sm:flex-row items-start gap-4 mb-6">
                             <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center shrink-0">
                                 <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -59,7 +59,7 @@ export default function AdminPage() {
                         </div>
                     </div>
 
-                    <div className="bg-white rounded-xl border border-amber-200 shadow-sm p-4 sm:p-6">
+                    <div className="bg-background rounded-xl border border-amber-200 shadow-sm p-4 sm:p-6">
                         <div className="flex items-start gap-3">
                             <svg className="w-5 h-5 text-amber-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />

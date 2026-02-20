@@ -104,7 +104,7 @@ export default function CommentSection({ projectId }: CommentSectionProps) {
 
     return (
         <section className="mb-8">
-            <div className="bg-white rounded-xl border border-border shadow-sm p-6 sm:p-8">
+            <div className="bg-background rounded-xl border border-border shadow-sm p-6 sm:p-8">
                 <div className="flex items-center gap-3 mb-6">
                     <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
                         <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -369,7 +369,7 @@ function CommentForm({ onSubmit, autoFocus, placeholder, onCancel }: { onSubmit:
                 placeholder={placeholder}
                 rows={autoFocus ? 2 : 3}
                 autoFocus={autoFocus}
-                className="w-full px-4 py-3 bg-white border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none transition-all"
+                className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none transition-all"
             />
             <div className="flex justify-end gap-2 mt-2">
                 {onCancel && (

@@ -163,7 +163,7 @@ export default function Timer({
   };
 
   return (
-    <Card className="p-6 bg-white border border-border shadow-sm">
+    <Card className="p-6 bg-background border border-border shadow-sm">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Clock className="w-5 h-5 text-primary" />

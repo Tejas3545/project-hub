@@ -128,6 +128,19 @@ async def proxy_github_search(
             
     return None, 0
 
+@router.get("/languages", response_model=list[str])
+async def get_github_project_languages(db: AsyncSession = Depends(get_db)):
+    """
+    Get all unique programming languages from cached GitHub projects.
+    """
+    result = await db.execute(
+        select(GitHubProject.language)
+        .where(GitHubProject.language != None)
+        .distinct()
+    )
+    languages = result.scalars().all()
+    return sorted(list(set(lang for lang in languages if lang)))
+
 
 @router.get("", response_model=GitHubProjectListResponse)
 async def get_github_projects(

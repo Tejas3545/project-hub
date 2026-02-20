@@ -158,7 +158,7 @@ export default function AdminUsersPage() {
 
       {/* Create User Form */}
       {showCreateForm && (
-        <div className="bg-white border border-border rounded-xl shadow-sm p-6 mb-8">
+        <div className="bg-background border border-border rounded-xl shadow-sm p-6 mb-8">
           <h2 className="text-xl font-bold text-foreground mb-4">Create New User</h2>
 
           {formError && (
@@ -184,7 +184,7 @@ export default function AdminUsersPage() {
                   required
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full px-4 py-2 bg-white border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full px-4 py-2 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                   placeholder="user@example.com"
                 />
               </div>
@@ -198,7 +198,7 @@ export default function AdminUsersPage() {
                   required
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="w-full px-4 py-2 bg-white border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full px-4 py-2 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                   placeholder="••••••••"
                 />
               </div>
@@ -211,7 +211,7 @@ export default function AdminUsersPage() {
                   type="text"
                   value={formData.firstName}
                   onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                  className="w-full px-4 py-2 bg-white border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full px-4 py-2 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                   placeholder="John"
                 />
               </div>
@@ -224,7 +224,7 @@ export default function AdminUsersPage() {
                   type="text"
                   value={formData.lastName}
                   onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                  className="w-full px-4 py-2 bg-white border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full px-4 py-2 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                   placeholder="Doe"
                 />
               </div>
@@ -238,7 +238,7 @@ export default function AdminUsersPage() {
                   aria-label="User role"
                   value={formData.role}
                   onChange={(e) => setFormData({ ...formData, role: e.target.value as 'STUDENT' | 'ADMIN' })}
-                  className="w-full px-4 py-2 bg-white border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full px-4 py-2 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 >
                   <option value="STUDENT">Student</option>
                   <option value="ADMIN">Admin</option>
@@ -267,7 +267,7 @@ export default function AdminUsersPage() {
       )}
 
       {/* Users Table */}
-      <div className="bg-white border border-border rounded-xl shadow-sm overflow-hidden">
+      <div className="bg-background border border-border rounded-xl shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-secondary">

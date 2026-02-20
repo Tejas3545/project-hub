@@ -42,7 +42,7 @@ export default function LandingPage() {
   };
 
   return (
-    <main className="relative overflow-hidden bg-white selection:bg-primary/20">
+    <main className="relative overflow-hidden bg-background selection:bg-primary/20">
       {/* ─── Hero Section ─── */}
       <section className="relative w-full min-h-[85vh] flex items-center justify-center py-24 px-4 sm:px-8">
         {/* Decorative background */}
@@ -54,7 +54,7 @@ export default function LandingPage() {
 
         <div className="relative z-10 text-center max-w-5xl mx-auto">
           {/* Pill badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#eff6ff] text-primary text-sm font-medium mb-8 border border-primary/15">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium mb-8 border border-primary/15">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary/60 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
@@ -70,7 +70,7 @@ export default function LandingPage() {
           </h1>
 
           {/* Subtitle */}
-          <p className="text-[#64748b] text-lg sm:text-xl max-w-2xl mx-auto mb-10 leading-relaxed">
+          <p className="text-muted-foreground text-lg sm:text-xl max-w-2xl mx-auto mb-10 leading-relaxed">
             Discover curated, real-world projects across every domain. Track your progress, build your portfolio, and stand out to recruiters.
           </p>
 
@@ -92,37 +92,37 @@ export default function LandingPage() {
           </div>
 
           {/* Stats Row */}
-          <div className="flex flex-wrap items-center justify-center gap-8 sm:gap-12 mt-16 pt-8 border-t border-[#e2e8f0]">
+          <div className="flex flex-wrap items-center justify-center gap-8 sm:gap-12 mt-16 pt-8 border-t border-border">
             <div className="text-center">
-              <p className="text-2xl sm:text-3xl font-bold text-[#020817]">500+</p>
-              <p className="text-sm text-[#64748b] mt-1">Projects</p>
+              <p className="text-2xl sm:text-3xl font-bold text-foreground">500+</p>
+              <p className="text-sm text-muted-foreground mt-1">Projects</p>
             </div>
             <div className="text-center">
-              <p className="text-2xl sm:text-3xl font-bold text-[#020817]">10+</p>
-              <p className="text-sm text-[#64748b] mt-1">Domains</p>
+              <p className="text-2xl sm:text-3xl font-bold text-foreground">10+</p>
+              <p className="text-sm text-muted-foreground mt-1">Domains</p>
             </div>
             <div className="text-center">
-              <p className="text-2xl sm:text-3xl font-bold text-[#020817]">Free</p>
-              <p className="text-sm text-[#64748b] mt-1">To Use</p>
+              <p className="text-2xl sm:text-3xl font-bold text-foreground">Free</p>
+              <p className="text-sm text-muted-foreground mt-1">To Use</p>
             </div>
           </div>
 
           {/* Trust Badges */}
           <div className="flex flex-wrap items-center justify-center gap-6 mt-8">
-            <div className="flex items-center gap-2 text-[#64748b]">
-              <div className="p-1 rounded-full bg-[#eff6ff] text-primary">
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <div className="p-1 rounded-full bg-primary/10 text-primary">
                 <CheckCircle2 className="w-4 h-4" />
               </div>
               <span className="text-sm font-medium">Open Source Projects</span>
             </div>
-            <div className="flex items-center gap-2 text-[#64748b]">
-              <div className="p-1 rounded-full bg-[#eff6ff] text-primary">
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <div className="p-1 rounded-full bg-primary/10 text-primary">
                 <CheckCircle2 className="w-4 h-4" />
               </div>
               <span className="text-sm font-medium">Progress Tracking</span>
             </div>
-            <div className="flex items-center gap-2 text-[#64748b]">
-              <div className="p-1 rounded-full bg-[#eff6ff] text-primary">
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <div className="p-1 rounded-full bg-primary/10 text-primary">
                 <CheckCircle2 className="w-4 h-4" />
               </div>
               <span className="text-sm font-medium">No Credit Card</span>
@@ -132,7 +132,7 @@ export default function LandingPage() {
       </section>
 
       {/* ─── Domain Categories ─── */}
-      <section className="w-full bg-[#f9fafb] py-20 px-4 sm:px-8">
+      <section className="w-full bg-secondary/30 py-20 px-4 sm:px-8">
         <div className="max-w-[1280px] mx-auto">
           {/* Section Header */}
           <div className="section-header">
@@ -140,7 +140,7 @@ export default function LandingPage() {
             <h2 className="mb-4">
               Explore by <span className="text-gradient">Domain</span>
             </h2>
-            <p className="text-[#64748b] text-base sm:text-lg leading-relaxed">
+            <p className="text-muted-foreground text-base sm:text-lg leading-relaxed">
               Pick a technical domain that matches your interests and dive into curated projects.
             </p>
           </div>
@@ -152,7 +152,7 @@ export default function LandingPage() {
                 <Link
                   key={domain.id}
                   href={`/projects?domainId=${domain.id}`}
-                  className="group relative flex flex-col gap-6 p-8 rounded-2xl border border-[#e2e8f0] bg-white hover:border-primary transition-all duration-500 hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-1"
+                  className="group relative flex flex-col gap-6 p-8 rounded-2xl border border-border bg-background hover:border-primary transition-all duration-500 hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-1"
                 >
                   {/* Hover bg */}
                   <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary/5 to-primary-dark/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10"></div>
@@ -164,10 +164,10 @@ export default function LandingPage() {
 
                   {/* Content */}
                   <div>
-                    <h3 className="text-lg font-semibold text-[#020817] mb-1 group-hover:text-primary transition-colors duration-300 tracking-tight">
+                    <h3 className="text-lg font-semibold text-foreground mb-1 group-hover:text-primary transition-colors duration-300 tracking-tight">
                       {domain.name}
                     </h3>
-                    <p className="text-sm text-[#64748b]">
+                    <p className="text-sm text-muted-foreground">
                       {((domain._count?.projects || 0) + (domain._count?.githubProjects || 0))} projects
                     </p>
                   </div>
@@ -181,10 +181,10 @@ export default function LandingPage() {
               ))
             ) : (
               Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className="p-8 rounded-2xl border border-[#e2e8f0] bg-white animate-pulse">
-                  <div className="w-14 h-14 rounded-xl bg-[#f1f5f9] mb-6"></div>
-                  <div className="h-5 bg-[#f1f5f9] rounded w-3/4 mb-2"></div>
-                  <div className="h-4 bg-[#f1f5f9] rounded w-1/2"></div>
+                <div key={i} className="p-8 rounded-2xl border border-border bg-background animate-pulse">
+                  <div className="w-14 h-14 rounded-xl bg-muted/50 mb-6"></div>
+                  <div className="h-5 bg-muted/50 rounded w-3/4 mb-2"></div>
+                  <div className="h-4 bg-muted/50 rounded w-1/2"></div>
                 </div>
               ))
             )}
@@ -208,7 +208,7 @@ export default function LandingPage() {
             <h2 className="mb-4">
               Why Choose <span className="text-gradient">Project Hub</span>?
             </h2>
-            <p className="text-[#64748b] text-base sm:text-lg leading-relaxed">
+            <p className="text-muted-foreground text-base sm:text-lg leading-relaxed">
               Everything you need to learn by doing — from discovering projects to tracking your growth.
             </p>
           </div>
@@ -233,16 +233,16 @@ export default function LandingPage() {
             ].map((feature, index) => (
               <div
                 key={index}
-                className="group relative flex flex-col items-start p-8 rounded-2xl border border-[#e2e8f0] hover:border-primary transition-all duration-500 hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-1 bg-white"
+                className="group relative flex flex-col items-start p-8 rounded-2xl border border-border hover:border-primary transition-all duration-500 hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-1 bg-background"
               >
                 <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary/5 to-primary-dark/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10"></div>
                 <div className="flex items-center justify-center w-14 h-14 rounded-xl bg-gradient-to-br from-primary to-primary-dark text-white mb-6 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300 shadow-lg shadow-primary/30">
                   <feature.icon className="w-6 h-6" />
                 </div>
-                <h3 className="text-xl font-semibold text-[#020817] mb-3 group-hover:text-primary transition-colors duration-300">
+                <h3 className="text-xl font-semibold text-foreground mb-3 group-hover:text-primary transition-colors duration-300">
                   {feature.title}
                 </h3>
-                <p className="text-[#64748b] text-sm leading-relaxed">
+                <p className="text-muted-foreground text-sm leading-relaxed">
                   {feature.description}
                 </p>
               </div>
@@ -252,14 +252,14 @@ export default function LandingPage() {
       </section>
 
       {/* ─── How It Works ─── */}
-      <section className="w-full bg-[#f9fafb] py-20 px-4 sm:px-8">
+      <section className="w-full bg-secondary/30 py-20 px-4 sm:px-8">
         <div className="max-w-[1280px] mx-auto">
           <div className="section-header">
             <div className="pill-badge mb-4 mx-auto">How It Works</div>
             <h2 className="mb-4">
               Four Simple <span className="text-gradient">Steps</span>
             </h2>
-            <p className="text-[#64748b] text-base sm:text-lg leading-relaxed">
+            <p className="text-muted-foreground text-base sm:text-lg leading-relaxed">
               From picking a domain to building a standout portfolio.
             </p>
           </div>
@@ -275,10 +275,10 @@ export default function LandingPage() {
                 <div className="text-6xl font-bold text-[#e2e8f0] group-hover:text-primary/20 transition-colors duration-300 mb-4 font-mono">
                   {step.id}
                 </div>
-                <h3 className="text-lg font-semibold text-[#020817] mb-2 group-hover:text-primary transition-colors duration-300 tracking-tight">
+                <h3 className="text-lg font-semibold text-foreground mb-2 group-hover:text-primary transition-colors duration-300 tracking-tight">
                   {step.title}
                 </h3>
-                <p className="text-sm text-[#64748b] leading-relaxed">
+                <p className="text-sm text-muted-foreground leading-relaxed">
                   {step.desc}
                 </p>
               </div>
@@ -304,7 +304,7 @@ export default function LandingPage() {
           <h2 className="mb-6">
             Ready to Start <span className="text-gradient">Building</span>?
           </h2>
-          <p className="text-[#64748b] text-lg sm:text-xl max-w-2xl mx-auto mb-10 leading-relaxed">
+          <p className="text-muted-foreground text-lg sm:text-xl max-w-2xl mx-auto mb-10 leading-relaxed">
             Join thousands of developers who are learning by building real projects.
           </p>
 
@@ -320,21 +320,21 @@ export default function LandingPage() {
 
           <div className="w-full max-w-md mx-auto h-px bg-[#e2e8f0] mt-12 mb-8"></div>
 
-          <div className="flex flex-wrap items-center justify-center gap-8 text-[#64748b]">
+          <div className="flex flex-wrap items-center justify-center gap-8 text-muted-foreground">
             <div className="flex items-center gap-2">
-              <div className="p-1 rounded-full bg-[#eff6ff] text-primary">
+              <div className="p-1 rounded-full bg-primary/10 text-primary">
                 <CheckCircle2 className="w-4 h-4" />
               </div>
               <span className="text-sm font-medium">100% Free</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="p-1 rounded-full bg-[#eff6ff] text-primary">
+              <div className="p-1 rounded-full bg-primary/10 text-primary">
                 <CheckCircle2 className="w-4 h-4" />
               </div>
               <span className="text-sm font-medium">No account required to browse</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="p-1 rounded-full bg-[#eff6ff] text-primary">
+              <div className="p-1 rounded-full bg-primary/10 text-primary">
                 <Users className="w-4 h-4" />
               </div>
               <span className="text-sm font-medium">Community supported</span>

@@ -87,7 +87,7 @@ export default function AchievementsPage() {
           <h1 className="text-3xl font-bold text-foreground tracking-tight">Achievements</h1>
           <p className="text-muted-foreground mt-1">Track your technical milestones and platform recognition.</p>
         </div>
-        <div className="flex items-center gap-6 bg-white px-6 py-4 rounded-xl border border-border shadow-sm">
+        <div className="flex items-center gap-6 bg-background px-6 py-4 rounded-xl border border-border shadow-sm">
           <div className="flex flex-col items-center px-4 border-r border-border">
             <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Total Points</span>
             <span className="text-2xl font-bold text-primary">{progress?.points || 0}</span>
@@ -107,7 +107,7 @@ export default function AchievementsPage() {
           { label: 'Current Streak', value: `${progress?.currentStreak || 0}d`, icon: Zap, bg: 'bg-amber-50', color: 'text-amber-500' },
           { label: 'Efficiency', value: '94%', icon: TrendingUp, bg: 'bg-violet-50', color: 'text-violet-500' }
         ].map((stat, i) => (
-          <div key={i} className="bg-white p-6 rounded-xl border border-border shadow-sm flex items-center gap-4">
+          <div key={i} className="bg-background p-6 rounded-xl border border-border shadow-sm flex items-center gap-4">
             <div className={`p-3 rounded-lg ${stat.bg} ${stat.color}`}>
               <stat.icon size={24} />
             </div>
@@ -129,7 +129,7 @@ export default function AchievementsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {achievements.length > 0 ? (
               achievements.map((achievement) => (
-                <div key={achievement.id} className="bg-white p-5 rounded-xl border border-border shadow-sm flex items-start gap-4 hover:border-primary/30 transition-all group">
+                <div key={achievement.id} className="bg-background p-5 rounded-xl border border-border shadow-sm flex items-start gap-4 hover:border-primary/30 transition-all group">
                   <div className="size-12 rounded-lg bg-amber-50 text-amber-500 flex items-center justify-center shrink-0 border border-amber-100">
                     <Star size={24} fill="currentColor" />
                   </div>
@@ -162,7 +162,7 @@ export default function AchievementsPage() {
           
           <div className="space-y-3">
             {allAchievements.filter(a => !achievements.some(ua => ua.id === a.id)).slice(0, 5).map((achievement) => (
-              <div key={achievement.id} className="bg-white p-4 rounded-xl border border-border opacity-70 grayscale hover:grayscale-0 hover:opacity-100 transition-all cursor-help relative overflow-hidden group">
+              <div key={achievement.id} className="bg-background p-4 rounded-xl border border-border opacity-70 grayscale hover:grayscale-0 hover:opacity-100 transition-all cursor-help relative overflow-hidden group">
                 <div className="flex items-center gap-4">
                   <div className="size-10 rounded-lg bg-secondary flex items-center justify-center text-muted-foreground shrink-0">
                     {getCategoryIcon(achievement.category)}

@@ -80,11 +80,11 @@ export default function DomainsPage() {
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div key={i} className="aspect-square bg-white rounded-2xl animate-pulse border border-border shadow-2xl" />
+              <div key={i} className="aspect-square bg-background rounded-2xl animate-pulse border border-border shadow-2xl" />
             ))}
           </div>
         ) : error ? (
-          <div className="bg-white rounded-2xl p-20 text-center border border-red-500/20 bg-red-500/5 max-w-2xl mx-auto">
+          <div className="bg-background rounded-2xl p-20 text-center border border-red-500/20 bg-red-500/5 max-w-2xl mx-auto">
             <span className="material-symbols-outlined text-5xl text-red-500 mb-6 font-thin">error_outline</span>
             <h3 className="text-2xl font-black text-foreground mb-4 uppercase">Failed to Load</h3>
             <p className="text-muted-foreground mb-8 font-medium">{error}</p>
@@ -96,7 +96,7 @@ export default function DomainsPage() {
             </button>
           </div>
         ) : domains.length === 0 ? (
-          <div className="bg-white rounded-2xl p-24 text-center border border-dashed border-border">
+          <div className="bg-background rounded-2xl p-24 text-center border border-dashed border-border">
             <p className="text-muted-foreground font-bold uppercase tracking-widest text-xs">No domains available yet.</p>
           </div>
         ) : (
@@ -126,7 +126,7 @@ export default function DomainsPage() {
       {/* Suggestion Modal */}
       {isSuggestModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden border border-border animate-in zoom-in-95 duration-200">
+          <div className="w-full max-w-md bg-background rounded-2xl shadow-2xl overflow-hidden border border-border animate-in zoom-in-95 duration-200">
             <div className="px-6 py-4 border-b border-border flex justify-between items-center bg-secondary">
               <h3 className="text-sm font-bold text-foreground uppercase tracking-widest">Suggest New Domain</h3>
               <button

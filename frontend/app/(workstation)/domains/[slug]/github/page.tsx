@@ -20,30 +20,30 @@ export default function GitHubProjectsPage() {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
         const url = `${apiUrl}/domains/slug/${domainSlug}`;
         console.log('Fetching domain from:', url);
-        
+
         const response = await fetch(url);
-        
+
         if (!response.ok) {
           const errorText = await response.text();
           console.error('Domain fetch failed:', response.status, errorText);
           console.error('Failed slug was:', domainSlug);
           throw new Error(`Failed to fetch domain: ${response.status}`);
         }
-        
+
         const data = await response.json();
         setDomain(data);
       } catch (error) {
         console.error('Error fetching domain:', error);
         // Set a fallback domain to prevent UI break
-        setDomain({ 
+        setDomain({
           name: domainSlug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
-          slug: domainSlug 
+          slug: domainSlug
         });
       } finally {
         setLoading(false);
       }
     }
-    
+
     if (domainSlug) {
       fetchDomain();
     }
@@ -63,7 +63,7 @@ export default function GitHubProjectsPage() {
     return (
       <div className="min-h-screen bg-background">
         <div className="container mx-auto px-4 py-8">
-          <div className="bg-card border border-border rounded-xl p-8 text-center">
+          <div className="bg-background border border-border rounded-xl p-8 text-center">
             <h1 className="text-3xl font-bold text-foreground mb-4">Domain Not Found</h1>
             <Link
               href="/"

@@ -39,7 +39,7 @@ export default function DomainPage({ params }: { params: Promise<{ slug: string 
     if (!domain) {
         return (
             <div className="flex items-center justify-center min-h-[60vh]">
-                <div className="bg-white border border-border p-8 max-w-md w-full text-center rounded-2xl">
+                <div className="bg-background border border-border p-8 max-w-md w-full text-center rounded-2xl">
                     <span className="material-symbols-outlined text-4xl text-muted-foreground mb-4">error</span>
                     <h2 className="text-2xl font-bold text-foreground mb-4">Domain not found</h2>
                     <Link href="/domains" className="text-primary hover:text-primary transition-colors font-bold uppercase text-xs tracking-widest">
@@ -59,7 +59,7 @@ export default function DomainPage({ params }: { params: Promise<{ slug: string 
             </Link>
 
             {/* Domain Header */}
-            <div className="bg-white border border-border p-10 rounded-2xl mb-12 relative overflow-hidden animate-fade-in-up">
+            <div className="bg-background border border-border p-10 rounded-2xl mb-12 relative overflow-hidden animate-fade-in-up">
                 <div className="relative z-10">
                     <div className="inline-flex items-center px-3 py-1 rounded-lg bg-secondary border border-border text-primary text-[10px] font-black uppercase tracking-[0.2em] mb-6">
                         Domain

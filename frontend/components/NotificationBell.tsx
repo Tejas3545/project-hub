@@ -180,9 +180,9 @@ export default function NotificationBell() {
                     className={`absolute right-0 mt-3 w-80 z-[100] transform transition-all duration-200 ease-out ${isAnimating ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 -translate-y-2'
                         }`}
                 >
-                    <div className="bg-white border border-border rounded-xl shadow-xl overflow-hidden flex flex-col max-h-[32rem]">
+                    <div className="bg-background border border-border rounded-xl shadow-xl overflow-hidden flex flex-col max-h-[32rem]">
                         {showSuccess && (
-                            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-white animate-in fade-in duration-200">
+                            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-background animate-in fade-in duration-200">
                                 <div className="w-14 h-14 bg-primary/15 rounded-full flex items-center justify-center mb-3 border border-primary/20">
                                     <span className="material-symbols-outlined text-primary text-2xl">done_all</span>
                                 </div>

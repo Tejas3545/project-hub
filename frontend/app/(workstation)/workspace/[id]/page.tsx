@@ -248,7 +248,7 @@ function WorkspaceContent() {
             )}
             <button
               onClick={saveState}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-muted rounded-lg text-sm transition border border-border"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-background hover:bg-muted rounded-lg text-sm transition border border-border"
             >
               <Save size={14} />
               Save
@@ -276,12 +276,12 @@ function WorkspaceContent() {
                   {project.difficulty}
                 </span>
                 {project.subDomain && (
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-white/10 text-white border border-white/20">
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-background/10 text-white border border-white/20">
                     {project.subDomain}
                   </span>
                 )}
                 {project.domainName && project.domainName !== project.subDomain && (
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-white/20 text-white border border-white/30">
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-background/20 text-white border border-white/30">
                     {project.domainName}
                   </span>
                 )}
@@ -294,7 +294,7 @@ function WorkspaceContent() {
                   href={project.downloadUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-5 py-2.5 bg-white/10 hover:bg-white text-white hover:text-primary backdrop-blur-sm rounded-xl text-sm font-bold transition-all duration-200 border border-white/20 hover:border-white shadow-sm hover:shadow-md"
+                  className="flex items-center gap-2 px-5 py-2.5 bg-background/10 hover:bg-background text-white hover:text-primary backdrop-blur-sm rounded-xl text-sm font-bold transition-all duration-200 border border-white/20 hover:border-white shadow-sm hover:shadow-md"
                 >
                   <Download size={18} />
                   Download
@@ -305,7 +305,7 @@ function WorkspaceContent() {
                   href={project.liveUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-5 py-2.5 bg-white/10 hover:bg-white text-white hover:text-primary backdrop-blur-sm rounded-xl text-sm font-bold transition-all duration-200 border border-white/20 hover:border-white shadow-sm hover:shadow-md"
+                  className="flex items-center gap-2 px-5 py-2.5 bg-background/10 hover:bg-background text-white hover:text-primary backdrop-blur-sm rounded-xl text-sm font-bold transition-all duration-200 border border-white/20 hover:border-white shadow-sm hover:shadow-md"
                 >
                   <ExternalLink size={18} />
                   Demo
@@ -320,7 +320,7 @@ function WorkspaceContent() {
           {/* LEFT COLUMN - Timer + Status + Progress */}
           <div className="space-y-6">
             {/* Timer Card */}
-            <div className="bg-white border border-border rounded-xl p-6">
+            <div className="bg-background border border-border rounded-xl p-6">
               <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
                 <Clock size={20} className="text-primary" />
                 Time Tracker
@@ -359,7 +359,7 @@ function WorkspaceContent() {
                       setIsTimerRunning(false);
                     }
                   }}
-                  className="flex items-center justify-center gap-2 py-3 bg-white hover:bg-muted border border-border rounded-xl text-sm font-bold text-foreground transition-all shadow-sm"
+                  className="flex items-center justify-center gap-2 py-3 bg-background hover:bg-muted border border-border rounded-xl text-sm font-bold text-foreground transition-all shadow-sm"
                 >
                   <RotateCcw size={18} />
                   Reset
@@ -368,7 +368,7 @@ function WorkspaceContent() {
             </div>
 
             {/* Status Card */}
-            <div className="bg-white border border-border rounded-xl p-6">
+            <div className="bg-background border border-border rounded-xl p-6">
               <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
                 <Target size={20} className="text-purple-600" />
                 Project Status
@@ -399,7 +399,7 @@ function WorkspaceContent() {
 
             {/* Deliverables Checklist */}
             {project.deliverables && project.deliverables.length > 0 && (
-              <div className="bg-white border border-border rounded-xl p-6">
+              <div className="bg-background border border-border rounded-xl p-6">
                 <h3 className="text-lg font-bold mb-2 flex items-center gap-2">
                   <CheckCircle2 size={20} className="text-emerald-600" />
                   Deliverables
@@ -445,7 +445,7 @@ function WorkspaceContent() {
 
             {/* Tech Skills */}
             {project.technicalSkills && project.technicalSkills.length > 0 && (
-              <div className="bg-white border border-border rounded-xl p-6">
+              <div className="bg-background border border-border rounded-xl p-6">
                 <h3 className="text-sm font-bold text-muted-foreground uppercase mb-3">Tech Stack</h3>
                 <div className="flex flex-wrap gap-2">
                   {project.technicalSkills.map((skill, idx) => (
@@ -464,7 +464,7 @@ function WorkspaceContent() {
           {/* RIGHT COLUMN - Notes + Project Brief */}
           <div className="lg:col-span-2 space-y-6">
             {/* Notes Editor */}
-            <div className="bg-white border border-border rounded-xl p-6">
+            <div className="bg-background border border-border rounded-xl p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-bold flex items-center gap-2">
                   <FileText size={20} className="text-amber-600" />
@@ -491,7 +491,7 @@ function WorkspaceContent() {
 
             {/* Project Quick Reference */}
             {(project.problemStatement || project.solutionDescription) && (
-              <div className="bg-white border border-border rounded-xl p-6">
+              <div className="bg-background border border-border rounded-xl p-6">
                 <h3 className="text-lg font-bold mb-4">Quick Reference</h3>
                 <div className="space-y-4">
                   {project.problemStatement && (
@@ -512,7 +512,7 @@ function WorkspaceContent() {
 
             {/* Evaluation Criteria */}
             {project.evaluationCriteria && (
-              <div className="bg-white border border-border rounded-xl p-6">
+              <div className="bg-background border border-border rounded-xl p-6">
                 <h3 className="text-lg font-bold mb-3 flex items-center gap-2">
                   <Target size={20} className="text-primary" />
                   Evaluation Criteria

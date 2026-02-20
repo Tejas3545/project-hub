@@ -68,7 +68,7 @@ export default function DomainProjectsManager({ projects }: DomainProjectsManage
                         ))}
                     </div>
                 ) : (
-                    <div className="bg-white rounded-xl border border-border shadow-sm p-12 text-center">
+                    <div className="bg-background rounded-xl border border-border shadow-sm p-12 text-center">
                         <p className="text-muted-foreground">
                             No projects match your filters. Try adjusting your criteria.
                         </p>

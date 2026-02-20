@@ -148,7 +148,7 @@ export default function LearningPathsPage() {
                     { label: 'Top Domain', val: insights.topDomain || 'Pending', sub: 'Your specialty', icon: 'hub' },
                     { label: 'Best Match', val: recommendations.length > 0 ? recommendations[0].title.split(' ')[0] : 'None', sub: 'Recommended start', icon: 'star' }
                   ].map((stat, i) => (
-                    <div key={i} className="bg-white/5 border border-white/10 p-8 rounded-3xl backdrop-blur-sm group hover:border-primary/50 transition-colors">
+                    <div key={i} className="bg-background/5 border border-white/10 p-8 rounded-3xl backdrop-blur-sm group hover:border-primary/50 transition-colors">
                       <div className="flex justify-between items-start mb-4 text-white/40 group-hover:text-primary transition-colors">
                         <span className="material-symbols-outlined text-xl">{stat.icon}</span>
                         <span className="text-[8px] font-black text-white/20 uppercase tracking-[0.2em]">0{i+1}</span>
@@ -164,7 +164,7 @@ export default function LearningPathsPage() {
               {recommendations.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                   {recommendations.map(path => (
-                    <div key={path.id} className="bg-white p-8 rounded-3xl group/card flex flex-col h-full hover:scale-[1.02] transition-all">
+                    <div key={path.id} className="bg-background p-8 rounded-3xl group/card flex flex-col h-full hover:scale-[1.02] transition-all">
                       <div className="flex-1">
                         <div className="flex justify-between items-start mb-6">
                           <span className="px-3 py-1 bg-primary/10 text-primary text-[10px] font-black uppercase tracking-widest rounded-lg border border-primary/20">
@@ -192,7 +192,7 @@ export default function LearningPathsPage() {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-20 bg-white/5 rounded-3xl border border-dashed border-white/10">
+                <div className="text-center py-20 bg-background/5 rounded-3xl border border-dashed border-white/10">
                   <p className="text-white/60 font-medium italic">Complete 1 project to unlock smart recommendations.</p>
                 </div>
               )}
@@ -213,7 +213,7 @@ export default function LearningPathsPage() {
         {paths.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {paths.map(path => (
-              <div key={path.id} className="bg-white border border-border p-8 rounded-3xl hover:border-primary/30 transition-all group/card flex flex-col h-full hover:bg-secondary">
+              <div key={path.id} className="bg-background border border-border p-8 rounded-3xl hover:border-primary/30 transition-all group/card flex flex-col h-full hover:bg-secondary">
                 <div className="flex-1">
                   <div className="flex justify-between items-start mb-6">
                     <span className={`px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-lg border ${path.difficulty === 'EASY' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' :

@@ -56,7 +56,7 @@ export default function HelpCenterPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-12">
           <Link
             href="/domains"
-            className="bg-white rounded-xl border border-border shadow-sm p-6 text-center hover:border-primary/30 transition-all group"
+            className="bg-background rounded-xl border border-border shadow-sm p-6 text-center hover:border-primary/30 transition-all group"
           >
             <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
               <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -69,7 +69,7 @@ export default function HelpCenterPage() {
 
           <Link
             href="/workspace"
-            className="bg-white rounded-xl border border-border shadow-sm p-6 text-center hover:border-primary/30 transition-all group"
+            className="bg-background rounded-xl border border-border shadow-sm p-6 text-center hover:border-primary/30 transition-all group"
           >
             <div className="w-12 h-12 rounded-full bg-emerald-50 flex items-center justify-center mx-auto mb-3">
               <svg className="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -82,7 +82,7 @@ export default function HelpCenterPage() {
 
           <Link
             href="/profile"
-            className="bg-white rounded-xl border border-border shadow-sm p-6 text-center hover:border-primary/30 transition-all group"
+            className="bg-background rounded-xl border border-border shadow-sm p-6 text-center hover:border-primary/30 transition-all group"
           >
             <div className="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center mx-auto mb-3">
               <svg className="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -103,7 +103,7 @@ export default function HelpCenterPage() {
             {faqs.map((faq, idx) => (
               <details
                 key={idx}
-                className="bg-white rounded-xl border border-border shadow-sm p-5 group cursor-pointer"
+                className="bg-background rounded-xl border border-border shadow-sm p-5 group cursor-pointer"
               >
                 <summary className="font-bold text-foreground flex items-center justify-between list-none">
                   {faq.q}
@@ -118,7 +118,7 @@ export default function HelpCenterPage() {
         </div>
 
         {/* Contact */}
-        <div className="bg-white rounded-xl border border-border shadow-sm p-8 mt-12 text-center">
+        <div className="bg-background rounded-xl border border-border shadow-sm p-8 mt-12 text-center">
           <h3 className="text-xl font-bold text-foreground mb-2">Still need help?</h3>
           <p className="text-muted-foreground mb-4">
             Our support team is here to assist you with any questions or issues.

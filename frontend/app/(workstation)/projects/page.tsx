@@ -233,7 +233,7 @@ function ProjectsContent() {
                                     <button
                                         onClick={() => fetchProjects(page + 1, true)}
                                         disabled={loadingMore}
-                                        className="px-6 py-3 bg-white border border-border rounded-xl font-semibold hover:bg-secondary transition-all disabled:opacity-50 flex items-center gap-2"
+                                        className="px-6 py-3 bg-background border border-border rounded-xl font-semibold hover:bg-secondary transition-all disabled:opacity-50 flex items-center gap-2"
                                     >
                                         {loadingMore ? 'Loading...' : 'Load More Projects'}
                                         <span className="material-symbols-outlined text-sm">expand_more</span>

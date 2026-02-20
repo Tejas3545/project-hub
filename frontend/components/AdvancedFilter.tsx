@@ -94,7 +94,7 @@ export default function AdvancedFilter({ onFilterChange, domains = [], initialFi
                     value={filters.search}
                     onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
                     placeholder="Search projects by title or keywords..."
-                    className="w-full pl-12 pr-4 py-3 bg-white border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 transition-colors"
+                    className="w-full pl-12 pr-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 transition-colors"
                 />
             </div>
 
@@ -132,7 +132,7 @@ export default function AdvancedFilter({ onFilterChange, domains = [], initialFi
 
             {/* Filters Panel */}
             {showFilters && (
-                <div className="bg-white rounded-xl border border-border shadow-sm p-6 space-y-6 animate-fadeIn">
+                <div className="bg-background rounded-xl border border-border shadow-sm p-6 space-y-6 animate-fadeIn">
                     {/* Domain Filter */}
                     {domains.length > 0 && (
                         <div>
@@ -222,7 +222,7 @@ export default function AdvancedFilter({ onFilterChange, domains = [], initialFi
                             </button>
 
                             {showTimeDropdown && (
-                                <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-border rounded-lg shadow-xl z-10 overflow-hidden">
+                                <div className="absolute top-full left-0 right-0 mt-2 bg-background border border-border rounded-lg shadow-xl z-10 overflow-hidden">
                                     <button
                                         onClick={() => setTimeRange(null)}
                                         className="w-full px-4 py-3 text-left text-muted-foreground hover:bg-muted transition-colors border-b border-border"

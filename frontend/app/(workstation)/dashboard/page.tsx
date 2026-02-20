@@ -63,7 +63,7 @@ export default function DashboardPage() {
     const loadData = async () => {
         setLoading(true);
         try {
-            const [ progressData, githubData] = await Promise.all([
+            const [progressData, githubData] = await Promise.all([
                 userApi.getProgress(),
                 userApi.getGithubProgress(),
             ]);
@@ -99,7 +99,7 @@ export default function DashboardPage() {
                     <Link href="/projects" className="px-5 py-2.5 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary/90 transition-all shadow-sm">
                         Browse Projects
                     </Link>
-                    <Link href="/workspace" className="px-5 py-2.5 bg-white border border-border rounded-lg text-sm font-semibold hover:bg-secondary transition-all">
+                    <Link href="/workspace" className="px-5 py-2.5 bg-background border border-border rounded-lg text-sm font-semibold hover:bg-secondary transition-all">
                         My Workspace
                     </Link>
                 </div>
@@ -108,12 +108,12 @@ export default function DashboardPage() {
             {/* Quick Stats */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {[
-                    { label: 'In Progress', value: stats.inProgress, icon: PlayCircle, color: 'text-blue-500', bg: 'bg-blue-50' },
-                    { label: 'Completed', value: stats.completed, icon: CheckCircle2, color: 'text-emerald-500', bg: 'bg-emerald-50' },
-                    { label: 'On Hold', value: stats.onHold, icon: Clock, color: 'text-amber-500', bg: 'bg-amber-50' },
-                    { label: 'Total Hours', value: `${stats.totalHours}h`, icon: Activity, color: 'text-violet-500', bg: 'bg-violet-50' }
+                    { label: 'In Progress', value: stats.inProgress, icon: PlayCircle, color: 'text-blue-500', bg: 'bg-blue-500/10' },
+                    { label: 'Completed', value: stats.completed, icon: CheckCircle2, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
+                    { label: 'On Hold', value: stats.onHold, icon: Clock, color: 'text-amber-500', bg: 'bg-amber-500/10' },
+                    { label: 'Total Hours', value: `${stats.totalHours}h`, icon: Activity, color: 'text-violet-500', bg: 'bg-violet-500/10' }
                 ].map((stat, i) => (
-                    <div key={i} className="bg-white p-6 rounded-xl border border-border shadow-sm flex items-center gap-4">
+                    <div key={i} className="bg-background p-6 rounded-xl border border-border shadow-sm flex items-center gap-4">
                         <div className={`p-3 rounded-lg ${stat.bg} ${stat.color}`}>
                             <stat.icon size={24} />
                         </div>
@@ -135,7 +135,7 @@ export default function DashboardPage() {
                         </Link>
                     </div>
 
-                    <div className="bg-white rounded-xl border border-border shadow-sm overflow-hidden">
+                    <div className="bg-background rounded-xl border border-border shadow-sm overflow-hidden">
                         <div className="overflow-x-auto">
                             <table className="w-full text-left border-collapse">
                                 <thead>
@@ -161,19 +161,19 @@ export default function DashboardPage() {
                                         </tr>
                                     ) : (
                                         [
-                                            ...progress.map(p => ({ 
-                                                ...p, 
-                                                type: 'standard' as const, 
-                                                title: p.project.title, 
-                                                id: p.id, 
+                                            ...progress.map(p => ({
+                                                ...p,
+                                                type: 'standard' as const,
+                                                title: p.project.title,
+                                                id: p.id,
                                                 projectId: p.projectId,
                                                 linkId: p.projectId
                                             })),
-                                            ...githubProgress.map(p => ({ 
-                                                ...p, 
-                                                type: 'github' as const, 
-                                                title: p.githubProject.title, 
-                                                id: p.id, 
+                                            ...githubProgress.map(p => ({
+                                                ...p,
+                                                type: 'github' as const,
+                                                title: p.githubProject.title,
+                                                id: p.id,
                                                 githubProjectId: p.githubProjectId,
                                                 linkId: p.githubProjectId
                                             }))
@@ -181,7 +181,7 @@ export default function DashboardPage() {
                                             <tr key={item.id} className="hover:bg-secondary/20 transition-colors group">
                                                 <td className="px-6 py-5">
                                                     <div className="flex items-center gap-3">
-                                                        <div className="size-10 rounded-lg bg-secondary flex items-center justify-center text-muted-foreground group-hover:bg-white group-hover:text-primary transition-all shadow-inner">
+                                                        <div className="size-10 rounded-lg bg-secondary flex items-center justify-center text-muted-foreground group-hover:bg-background group-hover:text-primary transition-all shadow-inner">
                                                             <Activity size={18} />
                                                         </div>
                                                         <p className="font-semibold text-foreground">{item.title}</p>
@@ -190,7 +190,7 @@ export default function DashboardPage() {
                                                 <td className="px-6 py-5">
                                                     <div className="flex items-center gap-3 w-32">
                                                         <div className="flex-1 h-2 bg-secondary rounded-full overflow-hidden">
-                                                            <div 
+                                                            <div
                                                                 className={`h-full bg-primary ${item.status === 'COMPLETED' ? 'w-full' : 'w-[45%]'}`}
                                                             ></div>
                                                         </div>
@@ -200,16 +200,14 @@ export default function DashboardPage() {
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-5">
-                                                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
-                                                        item.status === 'COMPLETED' ? 'bg-emerald-100 text-emerald-700' :
-                                                        item.status === 'ON_HOLD' ? 'bg-amber-100 text-amber-700' :
-                                                        'bg-blue-100 text-blue-700'
-                                                    }`}>
-                                                        <span className={`size-1.5 rounded-full ${
-                                                            item.status === 'COMPLETED' ? 'bg-emerald-500' :
-                                                            item.status === 'ON_HOLD' ? 'bg-amber-500' :
-                                                            'bg-blue-500'
-                                                        }`}></span>
+                                                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${item.status === 'COMPLETED' ? 'bg-emerald-100 text-emerald-700' :
+                                                            item.status === 'ON_HOLD' ? 'bg-amber-100 text-amber-700' :
+                                                                'bg-blue-100 text-blue-700'
+                                                        }`}>
+                                                        <span className={`size-1.5 rounded-full ${item.status === 'COMPLETED' ? 'bg-emerald-500' :
+                                                                item.status === 'ON_HOLD' ? 'bg-amber-500' :
+                                                                    'bg-blue-500'
+                                                            }`}></span>
                                                         {item.status.replace('_', ' ')}
                                                     </span>
                                                 </td>
@@ -241,7 +239,7 @@ export default function DashboardPage() {
                                     <h4 className="text-xl font-bold line-clamp-1">{activeSession.project?.title || 'Active Session'}</h4>
                                     <p className="text-5xl font-mono font-bold mt-2 tracking-tighter">{formatSessionTime(sessionTime)}</p>
                                 </div>
-                                <Link href="/workspace" className="block w-full py-3 bg-white text-foreground text-center text-sm font-bold rounded-lg hover:bg-primary hover:text-white transition-all">
+                                <Link href="/workspace" className="block w-full py-3 bg-secondary text-foreground text-center text-sm font-bold rounded-lg hover:bg-primary/90 hover:text-white transition-all">
                                     Go to Workspace
                                 </Link>
                             </div>
@@ -250,7 +248,7 @@ export default function DashboardPage() {
                     )}
 
                     {/* Quick Launch */}
-                    <div className="bg-white p-6 rounded-xl border border-border shadow-sm">
+                    <div className="bg-background p-6 rounded-xl border border-border shadow-sm">
                         <h4 className="font-bold text-foreground mb-4">Quick Launch</h4>
                         <div className="grid grid-cols-1 gap-3">
                             {[
@@ -260,7 +258,7 @@ export default function DashboardPage() {
                                 { title: 'Achievements', href: '/achievements', icon: Star },
                             ].map((link, i) => (
                                 <Link key={i} href={link.href} className="flex items-center gap-3 p-3 rounded-lg hover:bg-secondary transition-all group">
-                                    <div className="p-2 rounded-md bg-secondary group-hover:bg-white text-muted-foreground group-hover:text-primary transition-all">
+                                    <div className="p-2 rounded-md bg-secondary group-hover:bg-background text-muted-foreground group-hover:text-primary transition-all">
                                         <link.icon size={18} />
                                     </div>
                                     <span className="text-sm font-medium text-foreground">{link.title}</span>

@@ -100,7 +100,7 @@ export default function AdminProjectsPage() {
 
             <div className="space-y-4">
                 {filteredProjects.map((project) => (
-                    <div key={project.id} className="bg-white rounded-xl border border-border shadow-sm p-6 hover:shadow-md transition-all">
+                    <div key={project.id} className="bg-background rounded-xl border border-border shadow-sm p-6 hover:shadow-md transition-all">
                         <div className="flex items-start justify-between gap-4">
                             <div className="flex-1">
                                 <div className="flex items-center gap-3 mb-2">
@@ -145,7 +145,7 @@ export default function AdminProjectsPage() {
             </div>
 
             {filteredProjects.length === 0 && (
-                <div className="bg-white rounded-xl border border-border shadow-sm p-12 text-center">
+                <div className="bg-background rounded-xl border border-border shadow-sm p-12 text-center">
                     <p className="text-muted-foreground mb-4">No {filter !== 'all' && filter + ' '}projects found</p>
                     <Link
                         href="/admin/projects/new"

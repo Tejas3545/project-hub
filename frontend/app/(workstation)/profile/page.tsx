@@ -5,18 +5,18 @@ import { useAuth } from '@/lib/AuthContext';
 import { userApi } from '@/lib/api';
 import { Bookmark, GitHubProject as GitHubProjectType } from '@/types';
 import GitHubProjectCard from '@/components/GitHubProjectCard';
-import { 
-  User, 
-  Mail, 
-  Briefcase, 
-  MapPin, 
-  Globe, 
-  Calendar, 
-  Edit3, 
-  CheckCircle2, 
-  Clock, 
-  Star, 
-  History, 
+import {
+  User,
+  Mail,
+  Briefcase,
+  MapPin,
+  Globe,
+  Calendar,
+  Edit3,
+  CheckCircle2,
+  Clock,
+  Star,
+  History,
   Bookmark as BookmarkIcon,
   Activity,
   Award,
@@ -80,7 +80,7 @@ export default function ProfilePage() {
       ]);
       setBookmarks(bookmarksData);
       setActivities(activitiesData as ActivityItem[]);
-      
+
       // Calculate real-time completed projects count
       const regularCompleted = progressData.filter((p: any) => p.status === 'COMPLETED').length;
       const githubCompleted = githubProgressData.filter((p: any) => p.status === 'COMPLETED').length;
@@ -144,16 +144,16 @@ export default function ProfilePage() {
   return (
     <div className="max-w-7xl mx-auto px-6 py-10 space-y-10">
       {/* Profile Header Card */}
-      <div className="bg-white rounded-2xl border border-border shadow-sm overflow-hidden">
+      <div className="bg-background rounded-2xl border border-border shadow-sm overflow-hidden">
         <div className="h-48 bg-gradient-to-r from-primary/10 via-primary/5 to-secondary"></div>
         <div className="px-8 pb-8">
           <div className="relative flex flex-col md:flex-row items-end gap-6 -mt-16">
             <div className="relative group">
-              <div className="size-32 rounded-2xl bg-white p-1 shadow-xl border border-border">
+              <div className="size-32 rounded-2xl bg-background p-1 shadow-xl border border-border">
                 {user.profileImage ? (
-                  <img 
-                    src={user.profileImage} 
-                    alt={user.firstName} 
+                  <img
+                    src={user.profileImage}
+                    alt={user.firstName}
                     className="w-full h-full object-cover rounded-xl"
                   />
                 ) : (
@@ -179,15 +179,15 @@ export default function ProfilePage() {
                   </p>
                 </div>
                 <div className="flex items-center gap-3">
-                  <button 
+                  <button
                     onClick={() => setIsEditModalOpen(true)}
                     className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary/90 transition-all shadow-sm"
                   >
                     <Edit3 size={16} /> Edit Profile
                   </button>
-                  <Link 
+                  <Link
                     href="/settings"
-                    className="p-2.5 bg-white border border-border rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
+                    className="p-2.5 bg-background border border-border rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
                   >
                     <Settings size={20} />
                   </Link>
@@ -218,12 +218,12 @@ export default function ProfilePage() {
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
-          { label: 'Completed', value: stats.projectsCompleted, icon: CheckCircle2, bg: 'bg-emerald-50', color: 'text-emerald-500' },
-          { label: 'Bookmarks', value: stats.bookmarksCount, icon: BookmarkIcon, bg: 'bg-blue-50', color: 'text-blue-500' },
-          { label: 'Platform XP', value: stats.xp, icon: Trophy, bg: 'bg-amber-50', color: 'text-amber-500' },
-          { label: 'Global Rank', value: stats.projectsCompleted > 0 ? `#${Math.max(10 - stats.projectsCompleted, 1)}` : 'N/A', icon: Zap, bg: 'bg-violet-50', color: 'text-violet-500' }
+          { label: 'Completed', value: stats.projectsCompleted, icon: CheckCircle2, bg: 'bg-emerald-500/10', color: 'text-emerald-500' },
+          { label: 'Bookmarks', value: stats.bookmarksCount, icon: BookmarkIcon, bg: 'bg-blue-500/10', color: 'text-blue-500' },
+          { label: 'Platform XP', value: stats.xp, icon: Trophy, bg: 'bg-amber-500/10', color: 'text-amber-500' },
+          { label: 'Global Rank', value: stats.projectsCompleted > 0 ? `#${Math.max(10 - stats.projectsCompleted, 1)}` : 'N/A', icon: Zap, bg: 'bg-violet-500/10', color: 'text-violet-500' }
         ].map((stat, i) => (
-          <div key={i} className="bg-white p-6 rounded-xl border border-border shadow-sm flex items-center gap-4">
+          <div key={i} className="bg-background p-6 rounded-xl border border-border shadow-sm flex items-center gap-4">
             <div className={`p-3 rounded-lg ${stat.bg} ${stat.color}`}>
               <stat.icon size={24} />
             </div>
@@ -246,11 +246,10 @@ export default function ProfilePage() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-6 py-4 text-sm font-medium border-b-2 transition-all ${
-                activeTab === tab.id 
-                  ? 'border-primary text-primary' 
+              className={`flex items-center gap-2 px-6 py-4 text-sm font-medium border-b-2 transition-all ${activeTab === tab.id
+                  ? 'border-primary text-primary'
                   : 'border-transparent text-muted-foreground hover:text-foreground'
-              }`}
+                }`}
             >
               <tab.icon size={16} />
               {tab.label}
@@ -266,14 +265,14 @@ export default function ProfilePage() {
           ) : activeTab === 'overview' ? (
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
               <div className="lg:col-span-8 space-y-8">
-                <div className="bg-white rounded-xl border border-border p-6">
+                <div className="bg-background rounded-xl border border-border p-6">
                   <h3 className="text-lg font-bold text-foreground mb-4">Technical Profile</h3>
                   <p className="text-muted-foreground leading-relaxed">
                     {user.headline ? `${user.headline}. Primary focus on full-stack engineering and cloud-native solutions.` : 'No bio provided. Update your profile to share your expertise.'}
                   </p>
                 </div>
-                
-                <div className="bg-white rounded-xl border border-border p-6">
+
+                <div className="bg-background rounded-xl border border-border p-6">
                   <h3 className="text-lg font-bold text-foreground mb-6">Recent Achievements</h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="flex items-center gap-4 p-4 rounded-lg bg-secondary/30 border border-border">
@@ -299,7 +298,7 @@ export default function ProfilePage() {
               </div>
 
               <div className="lg:col-span-4 space-y-6">
-                <div className="bg-white rounded-xl border border-border p-6 shadow-sm">
+                <div className="bg-background rounded-xl border border-border p-6 shadow-sm">
                   <h4 className="font-bold text-foreground mb-4">Identity Details</h4>
                   <div className="space-y-4">
                     <div className="flex justify-between items-center text-sm">
@@ -339,7 +338,7 @@ export default function ProfilePage() {
             <div className="max-w-3xl mx-auto space-y-4">
               {activities.length > 0 ? (
                 activities.map((activity, i) => (
-                  <div key={activity.id} className="flex gap-4 p-4 bg-white rounded-xl border border-border hover:shadow-md transition-shadow">
+                  <div key={activity.id} className="flex gap-4 p-4 bg-background rounded-xl border border-border hover:shadow-md transition-shadow">
                     <div className="size-10 rounded-full bg-secondary flex items-center justify-center text-primary shrink-0">
                       <Activity size={18} />
                     </div>
@@ -369,7 +368,7 @@ export default function ProfilePage() {
       {/* Edit Profile Modal */}
       {isEditModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="w-full max-w-lg bg-white rounded-2xl shadow-2xl overflow-hidden border border-border animate-in zoom-in-95 duration-200">
+          <div className="w-full max-w-lg bg-background rounded-2xl shadow-2xl overflow-hidden border border-border animate-in zoom-in-95 duration-200">
             <div className="px-6 py-4 border-b border-border flex justify-between items-center bg-secondary/30">
               <h3 className="font-bold text-foreground flex items-center gap-2">
                 <Shield size={18} className="text-primary" />
@@ -382,7 +381,7 @@ export default function ProfilePage() {
                 </svg>
               </button>
             </div>
-            
+
             <form onSubmit={handleUpdateProfile} className="p-6 space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">

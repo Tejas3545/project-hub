@@ -149,7 +149,7 @@ export default function EditProjectPage() {
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     {/* Basic Information - Same as create form */}
-                    <div className="bg-white rounded-xl border border-border shadow-sm p-6">
+                    <div className="bg-background rounded-xl border border-border shadow-sm p-6">
                         <h2 className="text-xl font-bold text-foreground mb-6">
                             Basic Information
                         </h2>
@@ -165,7 +165,7 @@ export default function EditProjectPage() {
                                     aria-label="Project Title"
                                     value={formData.title}
                                     onChange={handleChange}
-                                    className="w-full px-4 py-3 bg-white border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                                    className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                                 />
                             </div>
 
@@ -178,7 +178,7 @@ export default function EditProjectPage() {
                                         aria-label="Domain"
                                         value={formData.domainId}
                                         onChange={handleChange}
-                                        className="w-full px-4 py-3 bg-white border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                                        className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                                     >
                                         {domains.map(domain => (
                                             <option key={domain.id} value={domain.id}>{domain.name}</option>
@@ -194,7 +194,7 @@ export default function EditProjectPage() {
                                         aria-label="Difficulty"
                                         value={formData.difficulty}
                                         onChange={handleChange}
-                                        className="w-full px-4 py-3 bg-white border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                                        className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                                     >
                                         <option value="EASY">Easy</option>
                                         <option value="MEDIUM">Medium</option>
@@ -212,7 +212,7 @@ export default function EditProjectPage() {
                                     name="subDomain"
                                     value={formData.subDomain}
                                     onChange={handleChange}
-                                    className="w-full px-4 py-3 bg-white border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                                    className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                                     placeholder="e.g., Natural Language Processing, Frontend Development, Network Security"
                                 />
                                 <p className="text-xs text-muted-foreground mt-1">
@@ -223,52 +223,52 @@ export default function EditProjectPage() {
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium text-foreground mb-2">Min Time (hours) *</label>
-                                    <input type="number" name="minTime" required min="1" aria-label="Min Time (hours)" value={formData.minTime} onChange={handleChange} className="w-full px-4 py-3 bg-white border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary" />
+                                    <input type="number" name="minTime" required min="1" aria-label="Min Time (hours)" value={formData.minTime} onChange={handleChange} className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary" />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-foreground mb-2">Max Time (hours) *</label>
-                                    <input type="number" name="maxTime" required min="1" aria-label="Max Time (hours)" value={formData.maxTime} onChange={handleChange} className="w-full px-4 py-3 bg-white border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary" />
+                                    <input type="number" name="maxTime" required min="1" aria-label="Max Time (hours)" value={formData.maxTime} onChange={handleChange} className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary" />
                                 </div>
                             </div>
 
                             <div>
                                 <label className="block text-sm font-medium text-foreground mb-2">Skills Focus (comma-separated) *</label>
-                                <input type="text" name="skillFocus" required aria-label="Skills Focus" value={formData.skillFocus} onChange={handleChange} className="w-full px-4 py-3 bg-white border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary" />
+                                <input type="text" name="skillFocus" required aria-label="Skills Focus" value={formData.skillFocus} onChange={handleChange} className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary" />
                             </div>
                         </div>
                     </div>
 
                     {/* Project Details - Same structure as create */}
-                    <div className="bg-white rounded-xl border border-border shadow-sm p-6">
+                    <div className="bg-background rounded-xl border border-border shadow-sm p-6">
                         <h2 className="text-xl font-bold text-foreground mb-6">Project Details</h2>
                         <div className="space-y-6">
                             <div>
                                 <label className="block text-sm font-medium text-foreground mb-2">Industry Context *</label>
-                                <textarea name="industryContext" required rows={4} aria-label="Industry Context" value={formData.industryContext} onChange={handleChange} className="w-full px-4 py-3 bg-white border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none" />
+                                <textarea name="industryContext" required rows={4} aria-label="Industry Context" value={formData.industryContext} onChange={handleChange} className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none" />
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-foreground mb-2">Problem Statement *</label>
-                                <textarea name="problemStatement" required rows={4} aria-label="Problem Statement" value={formData.problemStatement} onChange={handleChange} className="w-full px-4 py-3 bg-white border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none" />
+                                <textarea name="problemStatement" required rows={4} aria-label="Problem Statement" value={formData.problemStatement} onChange={handleChange} className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none" />
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-foreground mb-2">Scope *</label>
-                                <textarea name="scope" required rows={6} aria-label="Scope" value={formData.scope} onChange={handleChange} className="w-full px-4 py-3 bg-white border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none" />
+                                <textarea name="scope" required rows={6} aria-label="Scope" value={formData.scope} onChange={handleChange} className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none" />
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-foreground mb-2">Prerequisites (comma-separated) *</label>
-                                <input type="text" name="prerequisites" required aria-label="Prerequisites" value={formData.prerequisites} onChange={handleChange} className="w-full px-4 py-3 bg-white border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary" />
+                                <input type="text" name="prerequisites" required aria-label="Prerequisites" value={formData.prerequisites} onChange={handleChange} className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary" />
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-foreground mb-2">Deliverables (comma-separated) *</label>
-                                <input type="text" name="deliverables" required aria-label="Deliverables" value={formData.deliverables} onChange={handleChange} className="w-full px-4 py-3 bg-white border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary" />
+                                <input type="text" name="deliverables" required aria-label="Deliverables" value={formData.deliverables} onChange={handleChange} className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary" />
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-foreground mb-2">Advanced Extensions</label>
-                                <textarea name="advancedExtensions" rows={4} aria-label="Advanced Extensions" value={formData.advancedExtensions} onChange={handleChange} className="w-full px-4 py-3 bg-white border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none" />
+                                <textarea name="advancedExtensions" rows={4} aria-label="Advanced Extensions" value={formData.advancedExtensions} onChange={handleChange} className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none" />
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-foreground mb-2">Evaluation Criteria</label>
-                                <textarea name="evaluationCriteria" rows={4} aria-label="Evaluation Criteria" value={formData.evaluationCriteria} onChange={handleChange} className="w-full px-4 py-3 bg-white border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none" />
+                                <textarea name="evaluationCriteria" rows={4} aria-label="Evaluation Criteria" value={formData.evaluationCriteria} onChange={handleChange} className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none" />
                             </div>
                             <div className="flex items-center gap-3">
                                 <input type="checkbox" id="isPublished" name="isPublished" checked={formData.isPublished} onChange={handleChange} className="w-4 h-4 rounded border-border text-primary focus:ring-primary" />

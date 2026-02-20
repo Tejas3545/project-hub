@@ -201,7 +201,7 @@ export default function SubmitProjectPage() {
     if (success) {
         return (
             <div className="flex items-center justify-center h-[60vh]">
-                <div className="bg-white p-8 max-w-md w-full text-center rounded-xl border border-border shadow-sm">
+                <div className="bg-background p-8 max-w-md w-full text-center rounded-xl border border-border shadow-sm">
                     <div className="w-16 h-16 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-4 border border-emerald-500/30">
                         <svg className="w-8 h-8 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -243,7 +243,7 @@ export default function SubmitProjectPage() {
             </div>
 
             {/* Progress Bar */}
-            <div className="bg-white rounded-xl p-6 mb-8 border border-border shadow-sm">
+            <div className="bg-background rounded-xl p-6 mb-8 border border-border shadow-sm">
                 <div className="flex items-center justify-between mb-4">
                     <span className="text-base font-semibold text-foreground">
                         Step {currentStep} of {totalSteps}
@@ -294,7 +294,7 @@ export default function SubmitProjectPage() {
             <form onSubmit={handleSubmit}>
                 {/* Step 1: Basic Information */}
                 {currentStep === 1 && (
-                    <div className="bg-white rounded-xl p-8 space-y-6 border border-border shadow-sm animate-fade-in-up">
+                    <div className="bg-background rounded-xl p-8 space-y-6 border border-border shadow-sm animate-fade-in-up">
                         <h2 className="text-xl font-bold text-foreground mb-4 border-b border-border pb-4">
                             Basic Information
                         </h2>
@@ -309,7 +309,7 @@ export default function SubmitProjectPage() {
                                 required
                                 value={formData.title}
                                 onChange={handleChange}
-                                className="w-full px-4 py-3 bg-white border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary/50 transition-all"
+                                className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary/50 transition-all"
                                 placeholder="e.g., AI-Powered Task Manager"
                             />
                         </div>
@@ -325,7 +325,7 @@ export default function SubmitProjectPage() {
                                     aria-label="Domain"
                                     value={formData.domainId}
                                     onChange={handleChange}
-                                    className="w-full px-4 py-3 bg-white border border-border rounded-lg text-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary/50 transition-all appearance-none"
+                                    className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary/50 transition-all appearance-none"
                                     style={{ backgroundImage: 'url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23cbd5e1%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 1rem center', backgroundSize: '0.65em auto' }}
                                 >
                                     {domains.map(domain => (
@@ -345,7 +345,7 @@ export default function SubmitProjectPage() {
                                     name="subDomain"
                                     value={formData.subDomain}
                                     onChange={handleChange}
-                                    className="w-full px-4 py-3 bg-white border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary/50 transition-all"
+                                    className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary/50 transition-all"
                                     placeholder="e.g., Machine Learning"
                                 />
                             </div>
@@ -362,7 +362,7 @@ export default function SubmitProjectPage() {
                                     aria-label="Difficulty"
                                     value={formData.difficulty}
                                     onChange={handleChange}
-                                    className="w-full px-4 py-3 bg-white border border-border rounded-lg text-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary/50 transition-all appearance-none"
+                                    className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary/50 transition-all appearance-none"
                                     style={{ backgroundImage: 'url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23cbd5e1%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 1rem center', backgroundSize: '0.65em auto' }}
                                 >
                                     <option value="EASY">Easy</option>
@@ -383,7 +383,7 @@ export default function SubmitProjectPage() {
                                     aria-label="Min Time (hours)"
                                     value={formData.minTime}
                                     onChange={handleChange}
-                                    className="w-full px-4 py-3 bg-white border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary/50 transition-all"
+                                    className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary/50 transition-all"
                                 />
                             </div>
 
@@ -399,7 +399,7 @@ export default function SubmitProjectPage() {
                                     aria-label="Max Time (hours)"
                                     value={formData.maxTime}
                                     onChange={handleChange}
-                                    className="w-full px-4 py-3 bg-white border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary/50 transition-all"
+                                    className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary/50 transition-all"
                                 />
                             </div>
                         </div>
@@ -408,7 +408,7 @@ export default function SubmitProjectPage() {
 
                 {/* Step 2: Problem & Solution */}
                 {currentStep === 2 && (
-                    <div className="bg-white rounded-xl p-8 space-y-6 border border-border shadow-sm animate-fade-in-up">
+                    <div className="bg-background rounded-xl p-8 space-y-6 border border-border shadow-sm animate-fade-in-up">
                         <h2 className="text-xl font-bold text-foreground mb-4 border-b border-border pb-4">
                             Problem & Solution
                         </h2>
@@ -422,7 +422,7 @@ export default function SubmitProjectPage() {
                                 rows={3}
                                 value={formData.caseStudy}
                                 onChange={handleChange}
-                                className="w-full px-4 py-3 bg-white border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary/50 resize-none transition-all"
+                                className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary/50 resize-none transition-all"
                                 placeholder="3-4 sentences about the scenario and why this project matters..."
                             />
                         </div>
@@ -437,7 +437,7 @@ export default function SubmitProjectPage() {
                                 required
                                 value={formData.problemStatement}
                                 onChange={handleChange}
-                                className="w-full px-4 py-3 bg-white border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary/50 resize-none transition-all"
+                                className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary/50 resize-none transition-all"
                                 placeholder="What problem does this project solve? Be specific..."
                             />
                         </div>
@@ -451,7 +451,7 @@ export default function SubmitProjectPage() {
                                 rows={4}
                                 value={formData.solutionDescription}
                                 onChange={handleChange}
-                                className="w-full px-4 py-3 bg-white border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary/50 resize-none transition-all"
+                                className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary/50 resize-none transition-all"
                                 placeholder="High-level explanation of how your project solves the problem..."
                             />
                         </div>
@@ -466,7 +466,7 @@ export default function SubmitProjectPage() {
                                 required
                                 value={formData.deliverables}
                                 onChange={handleChange}
-                                className="w-full px-4 py-3 bg-white border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary/50 transition-all"
+                                className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary/50 transition-all"
                                 placeholder="Working app, API documentation, Test suite"
                             />
                         </div>
@@ -475,7 +475,7 @@ export default function SubmitProjectPage() {
 
                 {/* Step 3: Technical Details */}
                 {currentStep === 3 && (
-                    <div className="bg-white rounded-xl p-8 space-y-6 border border-border shadow-sm animate-fade-in-up">
+                    <div className="bg-background rounded-xl p-8 space-y-6 border border-border shadow-sm animate-fade-in-up">
                         <h2 className="text-xl font-bold text-foreground mb-4 border-b border-border pb-4">
                             Technical Details
                         </h2>
@@ -490,7 +490,7 @@ export default function SubmitProjectPage() {
                                 required
                                 value={formData.techStack}
                                 onChange={handleChange}
-                                className="w-full px-4 py-3 bg-white border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary/50 transition-all"
+                                className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary/50 transition-all"
                                 placeholder="React, Node.js, MongoDB, TypeScript"
                             />
                         </div>
@@ -505,7 +505,7 @@ export default function SubmitProjectPage() {
                                 required
                                 value={formData.prerequisites}
                                 onChange={handleChange}
-                                className="w-full px-4 py-3 bg-white border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary/50 transition-all"
+                                className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary/50 transition-all"
                                 placeholder="JavaScript, Basic React, REST APIs"
                             />
                         </div>
@@ -519,7 +519,7 @@ export default function SubmitProjectPage() {
                                 rows={8}
                                 value={formData.initializationGuide}
                                 onChange={handleChange}
-                                className="w-full px-4 py-3 bg-white border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary/50 resize-none font-mono text-sm transition-all"
+                                className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary/50 resize-none font-mono text-sm transition-all"
                                 placeholder="Step-by-step setup instructions with code blocks..."
                             />
                             <p className="text-sm text-muted-foreground mt-2">
@@ -531,7 +531,7 @@ export default function SubmitProjectPage() {
 
                 {/* Step 4: Media & Submit */}
                 {currentStep === 4 && (
-                    <div className="bg-white rounded-xl p-8 space-y-6 border border-border shadow-sm animate-fade-in-up">
+                    <div className="bg-background rounded-xl p-8 space-y-6 border border-border shadow-sm animate-fade-in-up">
                         <h2 className="text-xl font-bold text-foreground mb-4 border-b border-border pb-4">
                             Project Screenshots
                         </h2>

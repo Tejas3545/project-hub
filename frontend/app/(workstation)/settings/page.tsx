@@ -143,7 +143,7 @@ export default function SettingsPage() {
         </div>
 
         {/* Content */}
-        <div className="flex-1 bg-white rounded-xl border border-border p-4 sm:p-6">
+        <div className="flex-1 bg-background rounded-xl border border-border p-4 sm:p-6">
           {/* Account Settings */}
           {activeTab === 'account' && (
             <div className="space-y-6">
@@ -230,7 +230,7 @@ export default function SettingsPage() {
                       }`}
                     >
                       <span
-                        className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition-transform duration-200 ease-in-out ${
+                        className={`inline-block h-5 w-5 transform rounded-full bg-background shadow-lg ring-0 transition-transform duration-200 ease-in-out ${
                           isChecked ? 'translate-x-5 mt-0.5' : 'translate-x-0.5 mt-0.5'
                         }`}
                       />

@@ -120,7 +120,7 @@ function SearchContent() {
                                 return (
                                     <div
                                         key={`${result.type}-${id}`}
-                                        className="bg-white rounded-xl overflow-hidden border border-border hover:border-primary/30 transition-all duration-300 hover:shadow-md"
+                                        className="bg-background rounded-xl overflow-hidden border border-border hover:border-primary/30 transition-all duration-300 hover:shadow-md"
                                     >
                                         {/* Header - Always visible */}
                                         <div className="p-6">
@@ -279,7 +279,7 @@ function SearchContent() {
 
                     {/* No results */}
                     {!loading && query && results.length === 0 && (
-                        <div className="bg-white rounded-xl p-12 text-center border border-border">
+                        <div className="bg-background rounded-xl p-12 text-center border border-border">
                             <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-secondary flex items-center justify-center border border-border">
                                 <svg className="w-8 h-8 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -300,7 +300,7 @@ function SearchContent() {
 
                     {/* Empty state - no query */}
                     {!query && !loading && (
-                        <div className="bg-white rounded-xl p-12 text-center border border-border">
+                        <div className="bg-background rounded-xl p-12 text-center border border-border">
                             <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-purple-50 flex items-center justify-center border border-purple-200">
                                 <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />

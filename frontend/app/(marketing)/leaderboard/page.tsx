@@ -80,7 +80,7 @@ export default function LeaderboardPage() {
                     initial={{ opacity: 0, y: 40 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.3 }}
-                    className="bg-white border border-border rounded-xl overflow-hidden"
+                    className="bg-background border border-border rounded-xl overflow-hidden"
                 >
                     {/* Table Header */}
                     <div className="grid grid-cols-12 gap-4 p-6 border-b border-border text-xs font-semibold text-muted-foreground uppercase tracking-wide bg-secondary/50">

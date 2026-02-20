@@ -159,14 +159,14 @@ export default function NotesEditor({ projectId }: NotesEditorProps) {
             placeholder="Note title (optional)"
             value={newNote.title}
             onChange={e => setNewNote({ ...newNote, title: e.target.value })}
-            className="w-full mb-3 p-2 border border-border rounded-lg bg-white text-foreground"
+            className="w-full mb-3 p-2 border border-border rounded-lg bg-background text-foreground"
           />
           <textarea
             placeholder="Write your note here..."
             value={newNote.content}
             onChange={e => setNewNote({ ...newNote, content: e.target.value })}
             rows={6}
-            className="w-full p-3 border border-border rounded-lg bg-white text-foreground resize-none"
+            className="w-full p-3 border border-border rounded-lg bg-background text-foreground resize-none"
           />
           <div className="flex gap-2 mt-3">
             <Button onClick={handleCreate} className="bg-green-600 hover:bg-green-700 text-white">
@@ -195,14 +195,14 @@ export default function NotesEditor({ projectId }: NotesEditorProps) {
                   value={note.title}
                   onChange={e => setNotes(notes.map(n => n.id === note.id ? { ...n, title: e.target.value } : n))}
                   aria-label="Note title"
-                  className="w-full mb-2 p-2 border border-border rounded-lg bg-white"
+                  className="w-full mb-2 p-2 border border-border rounded-lg bg-background"
                 />
                 <textarea
                   value={note.content}
                   onChange={e => setNotes(notes.map(n => n.id === note.id ? { ...n, content: e.target.value } : n))}
                   rows={4}
                   aria-label="Note content"
-                  className="w-full p-2 border border-border rounded-lg bg-white resize-none"
+                  className="w-full p-2 border border-border rounded-lg bg-background resize-none"
                 />
                 <div className="flex gap-2 mt-2">
                   <Button

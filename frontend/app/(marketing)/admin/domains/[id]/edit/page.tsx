@@ -98,7 +98,7 @@ export default function EditDomainPage() {
                     </div>
                 )}
 
-                <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-border shadow-sm p-8 space-y-6">
+                <form onSubmit={handleSubmit} className="bg-background rounded-xl border border-border shadow-sm p-8 space-y-6">
                     <div>
                         <label htmlFor="name" className="block text-sm font-medium text-foreground mb-2">
                             Domain Name *
@@ -110,7 +110,7 @@ export default function EditDomainPage() {
                             required
                             value={formData.name}
                             onChange={handleChange}
-                            className="w-full px-4 py-3 bg-white border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                            className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                         />
                     </div>
 
@@ -125,7 +125,7 @@ export default function EditDomainPage() {
                             required
                             value={formData.slug}
                             onChange={handleChange}
-                            className="w-full px-4 py-3 bg-white border border-border rounded-lg text-foreground font-mono text-sm"
+                            className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground font-mono text-sm"
                             disabled
                         />
                         <p className="mt-1 text-xs text-muted-foreground">
@@ -143,7 +143,7 @@ export default function EditDomainPage() {
                             rows={4}
                             value={formData.description}
                             onChange={handleChange}
-                            className="w-full px-4 py-3 bg-white border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
+                            className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
                         />
                     </div>
 

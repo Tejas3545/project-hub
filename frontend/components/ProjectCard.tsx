@@ -60,7 +60,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
 
     if (!isValidProject) {
         return (
-            <div className="rounded-xl p-6 border border-border bg-white">
+            <div className="rounded-xl p-6 border border-border bg-background">
                 <p className="text-red-500">Invalid project data</p>
             </div>
         );
@@ -181,7 +181,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
 
     return (
         <Link href={`/projects/${project.id}`} className="block group h-full">
-            <div className="bg-white rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:border-primary/40 h-full flex flex-col border border-border shadow-sm">
+            <div className="bg-background rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:border-primary/40 h-full flex flex-col border border-border shadow-sm">
                 {featuredScreenshot && (
                     <div className="relative w-full aspect-video overflow-hidden">
                         <Image
@@ -198,7 +198,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
                             </span>
                         </div>
                         {project.screenshots && project.screenshots.length > 1 && (
-                            <div className="absolute bottom-3 right-3 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-lg flex items-center gap-1.5 text-xs border border-border text-foreground/80">
+                            <div className="absolute bottom-3 right-3 bg-background/90 backdrop-blur-sm px-2 py-1 rounded-lg flex items-center gap-1.5 text-xs border border-border text-foreground/80">
                                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>

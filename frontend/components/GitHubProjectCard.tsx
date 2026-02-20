@@ -50,7 +50,7 @@ export default function GitHubProjectCard({ project, initialBookmarked, hrefRoot
 
   return (
     <Link href={`${hrefRoot}/${project.id}`} className="block group">
-      <div className="bg-white rounded-2xl flex flex-col overflow-hidden transition-all duration-300 border border-border hover:border-primary/40 hover:-translate-y-1 relative h-full shadow-sm hover:shadow-xl">
+      <div className="bg-background rounded-2xl flex flex-col overflow-hidden transition-all duration-300 border border-border hover:border-primary/40 hover:-translate-y-1 relative h-full shadow-sm hover:shadow-xl">
         {/* Header strip */}
         <div className="px-6 pt-6 pb-4 flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">

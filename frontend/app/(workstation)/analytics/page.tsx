@@ -104,7 +104,7 @@ export default function AnalyticsDashboard() {
           { title: 'Completed', val: dashboardData.projects.completed, label: 'Projects finished', icon: 'verified', color: 'text-emerald-500' },
           { title: 'Points Earned', val: dashboardData.user.points, label: 'Total experience', icon: 'military_tech', color: 'text-purple-500' }
         ].map((stat, i) => (
-          <div key={i} className="bg-white p-10 rounded-3xl border border-border relative overflow-hidden group hover:border-border transition-all">
+          <div key={i} className="bg-background p-10 rounded-3xl border border-border relative overflow-hidden group hover:border-border transition-all">
             <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity">
               <span className="material-symbols-outlined text-8xl italic uppercase">{stat.icon}</span>
             </div>
@@ -124,7 +124,7 @@ export default function AnalyticsDashboard() {
 
       {/* Progress Matrix */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-        <div className="bg-white p-12 rounded-[40px] border border-border space-y-10">
+        <div className="bg-background p-12 rounded-[40px] border border-border space-y-10">
           <div className="flex items-center justify-between">
             <h3 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.4em]">Project Progress</h3>
             <span className="material-symbols-outlined text-primary">target</span>
@@ -157,7 +157,7 @@ export default function AnalyticsDashboard() {
           </div>
         </div>
 
-        <div className="bg-white p-12 rounded-[40px] border border-border space-y-10">
+        <div className="bg-background p-12 rounded-[40px] border border-border space-y-10">
           <div className="flex items-center justify-between">
             <h3 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.4em]">Your Level</h3>
             <span className="material-symbols-outlined text-emerald-500">verified</span>
@@ -198,7 +198,7 @@ export default function AnalyticsDashboard() {
           { label: 'Learning Paths', subText: 'Explore curated paths', href: '/learning-paths', icon: 'auto_awesome' }
         ].map((link, i) => (
           <Link key={i} href={link.href} className="group">
-            <div className="bg-white p-8 rounded-xl border border-border hover:border-primary/30 hover:bg-secondary/50 transition-all text-center h-full flex flex-col items-center justify-center gap-4">
+            <div className="bg-background p-8 rounded-xl border border-border hover:border-primary/30 hover:bg-secondary/50 transition-all text-center h-full flex flex-col items-center justify-center gap-4">
               <span className="material-symbols-outlined text-3xl text-muted-foreground group-hover:text-primary transition-colors">{link.icon}</span>
               <div>
                 <h4 className="font-black text-foreground uppercase text-[10px] tracking-widest group-hover:text-primary transition-colors">

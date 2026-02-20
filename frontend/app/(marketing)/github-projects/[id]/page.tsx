@@ -36,6 +36,7 @@ interface GitHubProject {
   language?: string;
   author?: string;
   techStack?: string[];
+  topics?: string[];
   sourceCode?: {
     downloadUrl: string;
     fileSize?: number;
@@ -187,7 +188,7 @@ export default function GitHubProjectDetailPage({ params }: { params: Promise<{ 
               <button
                 onClick={handleToggleBookmark}
                 disabled={bookmarkLoading}
-                className={`flex items-center gap-2 px-5 py-3 rounded-xl border font-medium text-sm transition-all active:scale-95 ${isBookmarked ? 'bg-primary/10 border-primary/30 text-primary' : 'bg-white border-border text-foreground hover:border-primary/30 hover:bg-primary/5'
+                className={`flex items-center gap-2 px-5 py-3 rounded-xl border font-medium text-sm transition-all active:scale-95 ${isBookmarked ? 'bg-primary/10 border-primary/30 text-primary' : 'bg-background border-border text-foreground hover:border-primary/30 hover:bg-primary/5'
                   }`}
               >
                 <span className="material-symbols-outlined text-lg" style={{ fontVariationSettings: isBookmarked ? "'FILL' 1" : "'FILL' 0" }}>bookmark</span>
@@ -200,7 +201,7 @@ export default function GitHubProjectDetailPage({ params }: { params: Promise<{ 
           <div className="mt-6 flex flex-wrap gap-3">
             {(project.downloadUrl || project.sourceCode?.downloadUrl) && (
               <a href={project.sourceCode?.downloadUrl || project.downloadUrl} target="_blank" rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-xl text-sm font-semibold transition-all active:scale-95">
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-50 hover:bg-emerald-500/15 text-emerald-700 border border-emerald-200 rounded-xl text-sm font-semibold transition-all active:scale-95">
                 <span className="material-symbols-outlined text-lg">download</span>Download Source Code
               </a>
             )}
@@ -218,10 +219,10 @@ export default function GitHubProjectDetailPage({ params }: { params: Promise<{ 
           {/* Left Column — 7 Documentation Sections */}
           <div className="lg:col-span-8 space-y-6">
             {/* Section 1: Case Study */}
-            <section className="relative bg-gradient-to-br from-indigo-50/80 to-white border border-indigo-100 rounded-2xl p-6 md:p-8 overflow-hidden">
+            <section className="relative bg-gradient-to-br from-indigo-500/10 to-background border border-indigo-500/20 rounded-2xl p-6 md:p-8 overflow-hidden">
               <div className="absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b from-indigo-500 to-indigo-300 rounded-l-2xl" />
               <div className="flex items-center gap-3 mb-5">
-                <div className="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-indigo-500/15 flex items-center justify-center">
                   <span className="material-symbols-outlined text-indigo-600">auto_stories</span>
                 </div>
                 <div>
@@ -235,10 +236,10 @@ export default function GitHubProjectDetailPage({ params }: { params: Promise<{ 
             </section>
 
             {/* Section 2: Problem Statement */}
-            <section className="relative bg-gradient-to-br from-rose-50/80 to-white border border-rose-100 rounded-2xl p-6 md:p-8 overflow-hidden">
+            <section className="relative bg-gradient-to-br from-rose-500/10 to-background border border-rose-500/20 rounded-2xl p-6 md:p-8 overflow-hidden">
               <div className="absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b from-rose-500 to-rose-300 rounded-l-2xl" />
               <div className="flex items-center gap-3 mb-5">
-                <div className="w-10 h-10 rounded-xl bg-rose-100 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-rose-500/15 flex items-center justify-center">
                   <span className="material-symbols-outlined text-rose-600">psychology</span>
                 </div>
                 <div>
@@ -252,10 +253,10 @@ export default function GitHubProjectDetailPage({ params }: { params: Promise<{ 
             </section>
 
             {/* Section 3: Solution Description */}
-            <section className="relative bg-gradient-to-br from-emerald-50/80 to-white border border-emerald-100 rounded-2xl p-6 md:p-8 overflow-hidden">
+            <section className="relative bg-gradient-to-br from-emerald-500/10 to-background border border-emerald-500/20 rounded-2xl p-6 md:p-8 overflow-hidden">
               <div className="absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b from-emerald-500 to-emerald-300 rounded-l-2xl" />
               <div className="flex items-center gap-3 mb-5">
-                <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-emerald-500/15 flex items-center justify-center">
                   <span className="material-symbols-outlined text-emerald-600">lightbulb</span>
                 </div>
                 <div>
@@ -264,15 +265,15 @@ export default function GitHubProjectDetailPage({ params }: { params: Promise<{ 
                 </div>
               </div>
               <p className="text-foreground/80 leading-relaxed text-base whitespace-pre-wrap">
-                {project.solutionDescription || project.introduction || 'No solution description available.'}
+                {project.solutionDescription || project.introduction || project.description || 'No solution description available.'}
               </p>
             </section>
 
             {/* Section 4: Prerequisites */}
-            <section className="relative bg-gradient-to-br from-amber-50/80 to-white border border-amber-100 rounded-2xl p-6 md:p-8 overflow-hidden">
+            <section className="relative bg-gradient-to-br from-amber-500/10 to-background border border-amber-500/20 rounded-2xl p-6 md:p-8 overflow-hidden">
               <div className="absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b from-amber-500 to-amber-300 rounded-l-2xl" />
               <div className="flex items-center gap-3 mb-5">
-                <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-amber-500/15 flex items-center justify-center">
                   <span className="material-symbols-outlined text-amber-600">school</span>
                 </div>
                 <div>
@@ -286,8 +287,8 @@ export default function GitHubProjectDetailPage({ params }: { params: Promise<{ 
               {(project.prerequisites && project.prerequisites.length > 0) ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {project.prerequisites.map((req, i) => (
-                    <div key={i} className="flex items-start gap-3 p-3 bg-white/80 rounded-xl border border-amber-100/60">
-                      <div className="w-6 h-6 rounded-lg bg-amber-100 flex items-center justify-center shrink-0 mt-0.5">
+                    <div key={i} className="flex items-start gap-3 p-3 bg-background/80 rounded-xl border border-amber-500/20/60">
+                      <div className="w-6 h-6 rounded-lg bg-amber-500/15 flex items-center justify-center shrink-0 mt-0.5">
                         <span className="material-symbols-outlined text-amber-600 text-xs">check</span>
                       </div>
                       <span className="text-sm text-foreground/80 font-medium">{req}</span>
@@ -295,15 +296,17 @@ export default function GitHubProjectDetailPage({ params }: { params: Promise<{ 
                   ))}
                 </div>
               ) : !project.prerequisitesText && (
-                <p className="text-muted-foreground text-sm italic">No specific prerequisites. General programming knowledge recommended.</p>
+                <p className="text-muted-foreground text-sm italic">
+                  {project.language ? `Basic knowledge of ${project.language} is recommended.` : 'No specific prerequisites. General programming knowledge recommended.'}
+                </p>
               )}
             </section>
 
             {/* Section 5: Tech Stack & Tools */}
-            <section className="relative bg-gradient-to-br from-sky-50/80 to-white border border-sky-100 rounded-2xl p-6 md:p-8 overflow-hidden">
+            <section className="relative bg-gradient-to-br from-sky-500/10 to-background border border-sky-500/20 rounded-2xl p-6 md:p-8 overflow-hidden">
               <div className="absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b from-sky-500 to-sky-300 rounded-l-2xl" />
               <div className="flex items-center gap-3 mb-5">
-                <div className="w-10 h-10 rounded-xl bg-sky-100 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-sky-500/100/15 flex items-center justify-center">
                   <span className="material-symbols-outlined text-sky-600">terminal</span>
                 </div>
                 <div>
@@ -316,7 +319,7 @@ export default function GitHubProjectDetailPage({ params }: { params: Promise<{ 
                   <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Technologies</p>
                   <div className="flex flex-wrap gap-2">
                     {uniqueTech.map(tech => (
-                      <span key={tech} className="px-3 py-1.5 bg-white border border-sky-200 text-sky-700 text-xs font-semibold rounded-lg shadow-sm">{tech}</span>
+                      <span key={tech} className="px-3 py-1.5 bg-background border border-sky-200 text-sky-700 text-xs font-semibold rounded-lg shadow-sm">{tech}</span>
                     ))}
                   </div>
                 </div>
@@ -326,7 +329,7 @@ export default function GitHubProjectDetailPage({ params }: { params: Promise<{ 
                   <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Tools & Platforms</p>
                   <div className="flex flex-wrap gap-2">
                     {project.toolsUsed.map(tool => (
-                      <span key={tool} className="px-3 py-1.5 bg-white border border-border text-foreground/70 text-xs font-medium rounded-lg">{tool}</span>
+                      <span key={tool} className="px-3 py-1.5 bg-background border border-border text-foreground/70 text-xs font-medium rounded-lg">{tool}</span>
                     ))}
                   </div>
                 </div>
@@ -336,21 +339,32 @@ export default function GitHubProjectDetailPage({ params }: { params: Promise<{ 
                   <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Concepts Applied</p>
                   <div className="flex flex-wrap gap-2">
                     {project.conceptsUsed.map(c => (
-                      <span key={c} className="px-3 py-1.5 bg-sky-50 border border-sky-100 text-sky-600 text-xs font-medium rounded-lg">{c}</span>
+                      <span key={c} className="px-3 py-1.5 bg-sky-500/10 border border-sky-500/20 text-sky-600 text-xs font-medium rounded-lg">{c}</span>
                     ))}
                   </div>
                 </div>
               )}
               {uniqueTech.length === 0 && (!project.toolsUsed || project.toolsUsed.length === 0) && (
-                <p className="text-muted-foreground text-sm italic">No tech stack specified.</p>
+                <div>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Topics</p>
+                  {project.topics && project.topics.length > 0 ? (
+                    <div className="flex flex-wrap gap-2">
+                      {project.topics.map(topic => (
+                        <span key={topic} className="px-3 py-1.5 bg-sky-500/10 border border-sky-500/20 text-sky-600 text-xs font-medium rounded-lg">{topic}</span>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-muted-foreground text-sm italic">No tech stack or topics specified.</p>
+                  )}
+                </div>
               )}
             </section>
 
             {/* Section 6: Deliverables */}
-            <section className="relative bg-gradient-to-br from-violet-50/80 to-white border border-violet-100 rounded-2xl p-6 md:p-8 overflow-hidden">
+            <section className="relative bg-gradient-to-br from-violet-500/10 to-background border border-violet-500/20 rounded-2xl p-6 md:p-8 overflow-hidden">
               <div className="absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b from-violet-500 to-violet-300 rounded-l-2xl" />
               <div className="flex items-center gap-3 mb-5">
-                <div className="w-10 h-10 rounded-xl bg-violet-100 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-violet-500/15 flex items-center justify-center">
                   <span className="material-symbols-outlined text-violet-600">task_alt</span>
                 </div>
                 <div>
@@ -361,8 +375,8 @@ export default function GitHubProjectDetailPage({ params }: { params: Promise<{ 
               {(project.deliverables && project.deliverables.length > 0) ? (
                 <div className="space-y-3">
                   {project.deliverables.map((item, i) => (
-                    <div key={i} className="flex items-start gap-4 p-4 bg-white/80 rounded-xl border border-violet-100/60 hover:border-violet-200 transition-colors group">
-                      <div className="w-8 h-8 rounded-lg bg-violet-100 flex items-center justify-center shrink-0 group-hover:bg-violet-200 transition-colors">
+                    <div key={i} className="flex items-start gap-4 p-4 bg-background/80 rounded-xl border border-violet-500/20/60 hover:border-violet-200 transition-colors group">
+                      <div className="w-8 h-8 rounded-lg bg-violet-500/15 flex items-center justify-center shrink-0 group-hover:bg-violet-200 transition-colors">
                         <span className="text-violet-600 text-xs font-bold">{String(i + 1).padStart(2, '0')}</span>
                       </div>
                       <span className="text-sm text-foreground font-medium leading-relaxed flex-1">{item}</span>
@@ -371,15 +385,30 @@ export default function GitHubProjectDetailPage({ params }: { params: Promise<{ 
                   ))}
                 </div>
               ) : (
-                <p className="text-muted-foreground text-sm italic">No specific deliverables. Follow general project submission guidelines.</p>
+                <div className="space-y-3">
+                  <div className="flex items-start gap-4 p-4 bg-background/80 rounded-xl border border-violet-500/20/60 hover:border-violet-200 transition-colors group">
+                    <div className="w-8 h-8 rounded-lg bg-violet-500/15 flex items-center justify-center shrink-0 group-hover:bg-violet-200 transition-colors">
+                      <span className="text-violet-600 text-xs font-bold">01</span>
+                    </div>
+                    <span className="text-sm text-foreground font-medium leading-relaxed flex-1">Clone the repository and explore the source code.</span>
+                    <span className="material-symbols-outlined text-violet-300 text-sm mt-0.5">check_circle</span>
+                  </div>
+                  <div className="flex items-start gap-4 p-4 bg-background/80 rounded-xl border border-violet-500/20/60 hover:border-violet-200 transition-colors group">
+                    <div className="w-8 h-8 rounded-lg bg-violet-500/15 flex items-center justify-center shrink-0 group-hover:bg-violet-200 transition-colors">
+                      <span className="text-violet-600 text-xs font-bold">02</span>
+                    </div>
+                    <span className="text-sm text-foreground font-medium leading-relaxed flex-1">Follow the README instructions to setup the project locally.</span>
+                    <span className="material-symbols-outlined text-violet-300 text-sm mt-0.5">check_circle</span>
+                  </div>
+                </div>
               )}
             </section>
 
             {/* Section 7: Deadline */}
-            <section className="relative bg-gradient-to-br from-orange-50/80 to-white border border-orange-100 rounded-2xl p-6 md:p-8 overflow-hidden">
+            <section className="relative bg-gradient-to-br from-orange-500/10 to-background border border-orange-500/20 rounded-2xl p-6 md:p-8 overflow-hidden">
               <div className="absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b from-orange-500 to-orange-300 rounded-l-2xl" />
               <div className="flex items-center gap-3 mb-5">
-                <div className="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-orange-500/15 flex items-center justify-center">
                   <span className="material-symbols-outlined text-orange-600">timer</span>
                 </div>
                 <div>
@@ -388,7 +417,7 @@ export default function GitHubProjectDetailPage({ params }: { params: Promise<{ 
                 </div>
               </div>
               <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                <div className="flex items-center gap-3 px-5 py-3 bg-white border border-orange-200 rounded-xl">
+                <div className="flex items-center gap-3 px-5 py-3 bg-background border border-orange-200 rounded-xl">
                   <span className="material-symbols-outlined text-orange-500 text-2xl">event</span>
                   <div>
                     <p className="text-xs text-muted-foreground font-medium">Expected Duration</p>
@@ -401,7 +430,7 @@ export default function GitHubProjectDetailPage({ params }: { params: Promise<{ 
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-3 px-5 py-3 bg-white border border-border rounded-xl">
+                <div className="flex items-center gap-3 px-5 py-3 bg-background border border-border rounded-xl">
                   <span className="material-symbols-outlined text-muted-foreground text-2xl">hourglass_top</span>
                   <div>
                     <p className="text-xs text-muted-foreground font-medium">Time Range</p>
@@ -417,7 +446,7 @@ export default function GitHubProjectDetailPage({ params }: { params: Promise<{ 
 
             {/* Optional: Technical Requirements */}
             {((project.requirements && project.requirements.length > 0) || project.requirementsText) && (
-              <section className="bg-white border border-border rounded-2xl p-6 md:p-8">
+              <section className="bg-background border border-border rounded-2xl p-6 md:p-8">
                 <div className="flex items-center gap-3 mb-5">
                   <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center">
                     <span className="material-symbols-outlined text-foreground/60">checklist</span>
@@ -442,7 +471,7 @@ export default function GitHubProjectDetailPage({ params }: { params: Promise<{ 
 
             {/* Optional: Implementation */}
             {project.implementation && (
-              <section className="bg-white border border-border rounded-2xl p-6 md:p-8">
+              <section className="bg-background border border-border rounded-2xl p-6 md:p-8">
                 <div className="flex items-center gap-3 mb-5">
                   <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center">
                     <span className="material-symbols-outlined text-foreground/60">architecture</span>
@@ -455,7 +484,7 @@ export default function GitHubProjectDetailPage({ params }: { params: Promise<{ 
 
             {/* Optional: Evaluation Criteria */}
             {project.evaluationCriteria && (
-              <section className="bg-white border border-border rounded-2xl p-6 md:p-8">
+              <section className="bg-background border border-border rounded-2xl p-6 md:p-8">
                 <div className="flex items-center gap-3 mb-5">
                   <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center">
                     <span className="material-symbols-outlined text-foreground/60">grade</span>
@@ -487,7 +516,7 @@ export default function GitHubProjectDetailPage({ params }: { params: Promise<{ 
           <aside className="lg:col-span-4">
             <div className="sticky top-24 space-y-5">
               {/* Quick Actions */}
-              <div className="bg-white border border-border rounded-2xl p-6 shadow-sm space-y-5">
+              <div className="bg-background border border-border rounded-2xl p-6 shadow-sm space-y-5">
                 <button
                   onClick={() => router.push(`/workspace/${project.id}?type=github`)}
                   className="w-full flex items-center justify-center gap-2 py-3.5 bg-primary hover:bg-primary/90 text-white font-semibold rounded-xl transition-all shadow-lg shadow-primary/20 text-sm"
@@ -508,7 +537,7 @@ export default function GitHubProjectDetailPage({ params }: { params: Promise<{ 
                   <>
                     <div className="h-px bg-border" />
                     <a href={project.sourceCode?.downloadUrl || project.downloadUrl} target="_blank" rel="noopener noreferrer"
-                      className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 font-semibold text-sm transition-all">
+                      className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-emerald-50 hover:bg-emerald-500/15 text-emerald-700 border border-emerald-200 font-semibold text-sm transition-all">
                       <span className="material-symbols-outlined text-lg">download</span>Download Source Code
                     </a>
                   </>
@@ -516,7 +545,7 @@ export default function GitHubProjectDetailPage({ params }: { params: Promise<{ 
               </div>
 
               {/* Metadata */}
-              <div className="bg-white border border-border rounded-2xl p-6 shadow-sm">
+              <div className="bg-background border border-border rounded-2xl p-6 shadow-sm">
                 <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-5">Project Info</h4>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
@@ -560,7 +589,7 @@ export default function GitHubProjectDetailPage({ params }: { params: Promise<{ 
 
               {/* Source Code */}
               {project.sourceCode && (
-                <div className="bg-white border border-border rounded-2xl p-6 shadow-sm">
+                <div className="bg-background border border-border rounded-2xl p-6 shadow-sm">
                   <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-5">Source Code Details</h4>
                   <div className="space-y-3">
                     {project.sourceCode.fileSize && (
@@ -586,7 +615,7 @@ export default function GitHubProjectDetailPage({ params }: { params: Promise<{ 
               )}
 
               {/* Links */}
-              <div className="bg-white border border-border rounded-2xl p-6 shadow-sm">
+              <div className="bg-background border border-border rounded-2xl p-6 shadow-sm">
                 <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-5">Links</h4>
                 <div className="space-y-2">
 

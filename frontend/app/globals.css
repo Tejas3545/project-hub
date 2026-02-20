@@ -29,7 +29,21 @@
   --radius-sm: 0.5rem;
   --radius-md: 0.75rem;
   --radius-lg: 1rem;
-  --radius-xl: 1.5rem;
+}
+
+/* ─── Dark Theme Overrides ─── */
+.dark {
+  --color-background: #020817;
+  --color-foreground: #f8fafc;
+  --color-secondary: #0f172a;
+  --color-muted: #1e293b;
+  --color-muted-foreground: #94a3b8;
+  --color-border: #1e293b;
+  --color-accent: #1e3a8a;
+  --color-accent-foreground: #eff6ff;
+
+  --color-background-light: #020817;
+  --color-background-dark: #000000;
 }
 
 /* ─── Base Styles ─── */
@@ -79,19 +93,28 @@
 
 /* ─── Component Classes ─── */
 @layer components {
+
   /* Glass morphism — subtle, light-first (Antintern-inspired) */
   .glass {
-    background: rgba(255, 255, 255, 0.8);
+    background: rgba(var(--color-background-rgb, 255, 255, 255), 0.8);
     -webkit-backdrop-filter: blur(12px);
     backdrop-filter: blur(12px);
     border: 1px solid var(--color-border);
   }
 
+  .dark .glass {
+    background: rgba(2, 8, 23, 0.8);
+  }
+
   .glass-morphism {
-    background: rgba(255, 255, 255, 0.8);
+    background: rgba(var(--color-background-rgb, 255, 255, 255), 0.8);
     -webkit-backdrop-filter: blur(8px);
     backdrop-filter: blur(8px);
     border: 1px solid var(--color-border);
+  }
+
+  .dark .glass-morphism {
+    background: rgba(2, 8, 23, 0.8);
   }
 
   /* Card base */
@@ -196,14 +219,14 @@
 /* Subtle grid background pattern */
 .bg-grid-pattern {
   background-image: linear-gradient(to right, #e5e7eb 1px, transparent 1px),
-                     linear-gradient(to bottom, #e5e7eb 1px, transparent 1px);
+    linear-gradient(to bottom, #e5e7eb 1px, transparent 1px);
   background-size: 4rem 4rem;
 }
 
 /* Blue glow effect */
 .blue-glow {
   box-shadow: 0 0 60px rgba(59, 130, 246, 0.15),
-              0 0 120px rgba(59, 130, 246, 0.05);
+    0 0 120px rgba(59, 130, 246, 0.05);
 }
 
 /* ─── Scrollbar ─── */
@@ -247,10 +270,12 @@
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
 }
+
 .text-transparent-gradient {
   background: linear-gradient(to right, var(--color-primary), #6366f1, #06b6d4);
   -webkit-background-clip: text;

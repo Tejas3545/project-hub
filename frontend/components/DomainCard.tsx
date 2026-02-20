@@ -25,7 +25,7 @@ export default function DomainCard({ domain }: DomainCardProps) {
 
     return (
         <Link href={`/domains/${domain.slug}`} className="block group h-full">
-            <div className="h-full bg-white rounded-xl border border-border shadow-sm p-5 transition-all duration-300 hover:border-primary/30 hover:shadow-md relative overflow-hidden flex flex-col">
+            <div className="h-full bg-background rounded-xl border border-border shadow-sm p-5 transition-all duration-300 hover:border-primary/30 hover:shadow-md relative overflow-hidden flex flex-col">
                 <div className="flex flex-col h-full">
                     <div className="size-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary mb-4 group-hover:scale-110 transition-all duration-300">
                         <span className="material-symbols-outlined text-xl">{getDomainIcon(domain.slug)}</span>
