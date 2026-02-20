@@ -220,10 +220,10 @@ export const authApi = {
     },
 
     updateProfile: async (
-        data: { 
-            firstName?: string; 
-            lastName?: string; 
-            profileImage?: string; 
+        data: {
+            firstName?: string;
+            lastName?: string;
+            profileImage?: string;
             bio?: string;
             headline?: string;
             location?: string;
@@ -384,9 +384,19 @@ export const userApi = {
         return api.put(`/user/github-progress/${projectId}`, data);
     },
 
-    getGithubSingleProgress: async (projectId: string): Promise<{ status: string }> => {
+    getGithubSingleProgress: async (projectId: string): Promise<{
+        status: string;
+        timeSpent?: number;
+        notes?: string;
+        checklist?: boolean[];
+    }> => {
         try {
-            return await api.get<{ status: string }>(`/user/github-progress/${projectId}`);
+            return await api.get<{
+                status: string;
+                timeSpent?: number;
+                notes?: string;
+                checklist?: boolean[];
+            }>(`/user/github-progress/${projectId}`);
         } catch {
             return { status: 'NOT_STARTED' };
         }

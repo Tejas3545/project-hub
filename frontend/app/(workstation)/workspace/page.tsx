@@ -6,7 +6,7 @@ import { userApi, projectApi, socialApi } from '@/lib/api';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { ProjectProgress, Bookmark } from '@/types';
+import { ProjectProgress, GitHubProjectProgress, Bookmark, GitHubProject, Project } from '@/types';
 
 interface UnifiedProject {
     id: string;
@@ -72,8 +72,8 @@ export default function WorkspacePage() {
                     status: p.status,
                     timeSpent: p.timeSpent || 0,
                     timeUnit: 'minutes',
-                    startedAt: p.startedAt,
-                    completedAt: p.completedAt,
+                    startedAt: p.startedAt ? String(p.startedAt) : undefined,
+                    completedAt: p.completedAt ? String(p.completedAt) : undefined,
                     screenshots: p.project?.screenshots,
                     minTime: p.project?.minTime,
                     maxTime: p.project?.maxTime,
@@ -85,14 +85,23 @@ export default function WorkspacePage() {
 
             bookmarksData.forEach((bookmark: Bookmark) => {
                 // Bookmark can reference either a regular project or a GitHub project
+                const isGithub = !bookmark.project && !!bookmark.githubProject;
                 const proj = bookmark.project || bookmark.githubProject;
                 if (!proj) return; // skip bookmarks with no associated project
 
-                const isGithub = !bookmark.project && !!bookmark.githubProject;
                 const projId = proj.id;
 
                 // Skip if already in the unified list
                 if (unified.find(u => u.projectId === projId)) return;
+
+                // Safely access type-specific fields
+                const screenshots = !isGithub && bookmark.project ? (bookmark.project as Project).screenshots : undefined;
+                const minTime = isGithub && bookmark.githubProject
+                    ? (bookmark.githubProject as GitHubProject).estimatedMinTime
+                    : bookmark.project ? (bookmark.project as Project).minTime : undefined;
+                const maxTime = isGithub && bookmark.githubProject
+                    ? (bookmark.githubProject as GitHubProject).estimatedMaxTime
+                    : bookmark.project ? (bookmark.project as Project).maxTime : undefined;
 
                 unified.push({
                     id: `bookmark-${bookmark.id}`,
@@ -104,16 +113,16 @@ export default function WorkspacePage() {
                     status: 'NOT_STARTED',
                     timeSpent: 0,
                     timeUnit: isGithub ? 'seconds' : 'minutes',
-                    screenshots: proj.screenshots,
-                    minTime: proj.minTime || proj.estimatedMinTime,
-                    maxTime: proj.maxTime || proj.estimatedMaxTime,
+                    screenshots,
+                    minTime,
+                    maxTime,
                     source: isGithub ? 'catalog' : 'regular',
-                    detailUrl: isGithub ? `/projects/${projId}` : `/projects/${projId}`,
+                    detailUrl: `/projects/${projId}`,
                     workspaceUrl: isGithub ? `/workspace/${projId}?type=github` : `/workspace/${projId}`,
                 });
             });
 
-            githubProgressData.forEach((gp: ProjectProgress) => {
+            githubProgressData.forEach((gp: GitHubProjectProgress) => {
                 unified.push({
                     id: gp.id,
                     projectId: gp.githubProjectId,
@@ -125,8 +134,8 @@ export default function WorkspacePage() {
                     status: gp.status,
                     timeSpent: gp.timeSpent || 0,
                     timeUnit: 'seconds',
-                    startedAt: gp.startedAt,
-                    completedAt: gp.completedAt,
+                    startedAt: gp.startedAt ? String(gp.startedAt) : undefined,
+                    completedAt: gp.completedAt ? String(gp.completedAt) : undefined,
                     source: 'catalog',
                     detailUrl: `/projects/${gp.githubProjectId}`,
                     workspaceUrl: `/workspace/${gp.githubProjectId}?type=github`,

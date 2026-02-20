@@ -36,8 +36,11 @@ export default function GitHubProjectsPage() {
         console.error('Error fetching domain:', error);
         // Set a fallback domain to prevent UI break
         setDomain({
+          id: '',
           name: domainSlug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
-          slug: domainSlug
+          slug: domainSlug,
+          createdAt: new Date(),
+          updatedAt: new Date(),
         });
       } finally {
         setLoading(false);

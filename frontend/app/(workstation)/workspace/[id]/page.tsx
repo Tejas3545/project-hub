@@ -63,7 +63,7 @@ function WorkspaceContent() {
         setTimeSpent(saved.timeSpent || 0);
         setNotes(saved.notes || '');
         setChecklist(saved.checklist || []);
-        setStatus(saved.status || 'IN_PROGRESS');
+        setStatus((saved.status as 'IN_PROGRESS' | 'COMPLETED' | 'ON_HOLD') || 'IN_PROGRESS');
       }
     } catch (err) {
       console.warn('Failed to load workspace state (may be first visit):', err);
@@ -236,11 +236,10 @@ function WorkspaceContent() {
             <span className="hidden sm:inline">Back to Project</span>
           </Link>
           <div className="flex items-center gap-3">
-            <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${
-              status === 'COMPLETED' ? 'bg-emerald-50 text-emerald-600 border-emerald-500/20' :
+            <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${status === 'COMPLETED' ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' :
               status === 'ON_HOLD' ? 'bg-yellow-500/10 text-amber-600 border-amber-500/20' :
-              'bg-primary/10 text-primary border-primary/20'
-            }`}>
+                'bg-primary/10 text-primary border-primary/20'
+              }`}>
               {status.replace('_', ' ')}
             </span>
             {saveMessage && (
@@ -268,11 +267,10 @@ function WorkspaceContent() {
               </div>
               <h1 className="text-2xl md:text-3xl font-bold mb-3 leading-tight text-white drop-shadow-sm">{project.title}</h1>
               <div className="flex flex-wrap gap-2">
-                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase border transition-colors ${
-                  project.difficulty === 'EASY' ? 'bg-emerald-500/10 text-emerald-200 border-emerald-500/30' :
+                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase border transition-colors ${project.difficulty === 'EASY' ? 'bg-emerald-500/10 text-emerald-200 border-emerald-500/30' :
                   project.difficulty === 'MEDIUM' ? 'bg-amber-500/10 text-amber-200 border-amber-500/30' :
-                  'bg-red-400/10 text-red-200 border-red-500/30'
-                }`}>
+                    'bg-red-400/10 text-red-200 border-red-500/30'
+                  }`}>
                   {project.difficulty}
                 </span>
                 {project.subDomain && (
@@ -343,11 +341,10 @@ function WorkspaceContent() {
                       setStatus('IN_PROGRESS');
                     }
                   }}
-                  className={`flex items-center justify-center gap-2 py-3 rounded-xl font-bold transition-all ${
-                    isTimerRunning
-                      ? 'bg-red-500 text-white shadow-lg shadow-red-500/20 border border-red-600'
-                      : 'bg-primary text-white shadow-lg shadow-primary/20 border border-primary'
-                  }`}
+                  className={`flex items-center justify-center gap-2 py-3 rounded-xl font-bold transition-all ${isTimerRunning
+                    ? 'bg-red-500 text-white shadow-lg shadow-red-500/20 border border-red-600'
+                    : 'bg-primary text-white shadow-lg shadow-primary/20 border border-primary'
+                    }`}
                 >
                   {isTimerRunning ? <Pause size={18} /> : <Play size={18} />}
                   {isTimerRunning ? 'Pause' : 'Start'}
@@ -381,13 +378,12 @@ function WorkspaceContent() {
                       setStatus(s);
                       if (s === 'COMPLETED') setIsTimerRunning(false);
                     }}
-                    className={`w-full text-left px-4 py-2.5 rounded-lg border transition text-sm font-semibold ${
-                      status === s
-                        ? s === 'COMPLETED' ? 'bg-emerald-50 border-emerald-500/20 text-emerald-600' :
-                          s === 'ON_HOLD' ? 'bg-yellow-500/10 border-amber-500/20 text-amber-600' :
+                    className={`w-full text-left px-4 py-2.5 rounded-lg border transition text-sm font-semibold ${status === s
+                      ? s === 'COMPLETED' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600' :
+                        s === 'ON_HOLD' ? 'bg-yellow-500/10 border-amber-500/20 text-amber-600' :
                           'bg-primary/10 border-primary/20 text-primary'
-                        : 'bg-muted/30 border-border text-muted-foreground hover:bg-muted/50'
-                    }`}
+                      : 'bg-muted/30 border-border text-muted-foreground hover:bg-muted/50'
+                      }`}
                   >
                     {s === 'IN_PROGRESS' && '▶ In Progress'}
                     {s === 'COMPLETED' && '✓ Completed'}
@@ -418,9 +414,8 @@ function WorkspaceContent() {
                   {project.deliverables.map((item, idx) => (
                     <label
                       key={idx}
-                      className={`flex items-start gap-3 p-2.5 rounded-lg cursor-pointer transition ${
-                        checklist[idx] ? 'bg-emerald-50 border border-emerald-500/20' : 'hover:bg-muted/50'
-                      }`}
+                      className={`flex items-start gap-3 p-2.5 rounded-lg cursor-pointer transition ${checklist[idx] ? 'bg-emerald-50 border border-emerald-500/20' : 'hover:bg-muted/50'
+                        }`}
                     >
                       <input
                         type="checkbox"
@@ -432,9 +427,8 @@ function WorkspaceContent() {
                         }}
                         className="mt-0.5 h-4 w-4 rounded border-border text-green-500 focus:ring-green-500"
                       />
-                      <span className={`text-sm ${
-                        checklist[idx] ? 'text-emerald-600 line-through' : 'text-foreground'
-                      }`}>
+                      <span className={`text-sm ${checklist[idx] ? 'text-emerald-600 line-through' : 'text-foreground'
+                        }`}>
                         {item}
                       </span>
                     </label>
@@ -451,7 +445,7 @@ function WorkspaceContent() {
                   {project.technicalSkills.map((skill, idx) => (
                     <span
                       key={idx}
-                      className="px-3 py-1 bg-purple-50 text-purple-600 rounded-full text-xs border border-purple-500/20"
+                      className="px-3 py-1 bg-purple-500/10 text-purple-600 rounded-full text-xs border border-purple-500/20"
                     >
                       {skill}
                     </span>
