@@ -138,21 +138,21 @@ export default function ProjectFilters({
                         </div>
                     </div>
                     
-                    {/* Dual Range Slider */}
-                    <div className="relative h-12 flex items-center">
+                    {/* Dual Range Slider - CSS variables for dynamic positioning */}
+                    {/* @ts-expect-error - Dynamic CSS variables required for slider state */}
+                    <div 
+                        className="relative h-12 flex items-center"
+                        // Dynamic CSS variables for slider positioning
+                        {...{style: {
+                            '--slider-left': `${filters.minTime}%`,
+                            '--slider-width': `${filters.maxTime - filters.minTime}%`
+                        }}}
+                    >
                         {/* Track Background */}
                         <div className="absolute w-full h-2 bg-secondary rounded-full"></div>
                         
-                        {/* Active Range - Dynamic inline styles required for real-time slider updates */}
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <div 
-                            className="absolute h-2 bg-gradient-to-r from-primary to-primary/80 rounded-full transition-all duration-150"
-                            // @ts-ignore - Dynamic styles necessary for slider positioning
-                            style={{
-                                left: `${filters.minTime}%`,
-                                width: `${filters.maxTime - filters.minTime}%`
-                            }}
-                        ></div>
+                        {/* Active Range - Positioned using CSS variables from globals.css */}
+                        <div className="slider-range-indicator absolute h-2 bg-gradient-to-r from-primary to-primary/80 rounded-full transition-all duration-150"></div>
                         
                         {/* Min Handle */}
                         <input

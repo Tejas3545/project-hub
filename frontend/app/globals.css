@@ -257,3 +257,9 @@
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
+
+/* Range Slider Dynamic Positioning */
+.slider-range-indicator {
+  left: var(--slider-left, 0%);
+  width: var(--slider-width, 100%);
+}

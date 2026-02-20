@@ -74,7 +74,7 @@ export default function LoginPage() {
               Project<span className="text-primary">Hub</span>
             </span>
           </Link>
-          <h1 className="text-3xl font-bold text-[#020817] mb-2 tracking-tight" style={{ fontSize: '1.875rem' }}>
+          <h1 className="text-3xl font-bold text-[#020817] mb-2 tracking-tight">
             Welcome back
           </h1>
           <p className="text-sm text-[#64748b]">Sign in to continue to your dashboard</p>

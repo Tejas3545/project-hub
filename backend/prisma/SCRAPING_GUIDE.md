@@ -2,14 +2,15 @@
 
 ## 🎯 What's New - Improved Filtering System
 
-### Problems Solved:
+### Problems Solved
+
 1. ✅ **No more libraries/frameworks** - P5.js, D3.js, React components, etc. are filtered out
 2. ✅ **Live demo link required** - Only projects with working deployed applications are included
 3. ✅ **No duplicate versions** - Filters out project-v1, project-v2, project-v3 variations
 4. ✅ **Real-world applications only** - Stricter validation ensures only production-grade apps
 5. ✅ **Test mode enabled** - Web Development only for quality verification
 
-### Key Improvements:
+### Key Improvements
 
 #### 1. Comprehensive Exclusion Filtering
 - 60+ exclusion keywords covering libraries, frameworks, tools, learning materials, books
@@ -18,6 +19,7 @@
 - Explicit filtering of known libraries (P5.js, D3.js, Chart.js, etc.)
 
 #### 2. Live Demo Link Validation
+
 - ✅ Checks `homepage` field for valid deployment URLs
 - ✅ Validates common deployment platforms (Vercel, Netlify, Heroku, etc.)
 - ✅ Scans README for demo/live links
@@ -25,11 +27,13 @@
 - ❌ Rejects projects with no live demo
 
 #### 3. Duplicate Prevention
+
 - Removes version suffixes (-v1, -v2, _v3, -version-1, etc.)
 - Tracks base project names to prevent similar duplicates
 - Ensures unique, high-quality project selection
 
 #### 4. Stricter Quality Thresholds
+
 - Minimum 50 stars (up from 10)
 - Minimum 20-character meaningful descriptions
 - Must have application-indicating keywords
@@ -38,6 +42,7 @@
 ## 🚀 How to Use
 
 ### Step 1: Clear Existing Projects (Optional)
+
 If you want to start fresh and clear ALL existing projects:
 
 ```bash
@@ -46,11 +51,13 @@ npx ts-node prisma/clearAllProjects.ts
 ```
 
 **Warning**: This will delete:
+
 - All GitHub projects
 - All project progress records
 - All bookmarks for GitHub projects
 
 ### Step 2: Run the Scraper (Web Development Test Mode)
+
 The scraper is currently configured to only fetch Web Development projects for testing:
 
 ```bash
@@ -59,6 +66,7 @@ npx ts-node prisma/scrapeRealGitHubProjects.ts
 ```
 
 This will:
+
 - Clear existing GitHub projects automatically
 - Fetch ~200 Web Development projects
 - Apply strict filtering (libraries/tools excluded)
@@ -69,9 +77,10 @@ This will:
 **Expected Duration**: 30-60 minutes (includes API rate limiting delays)
 
 ### Step 3: Verify Quality
+
 After scraping completes:
 
-1. **Check the Project Library** 
+1. **Check the Project Library**
    - Go to Web Development domain
    - Verify NO libraries/frameworks appear (P5.js, D3.js, etc.)
    - All projects should be real applications
@@ -85,7 +94,8 @@ After scraping completes:
    - No "Project v1", "Project v2" variations
    - Each project should be unique
 
-### Step 4: Enable All Domains (If Quality is Good)
+### Step 4 - Enable All Domains (If Quality is Good)
+
 If the Web Development projects look good, enable other domains:
 
 **In `scrapeRealGitHubProjects.ts`**, uncomment the other domains:
@@ -107,7 +117,8 @@ npx ts-node prisma/scrapeRealGitHubProjects.ts
 
 ## 📊 Filtering Logic Details
 
-### Exclusion Keywords (60+):
+### Exclusion Keywords (60+)
+
 - **Libraries/Frameworks**: library, framework, plugin, sdk, react-component, vue-component
 - **Dev Tools**: boilerplate, template, starter, cli-tool, generator, bundler
 - **Learning**: tutorial, example, demo, course, workshop, awesome-list, cheatsheet
@@ -115,14 +126,16 @@ npx ts-node prisma/scrapeRealGitHubProjects.ts
 - **Specific Libraries**: p5.js, d3.js, three.js, chart.js, lodash, jquery, react, vue, angular
 - **Versioned Projects**: -v1, -v2, -v3, version-1, version-2
 
-### Inclusion Requirements (ALL must pass):
+### Inclusion Requirements (ALL must pass)
+
 1. ✅ Meaningful description (20+ characters)
 2. ✅ Minimum 50 GitHub stars
 3. ✅ Contains application keywords (platform, app, system, dashboard, etc.)
 4. ✅ Has production indicators (deployed, live, production, saas, etc.)
 5. ✅ **Has valid live demo URL**
 
-### Demo Link Validation:
+### Demo Link Validation
+
 - Accepts: Vercel, Netlify, Heroku, Railway, Render, Firebase, AWS, Azure, custom domains
 - Rejects: GitHub URLs, GitHub Pages (same repo name), localhost, example.com
 
@@ -155,15 +168,17 @@ Each domain has ~15-25 specific search queries targeting real applications:
 
 ## 📝 Console Output Guide
 
-### Good Signs (✓):
-```
+### Good Signs (✓)
+
+```text
 ✓ Added: user/project-name (1234 ⭐) - Live: https://project.vercel.app
 ✓ Valid live URL found: https://example.com
 ✓ Demo link found in README: https://demo.netlify.app
 ```
 
-### Filtered Out (✗):
-```
+### Filtered Out (✗)
+
+```text
 ✗ Excluded (library/tool/learning): facebook/react
 ✗ No meaningful description: user/test-repo
 ✗ Insufficient stars (23): user/small-project
@@ -182,7 +197,8 @@ Each domain has ~15-25 specific search queries targeting real applications:
 
 ## 🐛 Troubleshooting
 
-### "No valid live URL found" for many projects:
+### "No valid live URL found" for many projects
+
 - This is expected! Many popular repos are libraries or don't have demos
 - The strict filtering is intentional to ensure quality
 - You may need to run longer searches to get 200 projects
