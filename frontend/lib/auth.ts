@@ -51,39 +51,37 @@ export const authOptions: NextAuthOptions = {
         async session({ session, token }) {
             if (session.user) {
                 // Pass the access token to the session
-            // @ts-expect-error - NextAuth types don't include custom properties
-            session.accessToken = token.accessToken;
+                session.accessToken = token.accessToken;
 
-            // Handle Admin Session
-            if (token.email === "admin@project.com") {
-                // @ts-expect-error - NextAuth types don't include custom properties
-                session.user.id = "admin-user";
-                // @ts-expect-error - NextAuth types don't include custom properties
-                session.user.role = "ADMIN";
-                // @ts-expect-error - NextAuth types don't include custom properties
-                session.user.isVerified = true;
-                return session;
-            }
+                // Handle Admin Session
+                if (token.email === "admin@project.com") {
 
-            if (token.sub) {
-                // @ts-expect-error - NextAuth types don't include custom properties
+                    session.user.id = "admin-user";
+
+                    session.user.role = "ADMIN";
+
+                    session.user.isVerified = true;
+                    return session;
+                }
+
+                if (token.sub) {
+
                     try {
                         const user = await prismadb.user.findUnique({
                             where: { id: token.sub }
                         });
 
                         if (user) {
-                            // @ts-expect-error - NextAuth types don't include custom properties
+
                             session.user.role = user.role
-                            // @ts-expect-error - NextAuth types don't include custom properties
+
                             session.user.isVerified = user.isVerified
-                            // @ts-expect-error - NextAuth types don't include custom properties
+
                             session.user.firstName = user.firstName
-                            // @ts-expect-error - NextAuth types don't include custom properties
+
                             session.user.lastName = user.lastName
-                            // @ts-expect-error - NextAuth types don't include custom properties
+
                             session.user.profileImage = user.profileImage || user.image
-                            // @ts-expect-error - NextAuth types don't include custom properties
                             session.user.bio = user.bio
                         }
                     } catch (error) {

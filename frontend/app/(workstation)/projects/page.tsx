@@ -5,6 +5,7 @@ import { githubProjectApi, domainApi, userApi } from '@/lib/api';
 import GitHubProjectCard from '@/components/GitHubProjectCard';
 import ProjectFilters from '@/components/ProjectFilters';
 import SearchBar from '@/components/SearchBar';
+import { useDebounce } from '@/hooks/use-debounce';
 import { GitHubProject } from '@/types';
 
 const PAGE_SIZE = 24;
@@ -24,6 +25,7 @@ function ProjectsContent() {
     const [totalPages, setTotalPages] = useState(1);
     const [totalCount, setTotalCount] = useState(0);
     const [searchQuery, setSearchQuery] = useState('');
+    const debouncedSearch = useDebounce(searchQuery, 600);
     const [filters, setFilters] = useState({
         difficulty: [] as string[],
         minTime: 0,
@@ -50,13 +52,18 @@ function ProjectsContent() {
             const result = await githubProjectApi.getAll({
                 page: pageNum,
                 limit: PAGE_SIZE,
-                search: searchQuery.trim() || undefined,
+                search: debouncedSearch.trim() || undefined,
                 difficulty: filters.difficulty.length === 1 ? filters.difficulty[0] : undefined,
                 domainId: filters.domains.length === 1 ? filters.domains[0] : undefined,
             });
 
             const fetched = (result.projects || []) as GitHubProject[];
-            setProjects(prev => append ? [...prev, ...fetched] : fetched);
+            setProjects(prev => {
+                if (!append) return fetched;
+                const existingIds = new Set(prev.map(p => p.id));
+                const newItems = fetched.filter(p => !existingIds.has(p.id));
+                return [...prev, ...newItems];
+            });
             setTotalPages(result.pagination.totalPages);
             setTotalCount(result.pagination.total);
             setPage(pageNum);
@@ -74,7 +81,7 @@ function ProjectsContent() {
             setLoading(false);
             setLoadingMore(false);
         }
-    }, [searchQuery, filters.difficulty, filters.domains]);
+    }, [debouncedSearch, filters.difficulty, filters.domains]);
 
     useEffect(() => {
         fetchProjects(1, false);
@@ -101,19 +108,19 @@ function ProjectsContent() {
         return projects.filter(project => {
             // Difficulty filter
             if (filters.difficulty.length > 1 && !filters.difficulty.includes(project.difficulty)) return false;
-            
+
             // Domain filter
             if (filters.domains.length > 1 && !filters.domains.includes(project.domainId)) return false;
 
             // Time commitment filter - Real-time responsive filtering
             const projectMinTime = project.estimatedMinTime || 0;
             const projectMaxTime = project.estimatedMaxTime || 100;
-            
+
             // Check if project's time range overlaps with selected range
             // Project is shown if ANY part of its time range falls within the filter range
             const projectStartsBeforeFilterEnds = projectMinTime <= filters.maxTime;
             const projectEndsAfterFilterStarts = projectMaxTime >= filters.minTime;
-            
+
             if (!(projectStartsBeforeFilterEnds && projectEndsAfterFilterStarts)) {
                 return false;
             }
@@ -123,7 +130,7 @@ function ProjectsContent() {
                 const projectSkills = [...(project.technicalSkills || []), ...(project.techStack || [])];
                 if (!projectSkills.some(skill => filters.skills.includes(skill))) return false;
             }
-            
+
             return true;
         });
     }, [projects, filters]);

@@ -21,6 +21,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ projec
     const loadProject = useCallback(async () => {
         try {
             const data = await githubProjectApi.getById(projectId);
+            console.log("LOADED PROJECT DATA", data);
             setProject(data);
         } catch (err) {
             setError('Failed to load project details');
@@ -158,7 +159,11 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ projec
                             )}
                             <span className="flex items-center gap-1 text-muted-foreground text-xs font-medium">
                                 <span className="material-symbols-outlined text-sm">schedule</span>
-                                {project.supposedDeadline || `${project.estimatedMinTime}–${project.estimatedMaxTime}h`}
+                                {project.supposedDeadline
+                                    ? project.supposedDeadline
+                                    : (project.estimatedMinTime && project.estimatedMaxTime
+                                        ? `${project.estimatedMinTime}–${project.estimatedMaxTime}h`
+                                        : 'Self-paced')}
                             </span>
                         </div>
 
@@ -447,16 +452,24 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ projec
                                 <span className="material-symbols-outlined text-orange-500 text-2xl">event</span>
                                 <div>
                                     <p className="text-xs text-muted-foreground font-medium">Expected Duration</p>
-                                    <p className="text-lg font-bold text-foreground">{project.supposedDeadline || `${project.estimatedMinTime}–${project.estimatedMaxTime} Hours`}</p>
+                                    <p className="text-lg font-bold text-foreground">
+                                        {project.supposedDeadline
+                                            ? project.supposedDeadline
+                                            : (project.estimatedMinTime && project.estimatedMaxTime
+                                                ? `${project.estimatedMinTime}–${project.estimatedMaxTime} Hours`
+                                                : 'Self-paced')}
+                                    </p>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-3 px-5 py-3 bg-white border border-border rounded-xl">
-                                <span className="material-symbols-outlined text-muted-foreground text-2xl">hourglass_top</span>
-                                <div>
-                                    <p className="text-xs text-muted-foreground font-medium">Time Range</p>
-                                    <p className="text-lg font-bold text-foreground">{project.estimatedMinTime}–{project.estimatedMaxTime} Hours</p>
+                            {(project.estimatedMinTime && project.estimatedMaxTime) && (
+                                <div className="flex items-center gap-3 px-5 py-3 bg-white border border-border rounded-xl">
+                                    <span className="material-symbols-outlined text-muted-foreground text-2xl">hourglass_top</span>
+                                    <div>
+                                        <p className="text-xs text-muted-foreground font-medium">Time Range</p>
+                                        <p className="text-lg font-bold text-foreground">{project.estimatedMinTime}–{project.estimatedMaxTime} Hours</p>
+                                    </div>
                                 </div>
-                            </div>
+                            )}
                         </div>
                     </section>
 
@@ -602,7 +615,13 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ projec
                                 </div>
                                 <div className="flex items-center justify-between">
                                     <span className="text-sm text-muted-foreground">Duration</span>
-                                    <span className="text-sm font-semibold text-foreground">{project.supposedDeadline || `${project.estimatedMinTime}–${project.estimatedMaxTime}h`}</span>
+                                    <span className="text-sm font-semibold text-foreground">
+                                        {project.supposedDeadline
+                                            ? project.supposedDeadline
+                                            : (project.estimatedMinTime && project.estimatedMaxTime
+                                                ? `${project.estimatedMinTime}–${project.estimatedMaxTime}h`
+                                                : 'Self-paced')}
+                                    </span>
                                 </div>
                                 {project.language && (
                                     <div className="flex items-center justify-between">
@@ -650,16 +669,28 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ projec
                         <div className="bg-white border border-border rounded-2xl p-6 shadow-sm">
                             <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-5">Links</h4>
                             <div className="space-y-2">
+                                {/* GitHub Link (Highest Priority) */}
+                                {project.repoUrl && (
+                                    <a href={project.repoUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-3 -mx-1 rounded-xl border border-border hover:bg-secondary/50 transition-colors group">
+                                        <svg className="w-5 h-5 text-muted-foreground group-hover:text-foreground transition-colors" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
+                                        </svg>
+                                        <div className="flex-1 text-sm font-semibold text-foreground group-hover:text-primary transition-colors">
+                                            Open in GitHub
+                                        </div>
+                                        <span className="material-symbols-outlined text-sm text-muted-foreground ml-auto">open_in_new</span>
+                                    </a>
+                                )}
 
                                 {project.liveUrl && (
-                                    <a href={project.liveUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-3 -mx-1 rounded-xl hover:bg-secondary transition-colors group">
+                                    <a href={project.liveUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-3 -mx-1 rounded-xl hover:bg-secondary transition-colors group mt-2">
                                         <span className="material-symbols-outlined text-muted-foreground group-hover:text-foreground transition-colors">language</span>
-                                        <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">Live Demo</span>
+                                        <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">Live Site / Docs</span>
                                         <span className="material-symbols-outlined text-sm text-muted-foreground ml-auto">open_in_new</span>
                                     </a>
                                 )}
                                 {(project.downloadUrl || project.sourceCode?.downloadUrl) && (
-                                    <a href={project.sourceCode?.downloadUrl || project.downloadUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-3 -mx-1 rounded-xl hover:bg-secondary transition-colors group">
+                                    <a href={project.sourceCode?.downloadUrl || project.downloadUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-3 -mx-1 rounded-xl hover:bg-secondary transition-colors group mt-2">
                                         <span className="material-symbols-outlined text-muted-foreground group-hover:text-foreground transition-colors">folder_zip</span>
                                         <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">Download ZIP</span>
                                         <span className="material-symbols-outlined text-sm text-muted-foreground ml-auto">download</span>
