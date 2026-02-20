@@ -9,6 +9,7 @@
 import { Octokit } from '@octokit/rest';
 import { PrismaClient, Difficulty } from '@prisma/client';
 import { Buffer } from 'buffer';
+import axios from 'axios';
 
 const prisma = new PrismaClient();
 
@@ -102,6 +103,33 @@ interface GitHubRepo {
 }
 
 /**
+ * Check if a URL is actually accessible (responds with 2xx or 3xx status)
+ */
+async function isUrlAccessible(url: string): Promise<boolean> {
+  try {
+    const response = await axios.head(url, {
+      timeout: 10000, // 10 second timeout
+      maxRedirects: 5,
+      validateStatus: (status) => status < 400 // Accept 2xx and 3xx
+    });
+    return response.status < 400;
+  } catch (error) {
+    // Try GET request if HEAD fails (some servers don't support HEAD)
+    try {
+      const response = await axios.get(url, {
+        timeout: 10000,
+        maxRedirects: 5,
+        validateStatus: (status) => status < 400,
+        maxContentLength: 1024 * 1024 // Only download first 1MB
+      });
+      return response.status < 400;
+    } catch {
+      return false;
+    }
+  }
+}
+
+/**
  * Check if a repository has a valid live demo link
  * Returns the live URL if found, null otherwise
  */
@@ -128,8 +156,16 @@ async function getValidLiveUrl(repo: GitHubRepo): Promise<string | null> {
         const hasCustomDomain = !url.hostname.includes('github') && url.hostname.split('.').length >= 2;
         
         if (hasValidDomain || hasCustomDomain) {
-          console.log(`      ✓ Valid live URL found: ${repo.homepage}`);
-          return repo.homepage;
+          // Verify the URL is actually accessible
+          console.log(`      → Checking if URL is accessible: ${repo.homepage}`);
+          const isAccessible = await isUrlAccessible(repo.homepage);
+          if (isAccessible) {
+            console.log(`      ✓ Valid and accessible live URL: ${repo.homepage}`);
+            return repo.homepage;
+          } else {
+            console.log(`      ✗ URL not accessible: ${repo.homepage}`);
+            return null;
+          }
         }
       } catch (error) {
         // Invalid URL format
@@ -161,8 +197,15 @@ async function getValidLiveUrl(repo: GitHubRepo): Promise<string | null> {
         for (const pattern of demoPatterns) {
           const match = content.match(pattern);
           if (match && match[1] && !match[1].includes('github.com')) {
-            console.log(`      ✓ Demo link found in README: ${match[1]}`);
-            return match[1];
+            // Verify the URL is actually accessible
+            console.log(`      → Checking if README demo URL is accessible: ${match[1]}`);
+            const isAccessible = await isUrlAccessible(match[1]);
+            if (isAccessible) {
+              console.log(`      ✓ Accessible demo link found in README: ${match[1]}`);
+              return match[1];
+            } else {
+              console.log(`      ✗ README demo URL not accessible: ${match[1]}`);
+            }
           }
         }
       }
@@ -616,13 +659,19 @@ async function fetchProjectsFromQueries(queries: string[], targetCount: number):
         const details = await getRepoDetails(repo.owner.login, repo.name);
         if (!details) continue;
         
-        // Check for live demo URL (preferred but not required)
+        // Check for live demo URL (REQUIRED - must have working live demo)
         console.log(`    Checking live URL for: ${repo.full_name}...`);
         const liveUrl = await getValidLiveUrl(details);
         
-        // Store the validated live URL in the repo object (can be null)
+        // SKIP projects without valid live demo URLs
+        if (!liveUrl) {
+          console.log(`    ✗ No valid live demo URL - skipping: ${repo.full_name}`);
+          continue;
+        }
+        
+        // Store the validated live URL in the repo object
         (details as any).validatedLiveUrl = liveUrl;
-        (details as any).hasLiveDemo = liveUrl !== null;
+        (details as any).hasLiveDemo = true;
         
         seenIds.add(repo.id);
         seenNames.add(baseNameClean);
@@ -980,7 +1029,7 @@ function generateProjectContent(repo: GitHubRepo, category: string): any {
     repoName: repo.name,
     defaultBranch: repo.default_branch || 'main',
     downloadUrl: `${repo.html_url}/archive/refs/heads/${repo.default_branch || 'main'}.zip`,
-    liveUrl: (repo as any).validatedLiveUrl || repo.homepage || repo.html_url,
+    liveUrl: (repo as any).validatedLiveUrl, // REQUIRED - must have valid live demo URL
     stars: repo.stargazers_count,
     forks: repo.forks_count,
     language: repo.language || 'JavaScript',
