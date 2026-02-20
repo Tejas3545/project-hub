@@ -1,0 +1,675 @@
+'use client';
+
+import { useState, useEffect, useCallback, use } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { useAuth } from '@/lib/AuthContext';
+import { githubProjectApi, userApi } from '@/lib/api';
+import { GitHubProject } from '@/types';
+
+export default function ProjectDetailPage({ params }: { params: Promise<{ projectId: string }> }) {
+    const { projectId } = use(params);
+    const router = useRouter();
+    const { user } = useAuth();
+    const [project, setProject] = useState<GitHubProject | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [starting, setStarting] = useState(false);
+    const [error, setError] = useState('');
+    const [isBookmarked, setIsBookmarked] = useState(false);
+    const [bookmarkLoading, setBookmarkLoading] = useState(false);
+
+    const loadProject = useCallback(async () => {
+        try {
+            const data = await githubProjectApi.getById(projectId);
+            setProject(data);
+        } catch (err) {
+            setError('Failed to load project details');
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    }, [projectId]);
+
+    useEffect(() => {
+        loadProject();
+    }, [loadProject]);
+
+    // Check bookmark status
+    useEffect(() => {
+        if (user && projectId) {
+            userApi.checkBookmark(projectId)
+                .then((res) => setIsBookmarked(!!res?.bookmarked))
+                .catch(() => { });
+        }
+    }, [user, projectId]);
+
+    const handleStartProject = async () => {
+        if (!user) {
+            router.push('/login');
+            return;
+        }
+        setStarting(true);
+        try {
+            if (project?.isRegularProject) {
+                const progress = await userApi.getProjectProgress(projectId);
+                if (progress && progress.status && progress.status !== 'NOT_STARTED') {
+                    router.push(`/workspace/${projectId}`);
+                    return;
+                }
+                await userApi.updateProgress(projectId, { status: 'IN_PROGRESS' });
+                router.push(`/workspace/${projectId}`);
+            } else {
+                const progress = await userApi.getGithubSingleProgress(projectId);
+                if (progress && progress.status && progress.status !== 'NOT_STARTED') {
+                    router.push(`/workspace/${projectId}?type=github`);
+                    return;
+                }
+                await userApi.startGithubProject(projectId);
+                router.push(`/workspace/${projectId}?type=github`);
+            }
+        } catch (error) {
+            console.error('Failed to start project:', error);
+            router.push(`/workspace/${projectId}${project?.isRegularProject ? '' : '?type=github'}`);
+        } finally {
+            setStarting(false);
+        }
+    };
+
+    const handleToggleBookmark = async () => {
+        if (!user) {
+            router.push('/login');
+            return;
+        }
+        setBookmarkLoading(true);
+        try {
+            const res = await userApi.toggleBookmark(projectId);
+            setIsBookmarked(res.bookmarked);
+        } catch (err) {
+            console.error('Failed to toggle bookmark:', err);
+        } finally {
+            setBookmarkLoading(false);
+        }
+    };
+
+    const getDifficultyConfig = (diff: string) => {
+        switch (diff) {
+            case 'EASY': return { label: 'Beginner', color: 'bg-emerald-50 text-emerald-700 border-emerald-200', dot: 'bg-emerald-500' };
+            case 'MEDIUM': return { label: 'Intermediate', color: 'bg-amber-50 text-amber-700 border-amber-200', dot: 'bg-amber-500' };
+            case 'HARD': return { label: 'Advanced', color: 'bg-rose-50 text-rose-700 border-rose-200', dot: 'bg-rose-500' };
+            default: return { label: diff, color: 'bg-gray-50 text-gray-700 border-gray-200', dot: 'bg-gray-500' };
+        }
+    };
+
+    if (loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="flex flex-col items-center gap-4">
+                    <div className="w-10 h-10 border-2 border-border border-t-primary rounded-full animate-spin" />
+                    <p className="text-sm text-muted-foreground font-medium">Loading project...</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (!project || error) {
+        return (
+            <div className="min-h-screen flex items-center justify-center flex-col gap-4">
+                <span className="material-symbols-outlined text-5xl text-muted-foreground">folder_off</span>
+                <h2 className="text-xl font-bold text-foreground">Project not found</h2>
+                <Link href="/projects" className="text-primary hover:underline text-sm font-medium">← Back to Projects</Link>
+            </div>
+        );
+    }
+
+    const difficulty = getDifficultyConfig(project.difficulty);
+    const allTech = [...(project.techStack || []), ...(project.technicalSkills || [])];
+    const uniqueTech = [...new Set(allTech)];
+
+    return (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+            {/* Breadcrumb */}
+            <nav className="flex items-center gap-2 text-sm text-muted-foreground font-medium mb-8">
+                <Link href="/projects" className="hover:text-primary transition-colors">Projects</Link>
+                <span>/</span>
+                <Link href="/projects" className="hover:text-primary transition-colors">{project.domain?.name || 'Domain'}</Link>
+                <span>/</span>
+                <span className="text-foreground truncate max-w-xs">{project.title}</span>
+            </nav>
+
+            {/* ─── HERO SECTION ─── */}
+            <header className="mb-10">
+                <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
+                    <div className="space-y-4 max-w-3xl">
+                        {/* Meta badges */}
+                        <div className="flex flex-wrap items-center gap-3">
+                            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide border ${difficulty.color}`}>
+                                <span className={`w-1.5 h-1.5 rounded-full ${difficulty.dot}`} />
+                                {difficulty.label}
+                            </span>
+                            {project.domain?.name && (
+                                <span className="px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold border border-primary/20">
+                                    {project.domain.name}
+                                </span>
+                            )}
+                            {project.subDomain && (
+                                <span className="px-3 py-1 rounded-full bg-secondary text-muted-foreground text-xs font-medium border border-border">
+                                    {project.subDomain}
+                                </span>
+                            )}
+                            <span className="flex items-center gap-1 text-muted-foreground text-xs font-medium">
+                                <span className="material-symbols-outlined text-sm">schedule</span>
+                                {project.supposedDeadline || `${project.estimatedMinTime}–${project.estimatedMaxTime}h`}
+                            </span>
+                        </div>
+
+                        {/* Title */}
+                        <h1 className="text-3xl sm:text-4xl lg:text-[2.75rem] font-bold text-foreground leading-tight tracking-tight">
+                            {project.title}
+                        </h1>
+
+                        {/* Author & Date */}
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                            {project.author && (
+                                <span className="flex items-center gap-1.5">
+                                    <span className="material-symbols-outlined text-base">person</span>
+                                    {project.author}
+                                </span>
+                            )}
+                            {project.language && (
+                                <span className="flex items-center gap-1.5">
+                                    <span className="material-symbols-outlined text-base">code</span>
+                                    {project.language}
+                                </span>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Action buttons */}
+                    <div className="flex flex-wrap gap-3 shrink-0">
+                        <button
+                            onClick={handleStartProject}
+                            disabled={starting}
+                            className="flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary/90 text-white font-semibold rounded-xl transition-all shadow-lg shadow-primary/20 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                        >
+                            {starting ? (
+                                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                            ) : (
+                                <span className="material-symbols-outlined text-lg">rocket_launch</span>
+                            )}
+                            Start Building
+                        </button>
+                        <button
+                            onClick={handleToggleBookmark}
+                            disabled={bookmarkLoading}
+                            className={`flex items-center gap-2 px-5 py-3 rounded-xl border font-medium text-sm transition-all active:scale-95 ${isBookmarked
+                                ? 'bg-primary/10 border-primary/30 text-primary'
+                                : 'bg-white border-border text-foreground hover:border-primary/30 hover:bg-primary/5'
+                                }`}
+                        >
+                            <span className={`material-symbols-outlined text-lg ${isBookmarked ? 'symbol-filled' : ''}`}>
+                                bookmark
+                            </span>
+                            {isBookmarked ? 'Saved' : 'Save'}
+                        </button>
+                    </div>
+                </div>
+
+                {/* Quick-action bar — Download, Live, Source */}
+                <div className="mt-6 flex flex-wrap gap-3">
+                    {(project.downloadUrl || project.sourceCode?.downloadUrl) && (
+                        <a
+                            href={project.sourceCode?.downloadUrl || project.downloadUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-xl text-sm font-semibold transition-all active:scale-95"
+                        >
+                            <span className="material-symbols-outlined text-lg">download</span>
+                            Download Source Code
+                        </a>
+                    )}
+                    {project.liveUrl && (
+                        <a
+                            href={project.liveUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-xl text-sm font-semibold transition-all active:scale-95"
+                        >
+                            <span className="material-symbols-outlined text-lg">open_in_new</span>
+                            Live Demo
+                        </a>
+                    )}
+                </div>
+            </header>
+
+            {/* ─── MAIN CONTENT GRID ─── */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                {/* Left Column — 7 Documentation Sections */}
+                <div className="lg:col-span-8 space-y-6">
+
+                    {/* ╔══════════════════════════════════════╗
+                       ║  Section 1: THE CASE STUDY (Story)   ║
+                       ╚══════════════════════════════════════╝ */}
+                    <section className="relative bg-gradient-to-br from-indigo-50/80 to-white border border-indigo-100 rounded-2xl p-6 md:p-8 overflow-hidden">
+                        <div className="absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b from-indigo-500 to-indigo-300 rounded-l-2xl" />
+                        <div className="flex items-center gap-3 mb-5">
+                            <div className="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center">
+                                <span className="material-symbols-outlined text-indigo-600">auto_stories</span>
+                            </div>
+                            <div>
+                                <span className="text-xs font-bold text-indigo-500 uppercase tracking-widest">Section 01</span>
+                                <h3 className="text-lg font-bold text-foreground -mt-0.5">The Case Study</h3>
+                            </div>
+                        </div>
+                        <blockquote className="text-foreground/80 leading-relaxed text-base md:text-[1.05rem] italic border-l-0 pl-0">
+                            &ldquo;{project.caseStudy || project.description || 'No case study available for this project.'}&rdquo;
+                        </blockquote>
+                    </section>
+
+                    {/* ╔══════════════════════════════════════╗
+                       ║  Section 2: PROBLEM STATEMENT        ║
+                       ╚══════════════════════════════════════╝ */}
+                    <section className="relative bg-gradient-to-br from-rose-50/80 to-white border border-rose-100 rounded-2xl p-6 md:p-8 overflow-hidden">
+                        <div className="absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b from-rose-500 to-rose-300 rounded-l-2xl" />
+                        <div className="flex items-center gap-3 mb-5">
+                            <div className="w-10 h-10 rounded-xl bg-rose-100 flex items-center justify-center">
+                                <span className="material-symbols-outlined text-rose-600">psychology</span>
+                            </div>
+                            <div>
+                                <span className="text-xs font-bold text-rose-500 uppercase tracking-widest">Section 02</span>
+                                <h3 className="text-lg font-bold text-foreground -mt-0.5">The Problem Statement</h3>
+                            </div>
+                        </div>
+                        <p className="text-foreground/80 leading-relaxed text-base whitespace-pre-wrap">
+                            {project.problemStatement || 'No problem statement defined.'}
+                        </p>
+                    </section>
+
+                    {/* ╔══════════════════════════════════════╗
+                       ║  Section 3: SOLUTION DESCRIPTION     ║
+                       ╚══════════════════════════════════════╝ */}
+                    <section className="relative bg-gradient-to-br from-emerald-50/80 to-white border border-emerald-100 rounded-2xl p-6 md:p-8 overflow-hidden">
+                        <div className="absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b from-emerald-500 to-emerald-300 rounded-l-2xl" />
+                        <div className="flex items-center gap-3 mb-5">
+                            <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center">
+                                <span className="material-symbols-outlined text-emerald-600">lightbulb</span>
+                            </div>
+                            <div>
+                                <span className="text-xs font-bold text-emerald-500 uppercase tracking-widest">Section 03</span>
+                                <h3 className="text-lg font-bold text-foreground -mt-0.5">Solution Description</h3>
+                            </div>
+                        </div>
+                        <p className="text-foreground/80 leading-relaxed text-base whitespace-pre-wrap">
+                            {project.solutionDescription || project.introduction || 'No solution description available.'}
+                        </p>
+                    </section>
+
+                    {/* ╔══════════════════════════════════════╗
+                       ║  Section 4: PREREQUISITES            ║
+                       ╚══════════════════════════════════════╝ */}
+                    <section className="relative bg-gradient-to-br from-amber-50/80 to-white border border-amber-100 rounded-2xl p-6 md:p-8 overflow-hidden">
+                        <div className="absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b from-amber-500 to-amber-300 rounded-l-2xl" />
+                        <div className="flex items-center gap-3 mb-5">
+                            <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center">
+                                <span className="material-symbols-outlined text-amber-600">school</span>
+                            </div>
+                            <div>
+                                <span className="text-xs font-bold text-amber-500 uppercase tracking-widest">Section 04</span>
+                                <h3 className="text-lg font-bold text-foreground -mt-0.5">Prerequisites</h3>
+                            </div>
+                        </div>
+                        {(project.prerequisites && project.prerequisites.length > 0) ? (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                {project.prerequisites.map((req, i) => (
+                                    <div key={i} className="flex items-start gap-3 p-3 bg-white/80 rounded-xl border border-amber-100/60">
+                                        <div className="w-6 h-6 rounded-lg bg-amber-100 flex items-center justify-center shrink-0 mt-0.5">
+                                            <span className="material-symbols-outlined text-amber-600 text-xs">check</span>
+                                        </div>
+                                        <span className="text-sm text-foreground/80 font-medium">{req}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <p className="text-muted-foreground text-sm italic">No prerequisites specified. General programming knowledge recommended.</p>
+                        )}
+                    </section>
+
+                    {/* ╔══════════════════════════════════════╗
+                       ║  Section 5: TECH STACK & TOOLS       ║
+                       ╚══════════════════════════════════════╝ */}
+                    <section className="relative bg-gradient-to-br from-sky-50/80 to-white border border-sky-100 rounded-2xl p-6 md:p-8 overflow-hidden">
+                        <div className="absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b from-sky-500 to-sky-300 rounded-l-2xl" />
+                        <div className="flex items-center gap-3 mb-5">
+                            <div className="w-10 h-10 rounded-xl bg-sky-100 flex items-center justify-center">
+                                <span className="material-symbols-outlined text-sky-600">terminal</span>
+                            </div>
+                            <div>
+                                <span className="text-xs font-bold text-sky-500 uppercase tracking-widest">Section 05</span>
+                                <h3 className="text-lg font-bold text-foreground -mt-0.5">Tech Stack & Tools</h3>
+                            </div>
+                        </div>
+
+                        {/* Tech stack pills */}
+                        {uniqueTech.length > 0 && (
+                            <div className="mb-5">
+                                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Technologies</p>
+                                <div className="flex flex-wrap gap-2">
+                                    {uniqueTech.map(tech => (
+                                        <span key={tech} className="px-3 py-1.5 bg-white border border-sky-200 text-sky-700 text-xs font-semibold rounded-lg shadow-sm">
+                                            {tech}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Tools used */}
+                        {project.toolsUsed && project.toolsUsed.length > 0 && (
+                            <div className="mb-5">
+                                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Tools & Platforms</p>
+                                <div className="flex flex-wrap gap-2">
+                                    {project.toolsUsed.map(tool => (
+                                        <span key={tool} className="px-3 py-1.5 bg-white border border-border text-foreground/70 text-xs font-medium rounded-lg">
+                                            {tool}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Concepts */}
+                        {project.conceptsUsed && project.conceptsUsed.length > 0 && (
+                            <div>
+                                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Concepts Applied</p>
+                                <div className="flex flex-wrap gap-2">
+                                    {project.conceptsUsed.map(concept => (
+                                        <span key={concept} className="px-3 py-1.5 bg-sky-50 border border-sky-100 text-sky-600 text-xs font-medium rounded-lg">
+                                            {concept}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {uniqueTech.length === 0 && (!project.toolsUsed || project.toolsUsed.length === 0) && (
+                            <p className="text-muted-foreground text-sm italic">No tech stack specified.</p>
+                        )}
+                    </section>
+
+                    {/* ╔══════════════════════════════════════╗
+                       ║  Section 6: DELIVERABLES             ║
+                       ╚══════════════════════════════════════╝ */}
+                    <section className="relative bg-gradient-to-br from-violet-50/80 to-white border border-violet-100 rounded-2xl p-6 md:p-8 overflow-hidden">
+                        <div className="absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b from-violet-500 to-violet-300 rounded-l-2xl" />
+                        <div className="flex items-center gap-3 mb-5">
+                            <div className="w-10 h-10 rounded-xl bg-violet-100 flex items-center justify-center">
+                                <span className="material-symbols-outlined text-violet-600">task_alt</span>
+                            </div>
+                            <div>
+                                <span className="text-xs font-bold text-violet-500 uppercase tracking-widest">Section 06</span>
+                                <h3 className="text-lg font-bold text-foreground -mt-0.5">Deliverables</h3>
+                            </div>
+                        </div>
+                        {(project.deliverables && project.deliverables.length > 0) ? (
+                            <div className="space-y-3">
+                                {project.deliverables.map((item, i) => (
+                                    <div key={i} className="flex items-start gap-4 p-4 bg-white/80 rounded-xl border border-violet-100/60 hover:border-violet-200 transition-colors group">
+                                        <div className="w-8 h-8 rounded-lg bg-violet-100 flex items-center justify-center shrink-0 group-hover:bg-violet-200 transition-colors">
+                                            <span className="text-violet-600 text-xs font-bold">{String(i + 1).padStart(2, '0')}</span>
+                                        </div>
+                                        <div className="flex-1">
+                                            <span className="text-sm text-foreground font-medium leading-relaxed">{item}</span>
+                                        </div>
+                                        <span className="material-symbols-outlined text-violet-300 text-sm mt-0.5">check_circle</span>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <p className="text-muted-foreground text-sm italic">No specific deliverables defined. Follow general project submission guidelines.</p>
+                        )}
+                    </section>
+
+                    {/* ╔══════════════════════════════════════╗
+                       ║  Section 7: SUPPOSED DEADLINE        ║
+                       ╚══════════════════════════════════════╝ */}
+                    <section className="relative bg-gradient-to-br from-orange-50/80 to-white border border-orange-100 rounded-2xl p-6 md:p-8 overflow-hidden">
+                        <div className="absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b from-orange-500 to-orange-300 rounded-l-2xl" />
+                        <div className="flex items-center gap-3 mb-5">
+                            <div className="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center">
+                                <span className="material-symbols-outlined text-orange-600">timer</span>
+                            </div>
+                            <div>
+                                <span className="text-xs font-bold text-orange-500 uppercase tracking-widest">Section 07</span>
+                                <h3 className="text-lg font-bold text-foreground -mt-0.5">Supposed Deadline</h3>
+                            </div>
+                        </div>
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                            <div className="flex items-center gap-3 px-5 py-3 bg-white border border-orange-200 rounded-xl">
+                                <span className="material-symbols-outlined text-orange-500 text-2xl">event</span>
+                                <div>
+                                    <p className="text-xs text-muted-foreground font-medium">Expected Duration</p>
+                                    <p className="text-lg font-bold text-foreground">{project.supposedDeadline || `${project.estimatedMinTime}–${project.estimatedMaxTime} Hours`}</p>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-3 px-5 py-3 bg-white border border-border rounded-xl">
+                                <span className="material-symbols-outlined text-muted-foreground text-2xl">hourglass_top</span>
+                                <div>
+                                    <p className="text-xs text-muted-foreground font-medium">Time Range</p>
+                                    <p className="text-lg font-bold text-foreground">{project.estimatedMinTime}–{project.estimatedMaxTime} Hours</p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* ─── OPTIONAL: Requirements ─── */}
+                    {((project.requirements && project.requirements.length > 0) || project.requirementsText) && (
+                        <section className="bg-white border border-border rounded-2xl p-6 md:p-8">
+                            <div className="flex items-center gap-3 mb-5">
+                                <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center">
+                                    <span className="material-symbols-outlined text-foreground/60">checklist</span>
+                                </div>
+                                <h3 className="text-lg font-bold text-foreground">Technical Requirements</h3>
+                            </div>
+                            {project.requirementsText && (
+                                <p className="text-foreground/80 leading-relaxed text-sm whitespace-pre-wrap mb-4">{project.requirementsText}</p>
+                            )}
+                            {project.requirements && project.requirements.length > 0 && (
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    {project.requirements.map((req, idx) => (
+                                        <div key={idx} className="flex items-start gap-3 p-3 bg-secondary/50 rounded-xl border border-border">
+                                            <span className="material-symbols-outlined text-primary text-sm mt-0.5">check_circle</span>
+                                            <span className="text-sm text-foreground/80 font-medium">{req}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </section>
+                    )}
+
+                    {/* ─── OPTIONAL: Implementation / Architecture ─── */}
+                    {project.implementation && (
+                        <section className="bg-white border border-border rounded-2xl p-6 md:p-8">
+                            <div className="flex items-center gap-3 mb-5">
+                                <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center">
+                                    <span className="material-symbols-outlined text-foreground/60">architecture</span>
+                                </div>
+                                <h3 className="text-lg font-bold text-foreground">Implementation / Framework</h3>
+                            </div>
+                            <p className="text-foreground/80 leading-relaxed text-sm whitespace-pre-wrap">{project.implementation}</p>
+                        </section>
+                    )}
+
+                    {/* ─── OPTIONAL: Evaluation Criteria ─── */}
+                    {project.evaluationCriteria && (
+                        <section className="bg-white border border-border rounded-2xl p-6 md:p-8">
+                            <div className="flex items-center gap-3 mb-5">
+                                <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center">
+                                    <span className="material-symbols-outlined text-foreground/60">grade</span>
+                                </div>
+                                <h3 className="text-lg font-bold text-foreground">Evaluation Criteria</h3>
+                            </div>
+                            <p className="text-foreground/80 leading-relaxed text-sm whitespace-pre-wrap">{project.evaluationCriteria}</p>
+                        </section>
+                    )}
+
+                    {/* ─── OPTIONAL: Optional Extensions ─── */}
+                    {project.optionalExtensions && (
+                        <section className="bg-gradient-to-br from-primary/5 to-white border border-primary/20 rounded-2xl p-6 md:p-8">
+                            <div className="flex items-center gap-3 mb-5">
+                                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                                    <span className="material-symbols-outlined text-primary">extension</span>
+                                </div>
+                                <div>
+                                    <h3 className="text-lg font-bold text-foreground">Bonus Challenge</h3>
+                                    <p className="text-xs text-muted-foreground">Optional extensions for advanced students</p>
+                                </div>
+                            </div>
+                            <p className="text-foreground/80 leading-relaxed text-sm whitespace-pre-wrap">{project.optionalExtensions}</p>
+                        </section>
+                    )}
+                </div>
+
+                {/* ─── RIGHT SIDEBAR ─── */}
+                <aside className="lg:col-span-4">
+                    <div className="sticky top-24 space-y-5">
+
+                        {/* Quick Action Card */}
+                        <div className="bg-white border border-border rounded-2xl p-6 shadow-sm space-y-5">
+                            <button
+                                onClick={handleStartProject}
+                                disabled={starting}
+                                className="w-full flex items-center justify-center gap-2 py-3.5 bg-primary hover:bg-primary/90 text-white font-semibold rounded-xl transition-all shadow-lg shadow-primary/20 text-sm disabled:opacity-50"
+                            >
+                                {starting ? (
+                                    <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                ) : (
+                                    <>
+                                        <span className="material-symbols-outlined text-lg">play_arrow</span>
+                                        Start Project
+                                    </>
+                                )}
+                            </button>
+
+                            <button
+                                onClick={handleToggleBookmark}
+                                disabled={bookmarkLoading}
+                                className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl border font-medium text-sm transition-all ${isBookmarked
+                                    ? 'bg-primary/10 border-primary/30 text-primary'
+                                    : 'bg-secondary border-border text-foreground hover:border-primary/30'
+                                    }`}
+                            >
+                                <span className={`material-symbols-outlined text-base ${isBookmarked ? 'symbol-filled' : ''}`}>
+                                    bookmark
+                                </span>
+                                {isBookmarked ? 'Bookmarked' : 'Save for Later'}
+                            </button>
+
+                            {/* Quick download */}
+                            {(project.downloadUrl || project.sourceCode?.downloadUrl) && (
+                                <>
+                                    <div className="h-px bg-border" />
+                                    <a
+                                        href={project.sourceCode?.downloadUrl || project.downloadUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 font-semibold text-sm transition-all"
+                                    >
+                                        <span className="material-symbols-outlined text-lg">download</span>
+                                        Download Source Code
+                                    </a>
+                                </>
+                            )}
+                        </div>
+
+                        {/* Project Metadata Card */}
+                        <div className="bg-white border border-border rounded-2xl p-6 shadow-sm">
+                            <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-5">Project Info</h4>
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <span className="text-sm text-muted-foreground">Domain</span>
+                                    <span className="text-sm font-semibold text-foreground">{project.domain?.name || '—'}</span>
+                                </div>
+                                {project.subDomain && (
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-sm text-muted-foreground">Sub-domain</span>
+                                        <span className="text-sm font-semibold text-foreground">{project.subDomain}</span>
+                                    </div>
+                                )}
+                                <div className="flex items-center justify-between">
+                                    <span className="text-sm text-muted-foreground">Difficulty</span>
+                                    <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold border ${difficulty.color}`}>
+                                        {difficulty.label}
+                                    </span>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <span className="text-sm text-muted-foreground">Duration</span>
+                                    <span className="text-sm font-semibold text-foreground">{project.supposedDeadline || `${project.estimatedMinTime}–${project.estimatedMaxTime}h`}</span>
+                                </div>
+                                {project.language && (
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-sm text-muted-foreground">Language</span>
+                                        <span className="px-2.5 py-0.5 bg-secondary rounded text-xs font-medium text-foreground">{project.language}</span>
+                                    </div>
+                                )}
+                                {project.author && (
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-sm text-muted-foreground">Author</span>
+                                        <span className="text-sm font-semibold text-foreground">{project.author}</span>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Source Code Card */}
+                        {project.sourceCode && (
+                            <div className="bg-white border border-border rounded-2xl p-6 shadow-sm">
+                                <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-5">Source Code Details</h4>
+                                <div className="space-y-3">
+                                    {project.sourceCode.fileSize && (
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-sm text-muted-foreground">File Size</span>
+                                            <span className="text-sm font-semibold text-foreground">{(project.sourceCode.fileSize / 1024 / 1024).toFixed(1)} MB</span>
+                                        </div>
+                                    )}
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-sm text-muted-foreground">README.md</span>
+                                        <span className={`material-symbols-outlined text-base ${project.sourceCode.hasReadme ? 'text-emerald-600' : 'text-muted-foreground'}`}>
+                                            {project.sourceCode.hasReadme ? 'check_circle' : 'cancel'}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-sm text-muted-foreground">Dependencies File</span>
+                                        <span className={`material-symbols-outlined text-base ${project.sourceCode.hasRequirements ? 'text-emerald-600' : 'text-muted-foreground'}`}>
+                                            {project.sourceCode.hasRequirements ? 'check_circle' : 'cancel'}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* External Links */}
+                        <div className="bg-white border border-border rounded-2xl p-6 shadow-sm">
+                            <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-5">Links</h4>
+                            <div className="space-y-2">
+
+                                {project.liveUrl && (
+                                    <a href={project.liveUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-3 -mx-1 rounded-xl hover:bg-secondary transition-colors group">
+                                        <span className="material-symbols-outlined text-muted-foreground group-hover:text-foreground transition-colors">language</span>
+                                        <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">Live Demo</span>
+                                        <span className="material-symbols-outlined text-sm text-muted-foreground ml-auto">open_in_new</span>
+                                    </a>
+                                )}
+                                {(project.downloadUrl || project.sourceCode?.downloadUrl) && (
+                                    <a href={project.sourceCode?.downloadUrl || project.downloadUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-3 -mx-1 rounded-xl hover:bg-secondary transition-colors group">
+                                        <span className="material-symbols-outlined text-muted-foreground group-hover:text-foreground transition-colors">folder_zip</span>
+                                        <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">Download ZIP</span>
+                                        <span className="material-symbols-outlined text-sm text-muted-foreground ml-auto">download</span>
+                                    </a>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </div>
+    );
+}
