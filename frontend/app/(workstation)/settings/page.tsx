@@ -212,7 +212,9 @@ export default function SettingsPage() {
                   { key: 'projectUpdates', label: 'Project Updates', description: 'Get notified about project changes' },
                   { key: 'achievementAlerts', label: 'Achievement Alerts', description: 'Celebrate your accomplishments' },
                   { key: 'weeklyDigest', label: 'Weekly Digest', description: 'Receive a weekly summary email' },
-                ].map((item) => (
+                ].map((item) => {
+                  const isChecked = notifications[item.key as keyof typeof notifications];
+                  return (
                   <div key={item.key} className="flex items-start sm:items-center justify-between gap-4 p-4 border border-border rounded-lg">
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-sm sm:text-base">{item.label}</p>
@@ -222,20 +224,20 @@ export default function SettingsPage() {
                       onClick={() => setNotifications({ ...notifications, [item.key]: !notifications[item.key as keyof typeof notifications] })}
                       aria-label={`Toggle ${item.label}`}
                       role="switch"
-                      aria-checked={notifications[item.key as keyof typeof notifications]}
+                      aria-checked={isChecked ? "true" : "false"}
                       className={`relative inline-flex h-6 w-11 flex-shrink-0 rounded-full transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${
-                        notifications[item.key as keyof typeof notifications] ? 'bg-primary' : 'bg-gray-300'
+                        isChecked ? 'bg-primary' : 'bg-gray-300'
                       }`}
                     >
                       <span
                         className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition-transform duration-200 ease-in-out ${
-                          notifications[item.key as keyof typeof notifications] ? 'translate-x-5' : 'translate-x-0.5'
+                          isChecked ? 'translate-x-5 mt-0.5' : 'translate-x-0.5 mt-0.5'
                         }`}
-                        style={{ marginTop: '2px' }}
                       />
                     </button>
                   </div>
-                ))}
+                  );
+                })}
               </div>
 
               <button

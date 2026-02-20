@@ -95,7 +95,7 @@ if (process.env.NODE_ENV === 'production' && (!process.env.ALLOWED_ORIGINS || pr
 }
 
 const app: Express = express();
-const PORT = process.env.PORT || 5000;
+const PORT = parseInt(process.env.PORT || '5000', 10);
 
 // Trust proxy for Render deployment (required for rate limiting)
 app.set('trust proxy', 1);
