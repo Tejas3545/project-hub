@@ -65,7 +65,7 @@ export const getDashboard = async (req: AuthRequest, res: Response) => {
       where: { userId }
     });
 
-    res.json({
+    const result = {
       user: {
         ...user,
         totalTimeSpentHours: Math.floor((user?.totalTimeSpent || 0) / 60),
