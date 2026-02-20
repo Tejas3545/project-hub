@@ -94,34 +94,6 @@ export default function ProjectFilters({
                 </div>
             </div>
 
-            {/* Technology Search / Tags */}
-            <div>
-                <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-4">Focus Areas</h3>
-                <div className="flex flex-wrap gap-2">
-                    {availableSkills.slice(0, 15).map((skill) => {
-                        const isActive = filters.skills.includes(skill);
-                        return (
-                            <button
-                                key={skill}
-                                onClick={() => {
-                                    const newSkills = isActive
-                                        ? filters.skills.filter(s => s !== skill)
-                                        : [...filters.skills, skill];
-                                    updateFilters({ skills: newSkills });
-                                }}
-                                className={`pill-badge text-[11px] font-medium transition-all border ${isActive
-                                        ? 'bg-primary text-white border-primary'
-                                        : 'bg-secondary border-border text-muted-foreground hover:border-foreground/20'
-                                    }`}
-                            >
-                                {skill}
-                                {isActive && <span className="material-symbols-outlined text-[10px] ml-1">close</span>}
-                            </button>
-                        );
-                    })}
-                </div>
-            </div>
-
             {/* Time Slider */}
             <div>
                 <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-4">Time Commitment</h3>
