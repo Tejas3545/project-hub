@@ -6,7 +6,6 @@ import { authApi } from '@/lib/api';
 import { 
   User, 
   Bell, 
-  Palette, 
   Shield, 
   Save,
   ArrowLeft,
@@ -15,7 +14,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 
-type SettingsTab = 'account' | 'notifications' | 'appearance' | 'security';
+type SettingsTab = 'account' | 'notifications' | 'security';
 
 export default function SettingsPage() {
   const { user, refreshUser } = useAuth();
@@ -36,12 +35,6 @@ export default function SettingsPage() {
     projectUpdates: true,
     achievementAlerts: true,
     weeklyDigest: false,
-  });
-
-  // Appearance state
-  const [appearance, setAppearance] = useState({
-    theme: 'light',
-    compactMode: false,
   });
 
   useEffect(() => {
@@ -85,41 +78,24 @@ export default function SettingsPage() {
     }
   };
 
-  const handleSaveAppearance = async () => {
-    setSaving(true);
-    try {
-      localStorage.setItem('appearancePrefs', JSON.stringify(appearance));
-      showMessage('success', 'Appearance settings saved');
-    } catch {
-      showMessage('error', 'Failed to save settings');
-    } finally {
-      setSaving(false);
-    }
-  };
-
   // Load saved preferences on mount
   useEffect(() => {
     const savedNotifications = localStorage.getItem('notificationPrefs');
     if (savedNotifications) {
       setNotifications(JSON.parse(savedNotifications));
     }
-    const savedAppearance = localStorage.getItem('appearancePrefs');
-    if (savedAppearance) {
-      setAppearance(JSON.parse(savedAppearance));
-    }
   }, []);
 
   const tabs = [
     { id: 'account' as const, label: 'Account', icon: User },
     { id: 'notifications' as const, label: 'Notifications', icon: Bell },
-    { id: 'appearance' as const, label: 'Appearance', icon: Palette },
     { id: 'security' as const, label: 'Security', icon: Shield },
   ];
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6">
       {/* Header */}
-      <div className="flex items-center gap-4 mb-8">
+      <div className="flex items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
         <Link 
           href="/profile" 
           className="p-2 rounded-lg hover:bg-secondary transition-colors"
@@ -127,8 +103,8 @@ export default function SettingsPage() {
           <ArrowLeft size={20} />
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Settings</h1>
-          <p className="text-muted-foreground">Manage your account preferences</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-foreground">Settings</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">Manage your account preferences</p>
         </div>
       </div>
 
@@ -142,24 +118,24 @@ export default function SettingsPage() {
         </div>
       )}
 
-      <div className="flex gap-8">
+      <div className="flex flex-col lg:flex-row gap-4 lg:gap-8">
         {/* Sidebar Tabs */}
-        <div className="w-56 shrink-0">
-          <nav className="space-y-1">
+        <div className="w-full lg:w-56 shrink-0">
+          <nav className="flex lg:flex-col gap-2 lg:space-y-1 overflow-x-auto lg:overflow-x-visible pb-2 lg:pb-0">
             {tabs.map((tab) => {
               const Icon = tab.icon;
               return (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all ${
+                  className={`flex-shrink-0 lg:w-full flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg text-left transition-all whitespace-nowrap ${
                     activeTab === tab.id
                       ? 'bg-primary text-white shadow-sm'
                       : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
                   }`}
                 >
-                  <Icon size={18} />
-                  <span className="font-medium">{tab.label}</span>
+                  <Icon size={18} className="flex-shrink-0" />
+                  <span className="font-medium text-sm sm:text-base">{tab.label}</span>
                 </button>
               );
             })}
@@ -167,7 +143,7 @@ export default function SettingsPage() {
         </div>
 
         {/* Content */}
-        <div className="flex-1 bg-white rounded-xl border border-border p-6">
+        <div className="flex-1 bg-white rounded-xl border border-border p-4 sm:p-6">
           {/* Account Settings */}
           {activeTab === 'account' && (
             <div className="space-y-6">
@@ -176,7 +152,7 @@ export default function SettingsPage() {
                 <p className="text-sm text-muted-foreground">Update your personal details</p>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium mb-2">First Name</label>
                   <input
@@ -237,22 +213,25 @@ export default function SettingsPage() {
                   { key: 'achievementAlerts', label: 'Achievement Alerts', description: 'Celebrate your accomplishments' },
                   { key: 'weeklyDigest', label: 'Weekly Digest', description: 'Receive a weekly summary email' },
                 ].map((item) => (
-                  <div key={item.key} className="flex items-center justify-between p-4 border border-border rounded-lg">
-                    <div>
-                      <p className="font-medium">{item.label}</p>
-                      <p className="text-sm text-muted-foreground">{item.description}</p>
+                  <div key={item.key} className="flex items-start sm:items-center justify-between gap-4 p-4 border border-border rounded-lg">
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm sm:text-base">{item.label}</p>
+                      <p className="text-xs sm:text-sm text-muted-foreground">{item.description}</p>
                     </div>
                     <button
                       onClick={() => setNotifications({ ...notifications, [item.key]: !notifications[item.key as keyof typeof notifications] })}
                       aria-label={`Toggle ${item.label}`}
-                      className={`relative w-12 h-6 rounded-full transition-colors ${
+                      role="switch"
+                      aria-checked={notifications[item.key as keyof typeof notifications]}
+                      className={`relative inline-flex h-6 w-11 flex-shrink-0 rounded-full transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${
                         notifications[item.key as keyof typeof notifications] ? 'bg-primary' : 'bg-gray-300'
                       }`}
                     >
                       <span
-                        className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${
-                          notifications[item.key as keyof typeof notifications] ? 'translate-x-7' : 'translate-x-1'
+                        className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition-transform duration-200 ease-in-out ${
+                          notifications[item.key as keyof typeof notifications] ? 'translate-x-5' : 'translate-x-0.5'
                         }`}
+                        style={{ marginTop: '2px' }}
                       />
                     </button>
                   </div>
@@ -270,65 +249,7 @@ export default function SettingsPage() {
             </div>
           )}
 
-          {/* Appearance Settings */}
-          {activeTab === 'appearance' && (
-            <div className="space-y-6">
-              <div>
-                <h2 className="text-lg font-semibold mb-1">Appearance</h2>
-                <p className="text-sm text-muted-foreground">Customize how ProjectHub looks</p>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-3">Theme</label>
-                <div className="grid grid-cols-3 gap-3">
-                  {['light', 'dark', 'system'].map((theme) => (
-                    <button
-                      key={theme}
-                      onClick={() => setAppearance({ ...appearance, theme })}
-                      className={`p-4 border rounded-lg text-center capitalize transition-all ${
-                        appearance.theme === theme
-                          ? 'border-primary bg-primary/5 text-primary'
-                          : 'border-border hover:border-primary/50'
-                      }`}
-                    >
-                      {theme}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between p-4 border border-border rounded-lg">
-                <div>
-                  <p className="font-medium">Compact Mode</p>
-                  <p className="text-sm text-muted-foreground">Use smaller spacing throughout the app</p>
-                </div>
-                <button
-                  onClick={() => setAppearance({ ...appearance, compactMode: !appearance.compactMode })}
-                  aria-label="Toggle Compact Mode"
-                  className={`relative w-12 h-6 rounded-full transition-colors ${
-                    appearance.compactMode ? 'bg-primary' : 'bg-gray-300'
-                  }`}
-                >
-                  <span
-                    className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${
-                      appearance.compactMode ? 'translate-x-7' : 'translate-x-1'
-                    }`}
-                  />
-                </button>
-              </div>
-
-              <button
-                onClick={handleSaveAppearance}
-                disabled={saving}
-                className="flex items-center gap-2 px-6 py-2.5 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 disabled:opacity-50 transition-all"
-              >
-                <Save size={16} />
-                {saving ? 'Saving...' : 'Save Settings'}
-              </button>
-            </div>
-          )}
-
-          {/* Security Settings */}
+          {/* Security Settings */
           {activeTab === 'security' && (
             <div className="space-y-6">
               <div>
