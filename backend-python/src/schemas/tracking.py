@@ -1,4 +1,5 @@
 from pydantic import BaseModel, ConfigDict
+from pydantic.alias_generators import to_camel
 from typing import Optional, List
 from datetime import datetime
 
@@ -8,18 +9,22 @@ class NotificationBase(BaseModel):
     related_project_id: Optional[str] = None
     is_read: bool = False
 
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
+
 class NotificationResponse(NotificationBase):
     id: str
     user_id: str
     created_at: datetime
-    
-    model_config = ConfigDict(from_attributes=True)
+
+    model_config = ConfigDict(from_attributes=True, alias_generator=to_camel, populate_by_name=True)
 
 class ProjectProgressBase(BaseModel):
     status: str
     time_spent: int = 0
     is_running: bool = False
     notes: Optional[str] = None
+
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
 class ProjectProgressResponse(ProjectProgressBase):
     id: str
@@ -32,7 +37,7 @@ class ProjectProgressResponse(ProjectProgressBase):
     created_at: datetime
     updated_at: datetime
 
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True, alias_generator=to_camel, populate_by_name=True)
 
 class GitHubProjectProgressBase(BaseModel):
     status: str
@@ -40,13 +45,15 @@ class GitHubProjectProgressBase(BaseModel):
     notes: Optional[str] = None
     checklist: List[bool] = []
 
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
+
 class GitHubProjectProgressResponse(GitHubProjectProgressBase):
     id: str
     user_id: str
     github_project_id: str
-    started_at: datetime
+    started_at: Optional[datetime] = None
     completed_at: Optional[datetime] = None
     created_at: datetime
     updated_at: datetime
 
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True, alias_generator=to_camel, populate_by_name=True)

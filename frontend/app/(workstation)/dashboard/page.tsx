@@ -164,7 +164,7 @@ export default function DashboardPage() {
                                             ...progress.map(p => ({
                                                 ...p,
                                                 type: 'standard' as const,
-                                                title: p.project.title,
+                                                title: p.project?.title || 'Untitled',
                                                 id: p.id,
                                                 projectId: p.projectId,
                                                 linkId: p.projectId
@@ -172,7 +172,7 @@ export default function DashboardPage() {
                                             ...githubProgress.map(p => ({
                                                 ...p,
                                                 type: 'github' as const,
-                                                title: p.githubProject.title,
+                                                title: p.githubProject?.title || 'Untitled',
                                                 id: p.id,
                                                 githubProjectId: p.githubProjectId,
                                                 linkId: p.githubProjectId
@@ -201,12 +201,12 @@ export default function DashboardPage() {
                                                 </td>
                                                 <td className="px-6 py-5">
                                                     <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${item.status === 'COMPLETED' ? 'bg-emerald-100 text-emerald-700' :
-                                                            item.status === 'ON_HOLD' ? 'bg-amber-100 text-amber-700' :
-                                                                'bg-blue-100 text-blue-700'
+                                                        item.status === 'ON_HOLD' ? 'bg-amber-100 text-amber-700' :
+                                                            'bg-blue-100 text-blue-700'
                                                         }`}>
                                                         <span className={`size-1.5 rounded-full ${item.status === 'COMPLETED' ? 'bg-emerald-500' :
-                                                                item.status === 'ON_HOLD' ? 'bg-amber-500' :
-                                                                    'bg-blue-500'
+                                                            item.status === 'ON_HOLD' ? 'bg-amber-500' :
+                                                                'bg-blue-500'
                                                             }`}></span>
                                                         {item.status.replace('_', ' ')}
                                                     </span>

@@ -99,16 +99,16 @@ function Sidebar({ isOpen, isMobile, toggleSidebar }: { isOpen: boolean; isMobil
 
   return (
     <aside
-      className={`relative h-full flex flex-col transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] z-50 bg-background border-r border-border
-        ${expanded ? 'w-72' : 'w-24'}`}
+      className={`relative h-full flex flex-col transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] z-50 bg-background border-r border-border overflow-hidden
+        ${expanded ? 'w-72' : 'w-[72px]'}`}
     >
       {/* Brand Section */}
-      <div className={`h-20 flex items-center mb-4 ${expanded ? 'px-6' : 'justify-center px-2'}`}>
+      <div className="h-20 flex items-center mb-4 px-4">
         <Link href="/" className="flex items-center gap-3.5 group">
           <div className="size-11 rounded-2xl bg-gradient-to-br from-[#2563EB] to-[#1E40AF] flex items-center justify-center text-white shrink-0 shadow-xl shadow-blue-500/20 group-hover:scale-105 transition-all duration-300">
             <span className="material-symbols-outlined text-2xl font-light">hub</span>
           </div>
-          <div className={`transition-all duration-500 flex flex-col ${expanded ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4 pointer-events-none absolute'}`}>
+          <div className={`transition-all duration-500 flex flex-col whitespace-nowrap ${expanded ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4 pointer-events-none'}`}>
             <span className="text-xl font-bold tracking-tight text-foreground leading-tight">
               Project<span className="text-primary">Hub</span>
             </span>
@@ -118,8 +118,8 @@ function Sidebar({ isOpen, isMobile, toggleSidebar }: { isOpen: boolean; isMobil
       </div>
 
       {/* Navigation Section */}
-      <div className={`flex-1 space-y-2 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden pt-2 ${expanded ? 'px-4' : 'px-2 flex flex-col items-center'}`}>
-        <div className={`mb-4 px-4 text-[11px] font-bold uppercase tracking-[0.15em] text-muted-foreground transition-all duration-300 ${expanded ? 'opacity-100' : 'opacity-0 h-0 mb-0 overflow-hidden'}`}>
+      <div className="flex-1 space-y-2 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden pt-2 px-3">
+        <div className={`mb-4 px-2 text-[11px] font-bold uppercase tracking-[0.15em] text-muted-foreground transition-all duration-300 whitespace-nowrap ${expanded ? 'opacity-100' : 'opacity-0 h-0 mb-0 overflow-hidden'}`}>
           Main menu
         </div>
 
@@ -129,18 +129,18 @@ function Sidebar({ isOpen, isMobile, toggleSidebar }: { isOpen: boolean; isMobil
             <Link
               key={item.name}
               href={item.href}
-              className={`flex items-center gap-4 py-3.5 rounded-2xl transition-all duration-300 group relative ${expanded ? 'px-4' : 'px-3 justify-center w-full'} ${isActive
+              className={`flex items-center gap-4 py-3.5 px-3 rounded-2xl transition-all duration-300 group relative overflow-hidden ${isActive
                 ? 'bg-secondary text-primary shadow-sm ring-1 ring-border'
                 : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
                 }`}
             >
-              <div className={`flex items-center justify-center size-5 transition-all duration-300 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`}>
+              <div className={`flex items-center justify-center size-5 shrink-0 transition-all duration-300 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`}>
                 <span className="material-symbols-outlined text-[22px] font-light">
                   {item.icon}
                 </span>
               </div>
 
-              <span className={`text-[14px] font-semibold tracking-wide transition-all duration-500 whitespace-nowrap ${expanded ? 'opacity-100' : 'opacity-0 pointer-events-none absolute'}`}>
+              <span className={`text-[14px] font-semibold tracking-wide transition-all duration-500 whitespace-nowrap overflow-hidden ${expanded ? 'opacity-100 w-auto' : 'opacity-0 w-0 pointer-events-none'}`}>
                 {item.name}
               </span>
 
@@ -155,32 +155,32 @@ function Sidebar({ isOpen, isMobile, toggleSidebar }: { isOpen: boolean; isMobil
       </div>
 
       {/* System Section */}
-      <div className={`py-6 border-t border-border bg-secondary/10 ${expanded ? 'px-4' : 'px-2 flex flex-col items-center'}`}>
-        <div className={`mb-4 px-4 text-[11px] font-bold uppercase tracking-[0.15em] text-muted-foreground transition-all duration-300 ${expanded ? 'opacity-100' : 'opacity-0 h-0 mb-0 overflow-hidden'}`}>
+      <div className="py-6 border-t border-border bg-secondary/10 px-3">
+        <div className={`mb-4 px-2 text-[11px] font-bold uppercase tracking-[0.15em] text-muted-foreground transition-all duration-300 whitespace-nowrap ${expanded ? 'opacity-100' : 'opacity-0 h-0 mb-0 overflow-hidden'}`}>
           System
         </div>
 
         <div className="space-y-1">
           <Link
             href="/profile"
-            className={`flex items-center gap-4 py-3.5 rounded-2xl text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all duration-300 group relative ${expanded ? 'px-4' : 'px-3 justify-center w-full'}`}
+            className="flex items-center gap-4 py-3.5 px-3 rounded-2xl text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all duration-300 group relative"
           >
-            <div className="flex items-center justify-center size-5 group-hover:rotate-45 transition-transform duration-500">
+            <div className="flex items-center justify-center size-5 shrink-0 group-hover:rotate-45 transition-transform duration-500">
               <span className="material-symbols-outlined text-[22px] font-light">settings</span>
             </div>
-            <span className={`text-[14px] font-semibold tracking-wide transition-all duration-500 whitespace-nowrap ${expanded ? 'opacity-100' : 'opacity-0 pointer-events-none absolute'}`}>
+            <span className={`text-[14px] font-semibold tracking-wide transition-all duration-500 whitespace-nowrap overflow-hidden ${expanded ? 'opacity-100 w-auto' : 'opacity-0 w-0 pointer-events-none'}`}>
               Settings
             </span>
           </Link>
 
           <button
             onClick={() => signOut({ callbackUrl: '/' })}
-            className={`w-full flex items-center gap-4 py-3.5 rounded-2xl text-rose-500 hover:bg-rose-500/10 transition-all duration-300 group relative ${expanded ? 'px-4' : 'px-3 justify-center'}`}
+            className="w-full flex items-center gap-4 py-3.5 px-3 rounded-2xl text-rose-500 hover:bg-rose-500/10 transition-all duration-300 group relative"
           >
-            <div className="flex items-center justify-center size-5 group-hover:-translate-x-0.5 transition-transform duration-300">
+            <div className="flex items-center justify-center size-5 shrink-0 group-hover:-translate-x-0.5 transition-transform duration-300">
               <span className="material-symbols-outlined text-[22px] font-light">logout</span>
             </div>
-            <span className={`text-[14px] font-semibold tracking-wide transition-all duration-500 whitespace-nowrap ${expanded ? 'opacity-100' : 'opacity-0 pointer-events-none absolute'}`}>
+            <span className={`text-[14px] font-semibold tracking-wide transition-all duration-500 whitespace-nowrap overflow-hidden ${expanded ? 'opacity-100 w-auto' : 'opacity-0 w-0 pointer-events-none'}`}>
               Log Out
             </span>
           </button>
