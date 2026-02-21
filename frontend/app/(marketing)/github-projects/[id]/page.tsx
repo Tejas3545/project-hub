@@ -1,9 +1,12 @@
 'use client';
 
-import { use, useEffect, useState } from 'react';
+import { use, useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/AuthContext';
 import { userApi } from '@/lib/api';
+import ReactMarkdown from 'react-markdown';
+import rehypeRaw from 'rehype-raw';
+import remarkGfm from 'remark-gfm';
 
 interface GitHubProject {
   id: string;
@@ -53,6 +56,10 @@ export default function GitHubProjectDetailPage({ params }: { params: Promise<{ 
   const [loading, setLoading] = useState(true);
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [bookmarkLoading, setBookmarkLoading] = useState(false);
+  const [readmeOpen, setReadmeOpen] = useState(false);
+  const [readmeContent, setReadmeContent] = useState<string | null>(null);
+  const [readmeLoading, setReadmeLoading] = useState(false);
+  const [readmeError, setReadmeError] = useState<string | null>(null);
 
   useEffect(() => {
     const loadProject = async () => {
@@ -89,6 +96,54 @@ export default function GitHubProjectDetailPage({ params }: { params: Promise<{ 
     } catch (err) { console.error('Failed to toggle bookmark:', err); }
     finally { setBookmarkLoading(false); }
   };
+
+  /**
+   * Extract GitHub owner/repo from a repo URL and fetch the README via GitHub API.
+   * Decodes the base64-encoded content returned by the API.
+   */
+  const handleShowReadme = useCallback(async () => {
+    if (!project?.repoUrl) return;
+    if (readmeContent) { setReadmeOpen(true); return; } // Already fetched
+
+    setReadmeOpen(true);
+    setReadmeLoading(true);
+    setReadmeError(null);
+
+    try {
+      // Extract owner/repo from URLs like https://github.com/owner/repo
+      const match = project.repoUrl.match(/github\.com\/([^/]+)\/([^/]+)/);
+      if (!match) throw new Error('Invalid GitHub URL');
+      const [, owner, repo] = match;
+
+      const res = await fetch(`https://api.github.com/repos/${owner}/${repo.replace(/\.git$/, '')}/readme`, {
+        headers: { Accept: 'application/vnd.github.v3.json' },
+      });
+
+      if (!res.ok) throw new Error(res.status === 404 ? 'No README found in this repository' : `GitHub API error (${res.status})`);
+
+      const data = await res.json();
+      // GitHub returns base64 with embedded newlines — strip them before decoding
+      const cleanBase64 = data.content.replace(/\s/g, '');
+      const decoded = atob(cleanBase64);
+      // Handle UTF-8 properly
+      const bytes = Uint8Array.from(decoded, (c: string) => c.charCodeAt(0));
+      const text = new TextDecoder().decode(bytes);
+      setReadmeContent(text);
+      setReadmeError(null);
+    } catch (err) {
+      setReadmeError(err instanceof Error ? err.message : 'Failed to load README');
+      setReadmeContent(null);
+    } finally {
+      setReadmeLoading(false);
+    }
+  }, [project?.repoUrl, readmeContent]);
+
+  // Close modal on Escape key
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') setReadmeOpen(false); };
+    if (readmeOpen) window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [readmeOpen]);
 
   const getDifficultyConfig = (diff: string) => {
     switch (diff) {
@@ -645,8 +700,97 @@ export default function GitHubProjectDetailPage({ params }: { params: Promise<{ 
                       <span className="material-symbols-outlined text-sm text-muted-foreground ml-auto">download</span>
                     </a>
                   )}
+
+                  {project.repoUrl && (
+                    <button
+                      onClick={handleShowReadme}
+                      className="flex items-center gap-3 p-3 -mx-1 rounded-xl border border-border hover:bg-secondary/50 transition-colors group w-full text-left"
+                    >
+                      <span className="material-symbols-outlined text-muted-foreground group-hover:text-foreground transition-colors">description</span>
+                      <span className="flex-1 text-sm font-semibold text-foreground group-hover:text-primary transition-colors">View README</span>
+                      <span className="material-symbols-outlined text-sm text-muted-foreground">visibility</span>
+                    </button>
+                  )}
                 </div>
               </div>
+
+              {/* README Modal */}
+              {readmeOpen && (
+                <div className="fixed inset-0 z-[500] flex items-center justify-center p-4 sm:p-8">
+                  {/* Backdrop */}
+                  <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setReadmeOpen(false)} />
+                  {/* Modal */}
+                  <div className="relative w-full max-w-4xl max-h-[85vh] bg-background rounded-2xl border border-border shadow-2xl flex flex-col overflow-hidden z-10">
+                    {/* Header */}
+                    <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-secondary/30">
+                      <div className="flex items-center gap-3">
+                        <span className="material-symbols-outlined text-primary">description</span>
+                        <h3 className="text-lg font-bold text-foreground">README.md</h3>
+                        <span className="text-xs text-muted-foreground">— {project.title}</span>
+                      </div>
+                      <button
+                        onClick={() => setReadmeOpen(false)}
+                        className="size-9 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+                      >
+                        <span className="material-symbols-outlined text-xl">close</span>
+                      </button>
+                    </div>
+                    {/* Content */}
+                    <div className="flex-1 overflow-y-auto p-6 sm:p-8">
+                      {readmeLoading && (
+                        <div className="flex flex-col items-center justify-center py-16 gap-3">
+                          <div className="size-8 border-2 border-muted border-t-primary rounded-full animate-spin" />
+                          <p className="text-sm text-muted-foreground">Fetching README from GitHub…</p>
+                        </div>
+                      )}
+                      {readmeError && (
+                        <div className="flex flex-col items-center justify-center py-16 gap-3 text-center">
+                          <span className="material-symbols-outlined text-4xl text-muted-foreground">error_outline</span>
+                          <p className="text-sm text-muted-foreground">{readmeError}</p>
+                        </div>
+                      )}
+                      {readmeContent && !readmeLoading && (
+                        <div className="prose prose-sm max-w-none
+                          prose-headings:text-foreground prose-headings:border-b prose-headings:border-border prose-headings:pb-2 prose-headings:mb-4
+                          prose-h1:text-2xl prose-h2:text-xl prose-h3:text-lg
+                          prose-p:text-muted-foreground prose-li:text-muted-foreground prose-strong:text-foreground
+                          prose-blockquote:text-muted-foreground prose-blockquote:border-border
+                          prose-pre:bg-secondary prose-pre:border prose-pre:border-border prose-pre:rounded-xl
+                          prose-code:text-primary prose-code:bg-secondary/50 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-md prose-code:text-sm
+                          prose-a:text-primary prose-a:font-semibold prose-a:no-underline hover:prose-a:underline
+                          prose-img:rounded-xl prose-img:border prose-img:border-transparent prose-img:inline prose-img:m-0
+                          prose-table:border prose-table:border-border prose-th:bg-secondary/50
+                          prose-td:border prose-td:border-border prose-td:px-3 prose-td:py-2 prose-td:text-muted-foreground
+                          prose-th:border prose-th:border-border prose-th:px-3 prose-th:py-2 prose-th:text-foreground
+                          prose-li:marker:text-primary
+                        ">
+                          <ReactMarkdown
+                            remarkPlugins={[remarkGfm]}
+                            rehypePlugins={[rehypeRaw]}
+                            components={{
+                              img: ({ node, ...props }) => {
+                                // Fix relative image URLs to point to GitHub raw content
+                                let src = props.src as string;
+                                if (src && typeof src === 'string' && !src.startsWith('http') && !src.startsWith('data:')) {
+                                  let baseRawUrl = project?.repoUrl?.replace('github.com', 'raw.githubusercontent.com').replace(/\.git$/, '');
+                                  if (baseRawUrl) {
+                                    // GitHub raw URLs need a branch name. Assuming 'master' or 'main' usually works, 
+                                    // but we can just use HEAD which resolves to the default branch.
+                                    src = `${baseRawUrl}/HEAD/${src.replace(/^\.\//, '')}`;
+                                  }
+                                }
+                                return <img {...props} src={src} className="rounded-xl border border-transparent inline m-0" />;
+                              }
+                            }}
+                          >
+                            {readmeContent}
+                          </ReactMarkdown>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </aside>
         </div>
