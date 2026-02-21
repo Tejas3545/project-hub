@@ -232,24 +232,6 @@ export default function GitHubProjectDetailPage({ params }: { params: Promise<{ 
                 )}
               </div>
             </div>
-            <div className="flex flex-wrap gap-3 shrink-0">
-              <button
-                onClick={() => router.push(`/workspace/${project.id}?type=github`)}
-                className="flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary/90 text-white font-semibold rounded-xl transition-all shadow-lg shadow-primary/20 active:scale-95 text-sm"
-              >
-                <span className="material-symbols-outlined text-lg">rocket_launch</span>
-                Start Building
-              </button>
-              <button
-                onClick={handleToggleBookmark}
-                disabled={bookmarkLoading}
-                className={`flex items-center gap-2 px-5 py-3 rounded-xl border font-medium text-sm transition-all active:scale-95 ${isBookmarked ? 'bg-primary/10 border-primary/30 text-primary' : 'bg-background border-border text-foreground hover:border-primary/30 hover:bg-primary/5'
-                  }`}
-              >
-                <span className="material-symbols-outlined text-lg" style={{ fontVariationSettings: isBookmarked ? "'FILL' 1" : "'FILL' 0" }}>bookmark</span>
-                {isBookmarked ? 'Saved' : 'Save'}
-              </button>
-            </div>
           </div>
 
           {/* Quick-action bar */}

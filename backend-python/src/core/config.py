@@ -13,15 +13,17 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/api"
 
     # Database
-    DATABASE_URL: str = "postgresql+asyncpg://postgres:1475@localhost:5432/projecthub"
+    DATABASE_URL: str = ""
 
     # Security
-    SECRET_KEY: str = "106bf550939c91e65541c9616440a692399cccc7d4e35db6ca2ca885d6d30683"
+    SECRET_KEY: str = ""
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7  # 7 days
 
     # External APIs
     GITHUB_TOKEN: Union[str, None] = None
+    CEREBRAS_API_KEY: Union[str, None] = None
+    GEMINI_API_KEY: Union[str, None] = None
 
     # CORS
     BACKEND_CORS_ORIGINS: Union[List[str], str] = ["http://localhost:3000", "http://localhost:3001"]

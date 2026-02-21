@@ -2,6 +2,10 @@
 Routes for GitHub projects with pagination support.
 The frontend expects responses in {projects: [], pagination: {}} format.
 """
+import json
+from datetime import datetime, timezone
+import aiohttp
+from src.services.ai_service import generate_project_details
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
@@ -173,6 +177,11 @@ async def get_github_projects(
             db=db, search=search, domain_id=domainId, difficulty=difficulty, page=page, limit=limit
         )
         if gh_projects is not None:
+            if projectType:
+                gh_projects = [p for p in gh_projects if p.project_type == projectType.upper()]
+                # Adjust total, though GitHub's total might be higher, we only have this page's filtered count easily available
+                # In a real app we'd pass projectType into proxy_github_search, but doing it in-memory here for the current page works for now
+                
             total_pages = (gh_total + limit - 1) // limit if gh_total > 0 else 0
             return {
                 "projects": gh_projects,
@@ -351,13 +360,37 @@ async def get_github_projects_by_domain(
     }
 
 
+import time
+
+# Very simple in-memory rate limiter for AI queries
+# In a real production app, use Redis.
+ai_rate_limit = {
+    "tokens": 10,
+    "last_refill": time.time()
+}
+
+def check_ai_rate_limit() -> bool:
+    global ai_rate_limit
+    now = time.time()
+    
+    # Refill tokens (10 tokens per 60 seconds)
+    if now - ai_rate_limit["last_refill"] > 60:
+        ai_rate_limit["tokens"] = 10
+        ai_rate_limit["last_refill"] = now
+        
+    if ai_rate_limit["tokens"] > 0:
+        ai_rate_limit["tokens"] -= 1
+        return True
+    return False
+
 @router.get("/{project_id}", response_model=GitHubProjectResponse)
 async def get_github_project_by_id(
     project_id: str,
     db: AsyncSession = Depends(get_db),
 ):
     """
-    Get a single GitHub project by its ID.
+    Get a single GitHub project by its ID. 
+    Lazily generates AI details if they are missing.
     """
     result = await db.execute(
         select(GitHubProject).where(GitHubProject.id == project_id)
@@ -366,6 +399,28 @@ async def get_github_project_by_id(
 
     if not project:
         raise HTTPException(status_code=404, detail="GitHub project not found")
+        
+    # Lazy AI Generation: Only generate rich info when the user OPENS the project page.
+    if not project.case_study or not project.problem_statement:
+        # Check Rate Limit to prevent abuse/high costs
+        if check_ai_rate_limit():
+            ai_details = await generate_project_details(
+                title=project.title,
+                description=project.description,
+                language=project.language,
+                topics=project.topics
+            )
+            if ai_details:
+                project.case_study = ai_details.get("case_study")
+                project.problem_statement = ai_details.get("problem_statement")
+                project.solution_description = ai_details.get("solution_description")
+                project.prerequisites = ai_details.get("prerequisites", [])
+                project.deliverables = ai_details.get("deliverables", [])
+                
+                await db.commit()
+                await db.refresh(project)
+        else:
+            print(f"AI Rate limit reached for generating project details {project.title}")
 
     return project
 

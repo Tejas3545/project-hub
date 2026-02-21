@@ -21,4 +21,6 @@ dependencies = [
     "uvicorn>=0.41.0",
     "email-validator>=2.3.0",
     "python-multipart>=0.0.22",
+    "google-genai>=1.64.0",
+    "cerebras-cloud-sdk>=1.67.0",
 ]

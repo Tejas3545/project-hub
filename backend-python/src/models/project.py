@@ -61,6 +61,7 @@ class GitHubProject(Base):
     tech_stack: Mapped[List[str]] = mapped_column(ARRAY(String), default=list)
     difficulty: Mapped[str] = mapped_column(String, default="MEDIUM", index=True)
     topics: Mapped[List[str]] = mapped_column(ARRAY(String), default=list)
+    project_type: Mapped[str] = mapped_column(String, default="PROJECT", index=True)
     last_updated: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, index=True)
 
