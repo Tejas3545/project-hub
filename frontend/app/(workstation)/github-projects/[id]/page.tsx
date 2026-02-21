@@ -149,8 +149,9 @@ export default function GitHubProjectDetailPage({ params }: { params: Promise<{ 
   }, [readmeOpen]);
 
   /**
-   * Translate the README content to the selected language using Google Translate free endpoint.
-   * Splits content into chunks under 4500 chars to respect URL limits.
+   * Translate the README content while preserving markdown syntax.
+   * Replaces code blocks, links, images, and other syntax with placeholders,
+   * translates the plain text, then restores the markdown elements.
    */
   const translateReadme = useCallback(async (lang: string) => {
     if (lang === 'en') {
@@ -163,8 +164,34 @@ export default function GitHubProjectDetailPage({ params }: { params: Promise<{ 
     setTranslating(true);
     setTranslateLang(lang);
     try {
-      // Split into chunks under 4500 chars respecting line boundaries
-      const lines = readmeContent.split('\n');
+      // Step 1: Protect markdown syntax with placeholders
+      const placeholders: Map<string, string> = new Map();
+      let phIndex = 0;
+      const addPlaceholder = (match: string): string => {
+        const key = `__PH${phIndex++}__`;
+        placeholders.set(key, match);
+        return key;
+      };
+
+      let protected_ = readmeContent;
+      // Protect fenced code blocks (```...```)
+      protected_ = protected_.replace(/```[\s\S]*?```/g, addPlaceholder);
+      // Protect inline code (`...`)
+      protected_ = protected_.replace(/`[^`\n]+`/g, addPlaceholder);
+      // Protect images ![alt](url)
+      protected_ = protected_.replace(/!\[[^\]]*\]\([^)]+\)/g, addPlaceholder);
+      // Protect links [text](url) — keep text translatable, protect the (url) part
+      protected_ = protected_.replace(/\[([^\]]*)\]\(([^)]+)\)/g, (_match, text, url) => {
+        const urlPh = addPlaceholder(`](${url})`);
+        return `[${text}${urlPh}`;
+      });
+      // Protect HTML tags
+      protected_ = protected_.replace(/<[^>]+>/g, addPlaceholder);
+      // Protect heading markers at start of line (##, ###, etc.)
+      protected_ = protected_.replace(/^(#{1,6})\s/gm, (match) => addPlaceholder(match));
+
+      // Step 2: Split into chunks under 4500 chars and translate
+      const lines = protected_.split('\n');
       const chunks: string[] = [];
       let current = '';
       for (const line of lines) {
@@ -191,11 +218,18 @@ export default function GitHubProjectDetailPage({ params }: { params: Promise<{ 
           `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=${lang}&dt=t&q=${encodeURIComponent(chunk)}`
         );
         const data = await res.json();
-        // Google returns [[["translated","original",...], ...], ...]
         const text = data?.[0]?.map((seg: any) => seg[0]).join('') || chunk;
         translated.push(text);
       }
-      setTranslatedReadme(translated.join('\n'));
+
+      // Step 3: Restore placeholders with original markdown syntax
+      let result = translated.join('\n');
+      placeholders.forEach((original, key) => {
+        // Google Translate may add spaces around placeholders, normalize
+        result = result.replace(new RegExp(key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), original);
+      });
+
+      setTranslatedReadme(result);
     } catch (err) {
       console.error('Translation failed:', err);
       setTranslatedReadme(null);
@@ -863,7 +897,7 @@ export default function GitHubProjectDetailPage({ params }: { params: Promise<{ 
                         ">
                           <ReactMarkdown
                             remarkPlugins={[remarkGfm]}
-                            rehypePlugins={[rehypeRaw]}
+                            rehypePlugins={translateLang === 'en' ? [rehypeRaw] : []}
                             components={{
                               img: ({ node, ...props }) => {
                                 // Fix relative image URLs to point to GitHub raw content

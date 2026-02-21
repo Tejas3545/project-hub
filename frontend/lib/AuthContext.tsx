@@ -11,6 +11,10 @@ interface User {
     lastName?: string;
     profileImage?: string;
     bio?: string;
+    headline?: string;
+    githubUrl?: string;
+    portfolioUrl?: string;
+    location?: string;
     role: 'STUDENT' | 'ADMIN';
     isVerified: boolean;
     currentStreak?: number;
