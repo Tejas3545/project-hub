@@ -1,5 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+import os
 from src.core.config import settings
 
 import src.models # Initialize SQLAlchemy models before request handlers are mapped
@@ -22,6 +24,10 @@ if settings.BACKEND_CORS_ORIGINS:
     )
 
 app.include_router(api_router, prefix=settings.API_V1_STR)
+
+# Serve static uploads
+os.makedirs("uploads/profiles", exist_ok=True)
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 @app.get("/")
 def read_root():

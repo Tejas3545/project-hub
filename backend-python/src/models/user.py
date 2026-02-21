@@ -49,6 +49,7 @@ class User(Base):
     notifications: Mapped[list] = relationship("Notification", back_populates="user", cascade="all, delete-orphan")
     progress: Mapped[list] = relationship("ProjectProgress", back_populates="user", cascade="all, delete-orphan")
     github_progress: Mapped[list] = relationship("GitHubProjectProgress", back_populates="user", cascade="all, delete-orphan")
+    bookmarks: Mapped[list] = relationship("Bookmark", back_populates="user", cascade="all, delete-orphan")
 
     def __repr__(self):
         return f"<User {self.email}>"

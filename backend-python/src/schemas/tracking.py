@@ -1,7 +1,21 @@
 from pydantic import BaseModel, ConfigDict
 from pydantic.alias_generators import to_camel
-from typing import Optional, List
+from typing import Optional, List, Any
 from datetime import datetime
+
+class ProjectSimpleResponse(BaseModel):
+    id: str
+    title: str
+
+    model_config = ConfigDict(from_attributes=True, alias_generator=to_camel, populate_by_name=True)
+
+class GitHubProjectSimpleResponse(BaseModel):
+    id: str
+    title: str
+    repo_owner: Optional[str] = None
+    repo_name: Optional[str] = None
+
+    model_config = ConfigDict(from_attributes=True, alias_generator=to_camel, populate_by_name=True)
 
 class NotificationBase(BaseModel):
     message: str
@@ -36,6 +50,7 @@ class ProjectProgressResponse(ProjectProgressBase):
     target_completion_date: Optional[datetime] = None
     created_at: datetime
     updated_at: datetime
+    project: Optional[ProjectSimpleResponse] = None
 
     model_config = ConfigDict(from_attributes=True, alias_generator=to_camel, populate_by_name=True)
 
@@ -55,5 +70,6 @@ class GitHubProjectProgressResponse(GitHubProjectProgressBase):
     completed_at: Optional[datetime] = None
     created_at: datetime
     updated_at: datetime
+    github_project: Optional[GitHubProjectSimpleResponse] = None
 
     model_config = ConfigDict(from_attributes=True, alias_generator=to_camel, populate_by_name=True)

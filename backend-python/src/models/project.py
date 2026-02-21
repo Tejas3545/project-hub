@@ -34,6 +34,7 @@ class Project(Base):
     domain: Mapped["Domain"] = relationship("Domain", back_populates="projects")
     
     progress: Mapped[list] = relationship("ProjectProgress", back_populates="project", cascade="all, delete-orphan")
+    bookmarks: Mapped[list] = relationship("Bookmark", back_populates="project", cascade="all, delete-orphan")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=get_utc_now)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=get_utc_now, onupdate=get_utc_now)
 
@@ -97,3 +98,4 @@ class GitHubProject(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=get_utc_now, onupdate=get_utc_now)
 
     progress: Mapped[list] = relationship("GitHubProjectProgress", back_populates="github_project", cascade="all, delete-orphan")
+    bookmarks: Mapped[list] = relationship("Bookmark", back_populates="github_project", cascade="all, delete-orphan")

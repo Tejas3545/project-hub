@@ -65,3 +65,17 @@ class GitHubProjectProgress(Base):
     
     user: Mapped[object] = relationship("User", back_populates="github_progress")
     github_project: Mapped[object] = relationship("GitHubProject", back_populates="progress")
+
+class Bookmark(Base):
+    __tablename__ = "bookmarks"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    project_id: Mapped[Optional[str]] = mapped_column(ForeignKey("projects.id", ondelete="CASCADE"), index=True)
+    github_project_id: Mapped[Optional[str]] = mapped_column(ForeignKey("github_projects.id", ondelete="CASCADE"), index=True)
+    
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=get_utc_now)
+    
+    user: Mapped[object] = relationship("User", back_populates="bookmarks")
+    project: Mapped[object] = relationship("Project", back_populates="bookmarks")
+    github_project: Mapped[object] = relationship("GitHubProject", back_populates="bookmarks")

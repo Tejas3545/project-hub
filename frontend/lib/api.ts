@@ -405,6 +405,24 @@ export const userApi = {
     startGithubProject: async (projectId: string) => {
         return api.put(`/user/github-progress/${projectId}`, { status: 'IN_PROGRESS' });
     },
+
+    // Profile Settings
+    updateProfile: async (data: any) => {
+        return api.put('/user/profile', data);
+    },
+
+    uploadProfileImage: async (formData: FormData) => {
+        const token = getAuthToken();
+        const res = await fetch(`${API_URL}/user/profile/image`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            },
+            body: formData,
+        });
+        if (!res.ok) throw new Error('Failed to upload image');
+        return res.json();
+    },
 };
 
 // GitHub Projects API

@@ -1,12 +1,16 @@
-from fastapi import APIRouter, Depends, Query
+import os
+import shutil
+from fastapi import APIRouter, Depends, Query, UploadFile, File, HTTPException, Body
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+from sqlalchemy.orm import selectinload
 from typing import List
 
 from src.core.database import get_db
+from src.core.config import settings
 from src.api.dependencies import get_current_user
 from src.models.user import User
-from src.models.tracking import ProjectProgress, GitHubProjectProgress
+from src.models.tracking import ProjectProgress, GitHubProjectProgress, Bookmark, Notification
 from src.schemas.tracking import ProjectProgressResponse, GitHubProjectProgressResponse, GitHubProjectProgressBase
 
 router = APIRouter()
@@ -19,7 +23,11 @@ async def get_user_progress(
     """
     Get the authenticated user's standard project progress.
     """
-    stmt = select(ProjectProgress).where(ProjectProgress.user_id == current_user.id)
+    stmt = (
+        select(ProjectProgress)
+        .options(selectinload(ProjectProgress.project))
+        .where(ProjectProgress.user_id == current_user.id)
+    )
     result = await db.execute(stmt)
     return result.scalars().all()
 
@@ -31,7 +39,11 @@ async def get_github_progress(
     """
     Get the authenticated user's GitHub project progress.
     """
-    stmt = select(GitHubProjectProgress).where(GitHubProjectProgress.user_id == current_user.id)
+    stmt = (
+        select(GitHubProjectProgress)
+        .options(selectinload(GitHubProjectProgress.github_project))
+        .where(GitHubProjectProgress.user_id == current_user.id)
+    )
     result = await db.execute(stmt)
     return result.scalars().all()
 
@@ -110,50 +122,224 @@ async def update_github_progress(
     await db.refresh(progress)
     return progress
 
-@router.get("/activity")
-async def get_user_activity(
-    current_user: User = Depends(get_current_user)
+@router.put("/profile")
+async def update_profile(
+    data: dict,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
 ):
     """
-    Get the authenticated user's recent activity feed.
+    Update the authenticated user's profile information.
     """
-    return []
+    if "firstName" in data:
+        current_user.first_name = data["firstName"]
+    if "lastName" in data:
+        current_user.last_name = data["lastName"]
+    if "headline" in data:
+        current_user.headline = data["headline"]
+    if "bio" in data:
+        current_user.bio = data["bio"]
+    if "location" in data:
+        current_user.location = data["location"]
+    if "githubUrl" in data:
+        current_user.github_url = data["githubUrl"]
+    if "portfolioUrl" in data:
+        current_user.portfolio_url = data["portfolioUrl"]
+
+    await db.commit()
+    await db.refresh(current_user)
+    
+    return current_user
+
+@router.post("/profile/image")
+async def upload_profile_image(
+    file: UploadFile = File(...),
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Upload a new profile image.
+    """
+    if not file.filename:
+        raise HTTPException(status_code=400, detail="No file uploaded")
+        
+    file_ext = file.filename.split(".")[-1]
+    new_filename = f"{current_user.id}.{file_ext}"
+    file_path = f"uploads/profiles/{new_filename}"
+    
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+        
+    # Make sure this matches the static mounting path in main.py
+    image_url = f"{settings.API_V1_STR.replace('/api', '')}/uploads/profiles/{new_filename}"
+    current_user.profile_image = image_url
+    await db.commit()
+    await db.refresh(current_user)
+    
+    return {"message": "Profile image updated successfully", "profileImage": current_user.profile_image}
+
+@router.get("/profile-stats")
+async def get_profile_stats(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Get aggregated profile statistics.
+    """
+    # Count bookmarks
+    bm_stmt = select(Bookmark).where(Bookmark.user_id == current_user.id)
+    bm_result = await db.execute(bm_stmt)
+    bookmarks_count = len(bm_result.scalars().all())
+    
+    # Count normal completed projects
+    prog_stmt = select(ProjectProgress).where(
+        ProjectProgress.user_id == current_user.id,
+        ProjectProgress.status == "COMPLETED"
+    )
+    prog_result = await db.execute(prog_stmt)
+    completed_projects = len(prog_result.scalars().all())
+
+    # Count GH completed projects
+    gh_prog_stmt = select(GitHubProjectProgress).where(
+        GitHubProjectProgress.user_id == current_user.id,
+        GitHubProjectProgress.status == "COMPLETED"
+    )
+    gh_prog_result = await db.execute(gh_prog_stmt)
+    gh_completed_projects = len(gh_prog_result.scalars().all())
+    
+    return {
+        "projects_completed": completed_projects + gh_completed_projects,
+        "bookmarks_count": bookmarks_count,
+        "xp": current_user.points,
+        "contributions": 0 # Default for now based on activities
+    }
+
+@router.get("/activity")
+async def get_user_activity(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Get the authenticated user's recent activity feed (mocked/simplified for now).
+    """
+    stmt = select(Notification).where(Notification.user_id == current_user.id).order_by(Notification.created_at.desc()).limit(10)
+    result = await db.execute(stmt)
+    notifications = result.scalars().all()
+    return notifications
 
 @router.get("/bookmarks")
 async def get_user_bookmarks(
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
 ):
     """
-    Get all bookmarks for the authenticated user.
+    Get all bookmarks for the authenticated user with nested project details.
     """
-    return []
+    stmt = (
+        select(Bookmark)
+        .options(selectinload(Bookmark.project), selectinload(Bookmark.github_project))
+        .where(Bookmark.user_id == current_user.id)
+        .order_by(Bookmark.created_at.desc())
+    )
+    result = await db.execute(stmt)
+    bookmarks = result.scalars().all()
+    
+    # We need to map the snake_case relationship (github_project) to camelCase (githubProject) 
+    # for the frontend before returning, or rely on FastAPI's model dumping if configured.
+    # Since we are returning raw dicts/objects, let's format it.
+    formatted_bookmarks = []
+    for b in bookmarks:
+        formatted_bookmarks.append({
+            "id": b.id,
+            "project": b.project,
+            "githubProject": b.github_project,
+            "createdAt": b.created_at
+        })
+        
+    return formatted_bookmarks
 
 @router.get("/bookmarks/{project_id}/check")
 async def check_bookmark(
     project_id: str,
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
 ):
     """
     Check if a specific project is bookmarked.
+    Checks both GitHub projects and standard projects.
     """
-    return {"bookmarked": False}
+    stmt = select(Bookmark).where(
+        Bookmark.user_id == current_user.id,
+        (Bookmark.project_id == project_id) | (Bookmark.github_project_id == project_id)
+    )
+    result = await db.execute(stmt)
+    bookmark = result.scalars().first()
+    return {"bookmarked": bookmark is not None}
+
+@router.post("/bookmarks/batch-check")
+async def batch_check_bookmarks(
+    data: dict, 
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Check bookmark status for multiple projects at once.
+    Expects {"projectIds": ["id1", "id2"]}
+    """
+    project_ids = data.get("projectIds", [])
+    if not project_ids:
+        return {"bookmarks": {}}
+        
+    stmt = select(Bookmark).where(
+        Bookmark.user_id == current_user.id,
+        (Bookmark.project_id.in_(project_ids)) | (Bookmark.github_project_id.in_(project_ids))
+    )
+    result = await db.execute(stmt)
+    bookmarks = result.scalars().all()
+    
+    bookmark_map = {}
+    for b in bookmarks:
+        if b.project_id:
+            bookmark_map[b.project_id] = True
+        if b.github_project_id:
+            bookmark_map[b.github_project_id] = True
+            
+    # Include un-bookmarked ones as false
+    return {"bookmarks": {pid: bookmark_map.get(pid, False) for pid in project_ids}}
 
 @router.post("/bookmarks/{project_id}")
 async def toggle_bookmark(
     project_id: str,
-    current_user: User = Depends(get_current_user)
+    data: dict = Body(default={}), # Allows specifying type, e.g {"type": "github"} or {"type": "standard"}
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
 ):
     """
     Toggle bookmark status for a project.
     """
-    return {"bookmarked": True}
+    project_type = data.get("type", "github")
+    
+    # Need to check exactly which column to target based on type
+    is_github = project_type.lower() == "github"
+    
+    stmt = select(Bookmark).where(
+        Bookmark.user_id == current_user.id,
+        Bookmark.github_project_id == project_id if is_github else Bookmark.project_id == project_id
+    )
+    result = await db.execute(stmt)
+    existing_bookmark = result.scalars().first()
 
-@router.post("/bookmarks/batch-check")
-async def batch_check_bookmarks(
-    data: dict,
-    current_user: User = Depends(get_current_user)
-):
-    """
-    Check bookmark status for multiple projects at once.
-    """
-    return {"bookmarks": {}}
+    if existing_bookmark:
+        await db.delete(existing_bookmark)
+        await db.commit()
+        return {"bookmarked": False}
+    else:
+        new_bookmark = Bookmark(user_id=current_user.id)
+        if is_github:
+            new_bookmark.github_project_id = project_id
+        else:
+            new_bookmark.project_id = project_id
+            
+        db.add(new_bookmark)
+        await db.commit()
+        return {"bookmarked": True}
