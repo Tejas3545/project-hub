@@ -60,6 +60,9 @@ export default function GitHubProjectDetailPage({ params }: { params: Promise<{ 
   const [readmeContent, setReadmeContent] = useState<string | null>(null);
   const [readmeLoading, setReadmeLoading] = useState(false);
   const [readmeError, setReadmeError] = useState<string | null>(null);
+  const [translateLang, setTranslateLang] = useState('en');
+  const [translatedReadme, setTranslatedReadme] = useState<string | null>(null);
+  const [translating, setTranslating] = useState(false);
 
   useEffect(() => {
     const loadProject = async () => {
@@ -144,6 +147,83 @@ export default function GitHubProjectDetailPage({ params }: { params: Promise<{ 
     if (readmeOpen) window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
   }, [readmeOpen]);
+
+  /**
+   * Translate the README content to the selected language using Google Translate free endpoint.
+   * Splits content into chunks under 4500 chars to respect URL limits.
+   */
+  const translateReadme = useCallback(async (lang: string) => {
+    if (lang === 'en') {
+      setTranslateLang('en');
+      setTranslatedReadme(null);
+      setTranslating(false);
+      return;
+    }
+    if (!readmeContent) return;
+    setTranslating(true);
+    setTranslateLang(lang);
+    try {
+      // Split into chunks under 4500 chars respecting line boundaries
+      const lines = readmeContent.split('\n');
+      const chunks: string[] = [];
+      let current = '';
+      for (const line of lines) {
+        if (current.length + line.length + 1 > 4500) {
+          if (current) chunks.push(current);
+          if (line.length > 4500) {
+            for (let j = 0; j < line.length; j += 4500) {
+              chunks.push(line.slice(j, j + 4500));
+            }
+            current = '';
+          } else {
+            current = line;
+          }
+        } else {
+          current = current ? current + '\n' + line : line;
+        }
+      }
+      if (current) chunks.push(current);
+
+      const translated: string[] = [];
+      for (const chunk of chunks) {
+        if (!chunk.trim()) { translated.push(chunk); continue; }
+        const res = await fetch(
+          `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=${lang}&dt=t&q=${encodeURIComponent(chunk)}`
+        );
+        const data = await res.json();
+        // Google returns [[["translated","original",...], ...], ...]
+        const text = data?.[0]?.map((seg: any) => seg[0]).join('') || chunk;
+        translated.push(text);
+      }
+      setTranslatedReadme(translated.join('\n'));
+    } catch (err) {
+      console.error('Translation failed:', err);
+      setTranslatedReadme(null);
+    } finally {
+      setTranslating(false);
+    }
+  }, [readmeContent]);
+
+  /** Available languages for the translation dropdown. */
+  const LANGUAGES = [
+    { code: 'en', label: 'English (Original)' },
+    { code: 'hi', label: 'हिंदी (Hindi)' },
+    { code: 'gu', label: 'ગુજરાતી (Gujarati)' },
+    { code: 'mr', label: 'मराठी (Marathi)' },
+    { code: 'ta', label: 'தமிழ் (Tamil)' },
+    { code: 'te', label: 'తెలుగు (Telugu)' },
+    { code: 'kn', label: 'ಕನ್ನಡ (Kannada)' },
+    { code: 'bn', label: 'বাংলা (Bengali)' },
+    { code: 'es', label: 'Español (Spanish)' },
+    { code: 'fr', label: 'Français (French)' },
+    { code: 'de', label: 'Deutsch (German)' },
+    { code: 'zh-CN', label: '中文 (Chinese)' },
+    { code: 'ja', label: '日本語 (Japanese)' },
+    { code: 'ko', label: '한국어 (Korean)' },
+    { code: 'ar', label: 'العربية (Arabic)' },
+    { code: 'pt', label: 'Português (Portuguese)' },
+    { code: 'ru', label: 'Русский (Russian)' },
+  ];
 
   const getDifficultyConfig = (diff: string) => {
     switch (diff) {
@@ -705,17 +785,52 @@ export default function GitHubProjectDetailPage({ params }: { params: Promise<{ 
                   <div className="relative w-full max-w-4xl max-h-[85vh] bg-background rounded-2xl border border-border shadow-2xl flex flex-col overflow-hidden z-10">
                     {/* Header */}
                     <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-secondary/30">
-                      <div className="flex items-center gap-3">
-                        <span className="material-symbols-outlined text-primary">description</span>
+                      <div className="flex items-center gap-3 truncate">
+                        <span className="material-symbols-outlined text-primary shrink-0">description</span>
                         <h3 className="text-lg font-bold text-foreground">README.md</h3>
-                        <span className="text-xs text-muted-foreground">— {project.title}</span>
+                        <span className="text-xs text-muted-foreground truncate hidden sm:inline-block">— {project.title}</span>
                       </div>
-                      <button
-                        onClick={() => setReadmeOpen(false)}
-                        className="size-9 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
-                      >
-                        <span className="material-symbols-outlined text-xl">close</span>
-                      </button>
+                      <div className="flex items-center gap-2 shrink-0">
+                        {/* Custom Translation Select */}
+                        <div className="flex items-center gap-2">
+                          <span className="material-symbols-outlined text-muted-foreground text-base">translate</span>
+                          <select
+                            value={translateLang}
+                            onChange={(e) => translateReadme(e.target.value)}
+                            disabled={translating || !readmeContent}
+                            className="appearance-none bg-background text-foreground border border-border rounded-lg px-3 py-1.5 pr-8 text-xs font-medium outline-none cursor-pointer transition-all hover:border-primary/50 focus:border-primary focus:ring-2 focus:ring-primary/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                            style={{
+                              backgroundImage: `url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23888%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E")`,
+                              backgroundRepeat: 'no-repeat',
+                              backgroundPosition: 'right 0.4rem center',
+                              backgroundSize: '0.9rem',
+                            }}
+                          >
+                            {LANGUAGES.map((l) => (
+                              <option key={l.code} value={l.code}>{l.label}</option>
+                            ))}
+                          </select>
+                          {translateLang !== 'en' && (
+                            <button
+                              onClick={() => translateReadme('en')}
+                              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 transition-all"
+                              title="Reset to English"
+                            >
+                              <span className="material-symbols-outlined text-sm">undo</span>
+                              Original
+                            </button>
+                          )}
+                        </div>
+                        {translating && (
+                          <div className="size-5 border-2 border-muted border-t-primary rounded-full animate-spin" />
+                        )}
+                        <button
+                          onClick={() => setReadmeOpen(false)}
+                          className="size-9 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+                        >
+                          <span className="material-symbols-outlined text-xl">close</span>
+                        </button>
+                      </div>
                     </div>
                     {/* Content */}
                     <div className="flex-1 overflow-y-auto p-6 sm:p-8">
@@ -765,7 +880,7 @@ export default function GitHubProjectDetailPage({ params }: { params: Promise<{ 
                               }
                             }}
                           >
-                            {readmeContent}
+                            {translateLang !== 'en' && translatedReadme ? translatedReadme : readmeContent}
                           </ReactMarkdown>
                         </div>
                       )}
