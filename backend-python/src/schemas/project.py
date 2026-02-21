@@ -25,6 +25,7 @@ class GitHubProjectBase(BaseModel):
     default_branch: str = "main"
     download_url: str = ""
     live_url: Optional[str] = None
+    project_type: str = "PROJECT"
     
     stars: int = 0
     forks: int = 0

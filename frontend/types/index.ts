@@ -164,6 +164,7 @@ export interface GitHubProject {
     updatedAt: Date;
     sourceCode?: ProjectSourceCode | null;
     isRegularProject?: boolean; // Flag for polymorphic items returned by the API
+    projectType: 'PROJECT' | 'LIBRARY';
     subDomain?: string; // Unified field for both types
 }
 

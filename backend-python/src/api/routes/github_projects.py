@@ -90,6 +90,10 @@ async def proxy_github_search(
                     if live_url and not str(live_url).startswith("http"):
                         live_url = f"https://{live_url}"
                         
+                    topics = repo.get("topics", [])
+                    library_keywords = {"library", "framework", "sdk", "api-wrapper", "toolkit", "plugin", "module", "package", "backend-framework", "frontend-framework"}
+                    project_type = "LIBRARY" if any(kw in topics for kw in library_keywords) else "PROJECT"
+                        
                     if not existing:
                         existing = GitHubProject(
                             title=repo["name"],
@@ -104,7 +108,8 @@ async def proxy_github_search(
                             forks=repo.get("forks_count", 0),
                             language=repo.get("language") or domain_name,
                             difficulty=diff,
-                            topics=repo.get("topics", []),
+                            topics=topics,
+                            project_type=project_type,
                             live_url=live_url,
                             author=repo["owner"]["login"],
                             last_updated=datetime.now(timezone.utc)
@@ -113,6 +118,7 @@ async def proxy_github_search(
                     else:
                         existing.stars = repo.get("stargazers_count", existing.stars)
                         existing.forks = repo.get("forks_count", existing.forks)
+                        existing.project_type = project_type
                         
                     saved_projects.append(existing)
                     
@@ -152,6 +158,7 @@ async def get_github_projects(
     sortBy: Optional[str] = "created_at",
     order: Optional[str] = "desc",
     qaStatus: Optional[str] = None,
+    projectType: Optional[str] = None,
     db: AsyncSession = Depends(get_db),
 ):
     """
@@ -192,6 +199,10 @@ async def get_github_projects(
     if qaStatus:
         stmt = stmt.where(GitHubProject.qa_status == qaStatus)
         count_stmt = count_stmt.where(GitHubProject.qa_status == qaStatus)
+
+    if projectType:
+        stmt = stmt.where(GitHubProject.project_type == projectType.upper())
+        count_stmt = count_stmt.where(GitHubProject.project_type == projectType.upper())
 
     if search:
         search_term = f"%{search}%"

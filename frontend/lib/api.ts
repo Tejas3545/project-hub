@@ -409,25 +409,25 @@ export const userApi = {
 
 // GitHub Projects API
 export const githubProjectApi = {
-    getAll: async (filters?: {
+    // List with pagination and filters
+    getAll: async ({ page = 1, limit = 24, domainId, difficulty, search, qaStatus, projectType }: {
         page?: number;
         limit?: number;
         domainId?: string;
         difficulty?: string;
         search?: string;
-        sortBy?: string;
-        order?: string;
         qaStatus?: string;
+        projectType?: string;
     }) => {
-        const params = new URLSearchParams();
-        if (filters?.page) params.append('page', String(filters.page));
-        if (filters?.limit) params.append('limit', String(filters.limit));
-        if (filters?.domainId) params.append('domainId', filters.domainId);
-        if (filters?.difficulty) params.append('difficulty', filters.difficulty);
-        if (filters?.search) params.append('search', filters.search);
-        if (filters?.sortBy) params.append('sortBy', filters.sortBy);
-        if (filters?.order) params.append('order', filters.order);
-        if (filters?.qaStatus) params.append('qaStatus', filters.qaStatus);
+        const params = new URLSearchParams({
+            page: page.toString(),
+            limit: limit.toString(),
+        });
+        if (domainId) params.append('domainId', domainId);
+        if (difficulty) params.append('difficulty', difficulty);
+        if (search) params.append('search', search);
+        if (qaStatus) params.append('qaStatus', qaStatus);
+        if (projectType) params.append('projectType', projectType);
 
         return api.get<{ projects: GitHubProject[]; pagination: { total: number; page: number; limit: number; totalPages: number } }>(`/github-projects?${params}`);
     },

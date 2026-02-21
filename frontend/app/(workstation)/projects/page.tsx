@@ -32,6 +32,7 @@ function ProjectsContent() {
         maxTime: 100,
         skills: [] as string[],
         domains: [] as string[],
+        projectType: 'ALL',
     });
     const [bookmarkMap, setBookmarkMap] = useState<Record<string, boolean>>({});
 
@@ -55,6 +56,7 @@ function ProjectsContent() {
                 search: debouncedSearch.trim() || undefined,
                 difficulty: filters.difficulty.length === 1 ? filters.difficulty[0] : undefined,
                 domainId: filters.domains.length === 1 ? filters.domains[0] : undefined,
+                projectType: filters.projectType === 'ALL' ? undefined : filters.projectType,
             });
 
             const fetched = (result.projects || []) as GitHubProject[];
@@ -81,7 +83,7 @@ function ProjectsContent() {
             setLoading(false);
             setLoadingMore(false);
         }
-    }, [debouncedSearch, filters.difficulty, filters.domains]);
+    }, [debouncedSearch, filters.difficulty, filters.domains, filters.projectType]);
 
     useEffect(() => {
         fetchProjects(1, false);

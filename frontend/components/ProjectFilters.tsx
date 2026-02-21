@@ -9,6 +9,7 @@ interface FilterState {
     maxTime: number;
     skills: string[];
     domains: string[];
+    projectType: string; // 'ALL', 'PROJECT', 'LIBRARY'
 }
 
 interface ProjectFiltersProps {
@@ -28,6 +29,7 @@ export default function ProjectFilters({
         maxTime: 100,
         skills: [],
         domains: [],
+        projectType: 'ALL',
     });
 
     const updateFilters = (newFilters: Partial<FilterState>) => {
@@ -50,8 +52,35 @@ export default function ProjectFilters({
         updateFilters({ domains: newDomains });
     };
 
+    const handleProjectTypeChange = (type: string) => {
+        updateFilters({ projectType: type });
+    };
+
     return (
         <aside className="lg:sticky lg:top-24 flex flex-col gap-8 flex-shrink-0">
+            {/* Project Type */}
+            <div>
+                <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-4">Type</h3>
+                <div className="flex bg-secondary inline-flex rounded-lg overflow-hidden border border-border">
+                    {[
+                        { id: 'ALL', label: 'All' },
+                        { id: 'PROJECT', label: 'Projects' },
+                        { id: 'LIBRARY', label: 'Libraries' }
+                    ].map((btn) => (
+                        <button
+                            key={btn.id}
+                            onClick={() => handleProjectTypeChange(btn.id)}
+                            className={`px-3 py-1.5 text-xs font-semibold transition-colors ${filters.projectType === btn.id
+                                ? 'bg-primary text-primary-foreground'
+                                : 'text-muted-foreground hover:bg-foreground/5'
+                                }`}
+                        >
+                            {btn.label}
+                        </button>
+                    ))}
+                </div>
+            </div>
+
             {/* Domains */}
             <div>
                 <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-4">Domain</h3>
@@ -83,8 +112,8 @@ export default function ProjectFilters({
                                 key={level}
                                 onClick={() => handleDifficultyToggle(level)}
                                 className={`px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all ${isActive
-                                        ? 'bg-accent border-primary text-primary'
-                                        : 'border-border text-muted-foreground hover:border-foreground/20 hover:text-foreground'
+                                    ? 'bg-accent border-primary text-primary'
+                                    : 'border-border text-muted-foreground hover:border-foreground/20 hover:text-foreground'
                                     }`}
                             >
                                 {level}
@@ -109,23 +138,25 @@ export default function ProjectFilters({
                             <span className="material-symbols-outlined text-sm text-primary">schedule</span>
                         </div>
                     </div>
-                    
+
                     {/* Dual Range Slider - CSS variables for dynamic positioning */}
                     {/* @ts-expect-error - Dynamic CSS variables required for slider state */}
-                    <div 
+                    <div
                         className="relative h-12 flex items-center"
                         // Dynamic CSS variables for slider positioning
-                        {...{style: {
-                            '--slider-left': `${filters.minTime}%`,
-                            '--slider-width': `${filters.maxTime - filters.minTime}%`
-                        }}}
+                        {...{
+                            style: {
+                                '--slider-left': `${filters.minTime}%`,
+                                '--slider-width': `${filters.maxTime - filters.minTime}%`
+                            }
+                        }}
                     >
                         {/* Track Background */}
                         <div className="absolute w-full h-2 bg-secondary rounded-full"></div>
-                        
+
                         {/* Active Range - Positioned using CSS variables from globals.css */}
                         <div className="slider-range-indicator absolute h-2 bg-gradient-to-r from-primary to-primary/80 rounded-full transition-all duration-150"></div>
-                        
+
                         {/* Min Handle */}
                         <input
                             type="range"
@@ -141,7 +172,7 @@ export default function ProjectFilters({
                             className="absolute w-full appearance-none bg-transparent pointer-events-none [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-background [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-primary [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:hover:scale-110 [&::-webkit-slider-thumb]:transition-transform [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-background [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-primary [&::-moz-range-thumb]:cursor-pointer [&::-moz-range-thumb]:shadow-lg [&::-moz-range-thumb]:hover:scale-110 [&::-moz-range-thumb]:transition-transform"
                             aria-label="Minimum time commitment in hours"
                         />
-                        
+
                         {/* Max Handle */}
                         <input
                             type="range"
@@ -158,7 +189,7 @@ export default function ProjectFilters({
                             aria-label="Maximum time commitment in hours"
                         />
                     </div>
-                    
+
                     {/* Range Labels */}
                     <div className="flex justify-between text-[10px] text-muted-foreground font-medium px-0.5">
                         <span>0h</span>
@@ -170,10 +201,10 @@ export default function ProjectFilters({
                 </div>
             </div>
 
-            {(filters.difficulty.length > 0 || filters.domains.length > 0 || filters.skills.length > 0) && (
+            {(filters.difficulty.length > 0 || filters.domains.length > 0 || filters.skills.length > 0 || filters.projectType !== 'ALL') && (
                 <button
                     onClick={() => {
-                        const cleared = { difficulty: [], minTime: 0, maxTime: 100, skills: [], domains: [] };
+                        const cleared = { difficulty: [], minTime: 0, maxTime: 100, skills: [], domains: [], projectType: 'ALL' };
                         setFilters(cleared);
                         onFilterChange(cleared);
                     }}
