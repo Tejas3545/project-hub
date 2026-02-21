@@ -195,10 +195,6 @@ function ProjectsContent() {
                 <main className="flex-1 flex flex-col min-w-0">
                     <div className="flex items-center justify-between mb-6 pb-4 border-b border-border">
                         <div className="flex items-center gap-4">
-                            <span className="text-sm font-semibold text-muted-foreground">
-                                {totalCount} projects total
-                            </span>
-                            <span className="h-4 w-px bg-border"></span>
                             <span className="text-sm font-semibold text-primary">
                                 {filteredProjects.length} shown
                             </span>
