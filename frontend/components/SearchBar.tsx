@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 interface SearchBarProps {
@@ -16,6 +16,19 @@ export default function SearchBar({
     const searchParams = useSearchParams();
     const [query, setQuery] = useState(searchParams.get('q') || searchParams.get('search') || '');
     const [debouncedQuery, setDebouncedQuery] = useState(query);
+    const inputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+                e.preventDefault();
+                inputRef.current?.focus();
+            }
+        };
+
+        document.addEventListener('keydown', handleKeyDown);
+        return () => document.removeEventListener('keydown', handleKeyDown);
+    }, []);
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -46,6 +59,7 @@ export default function SearchBar({
                 <span className="material-symbols-outlined">search</span>
             </div>
             <input
+                ref={inputRef}
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
@@ -55,7 +69,10 @@ export default function SearchBar({
             {query ? (
                 <button
                     type="button"
-                    onClick={() => setQuery('')}
+                    onClick={() => {
+                        setQuery('');
+                        inputRef.current?.focus();
+                    }}
                     className="absolute inset-y-0 right-0 flex items-center pr-4 text-muted-foreground hover:text-foreground"
                 >
                     <span className="material-symbols-outlined text-sm">close</span>
