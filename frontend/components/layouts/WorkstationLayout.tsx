@@ -7,6 +7,7 @@ import { useSession, signOut } from 'next-auth/react';
 import { useAuth } from '@/lib/AuthContext';
 import NotificationBell from '@/components/NotificationBell';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import ThemeChanger from '@/components/ThemeChanger';
 
 interface WorkstationLayoutProps {
   children: ReactNode;
@@ -78,6 +79,9 @@ export default function WorkstationLayout({ children }: WorkstationLayoutProps) 
           </div>
         </div>
       </main>
+
+      {/* Theme Generator floating panel */}
+      <ThemeChanger />
     </div>
   );
 }

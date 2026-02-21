@@ -69,8 +69,7 @@ class GitHubProjectResponse(GitHubProjectBase):
     reviewed_by: Optional[str] = None
     created_at: datetime
     updated_at: datetime
-    
-    # We could optionally include the nested `DomainResponse` if necessary
+    domain: Optional[DomainResponse] = None
 
 class PaginationSchema(BaseModel):
     model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)

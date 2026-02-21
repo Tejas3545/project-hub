@@ -58,7 +58,9 @@ async def get_single_github_progress(
     Get the authenticated user's progress for a specific GitHub project.
     Creates a NOT_STARTED record if none exists.
     """
-    stmt = select(GitHubProjectProgress).where(
+    stmt = select(GitHubProjectProgress).options(
+        selectinload(GitHubProjectProgress.github_project)
+    ).where(
         GitHubProjectProgress.user_id == current_user.id,
         GitHubProjectProgress.github_project_id == project_id,
     )
@@ -92,7 +94,9 @@ async def update_github_progress(
     """
     from datetime import datetime, timezone
 
-    stmt = select(GitHubProjectProgress).where(
+    stmt = select(GitHubProjectProgress).options(
+        selectinload(GitHubProjectProgress.github_project)
+    ).where(
         GitHubProjectProgress.user_id == current_user.id,
         GitHubProjectProgress.github_project_id == project_id,
     )
@@ -119,7 +123,7 @@ async def update_github_progress(
         progress.completed_at = datetime.now(timezone.utc)
 
     await db.commit()
-    await db.refresh(progress)
+    await db.refresh(progress, attribute_names=["github_project"])
     return progress
 
 @router.put("/profile")

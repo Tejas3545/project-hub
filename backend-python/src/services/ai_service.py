@@ -39,7 +39,12 @@ async def generate_project_details(title: str, description: str, language: Optio
         "problem_statement": "A 2-3 sentence paragraph explaining the specific technical or operational problem this project addresses.",
         "solution_description": "A 2-3 sentence paragraph describing how this project works, mentioning the tech stack and key features.",
         "prerequisites": ["A list of 3-5 strings detailing knowledge required before starting (e.g. 'Basic understanding of REST APIs', 'Familiarity with React')."],
-        "deliverables": ["A list of 4-6 strings detailing what the user will build/deploy (e.g. 'Fully functional backend', 'Interactive dashboard')."]
+        "deliverables": ["A list of 4-6 strings detailing what the user will build/deploy (e.g. 'Fully functional backend', 'Interactive dashboard')."],
+        "sub_domain": "A specific sub-category string like 'Web Development', 'Machine Learning', 'Data Engineering', 'Mobile App', etc.",
+        "difficulty": "One of: 'EASY', 'MEDIUM', 'ADVANCED', 'EXPERT'",
+        "estimated_min_time": 10,  # Minimum hours to complete (integer)
+        "estimated_max_time": 40,  # Maximum hours to complete (integer)
+        "language": "Primary programming language to use (e.g. 'Python', 'TypeScript', 'Rust')"
     }}
     
     Output ONLY valid JSON. Do not include markdown code blocks, backticks, or any other text before or after the JSON.

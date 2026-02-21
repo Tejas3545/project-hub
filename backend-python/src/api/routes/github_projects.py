@@ -15,7 +15,11 @@ from typing import Optional
 from src.core.database import get_db
 from src.core.config import settings
 from src.models.project import GitHubProject, Domain
-from src.schemas.project import GitHubProjectResponse, GitHubProjectListResponse
+from src.schemas.project import (
+    GitHubProjectListResponse, GitHubProjectResponse
+)
+from src.services.ai_service import generate_project_details
+from sqlalchemy.orm import selectinload
 from src.api.dependencies import get_current_user
 import httpx
 from datetime import datetime, timezone
@@ -82,7 +86,11 @@ async def proxy_github_search(
                 saved_projects = []
                 for repo in items:
                     slug = repo["full_name"].lower().replace("/", "-")
-                    result = await db.execute(select(GitHubProject).where(GitHubProject.slug == slug))
+                    result = await db.execute(
+                        select(GitHubProject)
+                        .options(selectinload(GitHubProject.domain))
+                        .where(GitHubProject.slug == slug)
+                    )
                     existing = result.scalars().first()
                     
                     diff = "MEDIUM"
@@ -127,6 +135,8 @@ async def proxy_github_search(
                     saved_projects.append(existing)
                     
                 await db.commit()
+                for p in saved_projects:
+                    await db.refresh(p, attribute_names=["domain"])
                 
                 if difficulty:
                     saved_projects = [p for p in saved_projects if p.difficulty == difficulty.upper()]
@@ -194,7 +204,7 @@ async def get_github_projects(
             }
 
     # === 2. Fallback to Local DB (Rate Limit or QA Status Filter) ===
-    stmt = select(GitHubProject)
+    stmt = select(GitHubProject).options(selectinload(GitHubProject.domain))
     count_stmt = select(func.count()).select_from(GitHubProject)
 
     if domainId:
@@ -393,7 +403,9 @@ async def get_github_project_by_id(
     Lazily generates AI details if they are missing.
     """
     result = await db.execute(
-        select(GitHubProject).where(GitHubProject.id == project_id)
+        select(GitHubProject)
+        .options(selectinload(GitHubProject.domain))
+        .where(GitHubProject.id == project_id)
     )
     project = result.scalars().first()
 
@@ -416,6 +428,19 @@ async def get_github_project_by_id(
                 project.solution_description = ai_details.get("solution_description")
                 project.prerequisites = ai_details.get("prerequisites", [])
                 project.deliverables = ai_details.get("deliverables", [])
+                
+                if ai_details.get("sub_domain"):
+                    project.sub_domain = ai_details.get("sub_domain")
+                if ai_details.get("difficulty") in ["EASY", "MEDIUM", "ADVANCED", "EXPERT"]:
+                    project.difficulty = ai_details.get("difficulty")
+                if ai_details.get("estimated_min_time"):
+                    try: project.estimated_min_time = int(ai_details.get("estimated_min_time"))
+                    except: pass
+                if ai_details.get("estimated_max_time"):
+                    try: project.estimated_max_time = int(ai_details.get("estimated_max_time"))
+                    except: pass
+                if ai_details.get("language"):
+                    project.language = ai_details.get("language")
                 
                 await db.commit()
                 await db.refresh(project)
