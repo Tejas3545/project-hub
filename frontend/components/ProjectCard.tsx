@@ -15,6 +15,16 @@ const difficultyColors: Record<string, string> = {
     EASY: 'bg-emerald-50 text-emerald-700 border-emerald-200',
     MEDIUM: 'bg-amber-50 text-amber-700 border-amber-200',
     HARD: 'bg-red-50 text-red-700 border-red-200',
+    ADVANCED: 'bg-rose-50 text-rose-700 border-rose-200',
+    EXPERT: 'bg-fuchsia-50 text-fuchsia-700 border-fuchsia-200',
+};
+
+const difficultyLabels: Record<string, string> = {
+    EASY: 'Beginner',
+    MEDIUM: 'Intermediate',
+    HARD: 'Advanced',
+    ADVANCED: 'Advanced',
+    EXPERT: 'Advanced+',
 };
 
 const apiCache = new Map<string, { data: unknown; timestamp: number }>();
@@ -94,7 +104,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
                 return;
             }
 
-            const result = await socialApi.getProjectLikeStatus(project.id);
+            const result = await socialApi.getProjectLikeStatus(project.id) as any;
             setIsLiked(result.liked);
             setCache(cacheKey, result);
         } catch {
@@ -111,7 +121,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
                 return;
             }
 
-            const result = await socialApi.getProjectLikesCount(project.id);
+            const result = await socialApi.getProjectLikesCount(project.id) as any;
             setLikesCount(result.count || 0);
             setCache(cacheKey, result);
         } catch (error) {
@@ -128,7 +138,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
                 return;
             }
 
-            const result = await socialApi.getComments(project.id, 1, 1);
+            const result = await socialApi.getComments(project.id, 1, 1) as any;
             const total = result.total || result.comments?.length || 0;
             setCommentsCount(total);
             setCache(cacheKey, { total });
@@ -163,7 +173,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
 
         setIsLoading(true);
         try {
-            const result = await socialApi.toggleProjectLike(project.id);
+            const result = await socialApi.toggleProjectLike(project.id) as any;
             setIsLiked(result.liked);
             setLikesCount(prev => result.liked ? prev + 1 : prev - 1);
             apiCache.delete(`like-status-${project.id}`);
@@ -194,7 +204,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
 
                         <div className="absolute top-3 right-3">
                             <span className={`px-2.5 py-1 rounded-lg text-xs font-bold border ${difficultyColors[project.difficulty]}`}>
-                                {project.difficulty}
+                                {difficultyLabels[project.difficulty] || project.difficulty}
                             </span>
                         </div>
                         {project.screenshots && project.screenshots.length > 1 && (
@@ -212,7 +222,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
                     {!featuredScreenshot && (
                         <div className="absolute top-0 right-0 p-5">
                             <span className={`px-2.5 py-1 rounded-lg text-xs font-bold border ${difficultyColors[project.difficulty]}`}>
-                                {project.difficulty}
+                                {difficultyLabels[project.difficulty] || project.difficulty}
                             </span>
                         </div>
                     )}
@@ -255,12 +265,12 @@ export default function ProjectCard({ project }: ProjectCardProps) {
                     </div>
 
                     <div className="flex items-center gap-2 flex-wrap">
-                        {project.skillFocus.slice(0, 2).map((skill) => (
+                        {(project.skillFocus || []).slice(0, 2).map((skill) => (
                             <span key={skill} className="pill-badge text-[11px] bg-secondary text-muted-foreground border border-border">
                                 {skill}
                             </span>
                         ))}
-                        {project.skillFocus.length > 2 && (
+                        {(project.skillFocus?.length || 0) > 2 && (
                             <span className="pill-badge text-[11px] bg-secondary text-muted-foreground border border-border">
                                 +{project.skillFocus.length - 2}
                             </span>

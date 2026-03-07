@@ -80,9 +80,9 @@ export default function DomainPage({ params }: { params: Promise<{ slug: string 
                                 Difficulty Levels
                             </h3>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                <DifficultyCard label="Easy" count={domain.projectCountsByDifficulty.EASY || 0} color="emerald-500" />
-                                <DifficultyCard label="Medium" count={domain.projectCountsByDifficulty.MEDIUM || 0} color="amber-500" />
-                                <DifficultyCard label="Hard" count={domain.projectCountsByDifficulty.HARD || 0} color="rose-500" />
+                                <DifficultyCard label="Beginner" count={domain.projectCountsByDifficulty.EASY || 0} color="emerald-500" />
+                                <DifficultyCard label="Intermediate" count={domain.projectCountsByDifficulty.MEDIUM || 0} color="amber-500" />
+                                <DifficultyCard label="Advanced" count={domain.projectCountsByDifficulty.HARD || 0} color="rose-500" />
                             </div>
                         </div>
                     )}

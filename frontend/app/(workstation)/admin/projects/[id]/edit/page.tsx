@@ -62,7 +62,7 @@ export default function EditProjectPage() {
                 minTime: project.minTime,
                 maxTime: project.maxTime,
                 skillFocus: project.skillFocus.join(', '),
-                industryContext: project.industryContext,
+                industryContext: project.industryContext || '',
                 problemStatement: project.problemStatement,
                 scope: project.scope,
                 prerequisites: project.prerequisites.join(', '),

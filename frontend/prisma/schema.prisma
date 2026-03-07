@@ -21,6 +21,11 @@ model User {
   image         String?  // NextAuth default profile image field
   profileImage  String?  // Keeping for backward compatibility or custom uploads
   bio           String?  @db.Text
+  headline      String?
+  location      String?
+  githubUrl     String?  @map("github_url")
+  portfolioUrl  String?  @map("portfolio_url")
+  passwordHash  String?  @map("password_hash")
   role          UserRole @default(STUDENT)
   isVerified    Boolean  @default(false)
   emailVerified DateTime? // NextAuth field
@@ -51,6 +56,7 @@ model User {
   projectNotes  ProjectNote[]
   deadlines     Deadline[]
   achievements  UserAchievement[]
+  githubProjectProgress GitHubProjectProgress[]
 
   @@map("users")
 }
@@ -210,6 +216,8 @@ enum Difficulty {
   EASY
   MEDIUM
   HARD
+  ADVANCED
+  EXPERT
 }
 
 enum UserRole {
@@ -294,6 +302,7 @@ model GitHubProject {
   techStack     String[]
   difficulty    Difficulty @default(MEDIUM)
   topics        String[]
+  projectType   String     @default("PROJECT") @map("project_type")
   lastUpdated   DateTime?
   isActive      Boolean    @default(true)
   
@@ -306,18 +315,32 @@ model GitHubProject {
   conceptsUsed       String[]  @default([]) // Programming concepts applied
   
   // Real-World Solution Framework Fields (Client Requirement)
+  subDomain          String?   @map("sub_domain")
   caseStudy          String?   @db.Text // The Story (3-4 sentences about persona & situation)
   problemStatement   String?   @db.Text // Core technical/logical gap
   solutionDescription String?  @db.Text // High-level explanation of what project builds
   prerequisites      String[]  @default([]) // Fundamental concepts student must know
+  prerequisitesText  String?   @db.Text @map("prerequisites_text")
+  estimatedMinTime   Int       @default(10) @map("estimated_min_time") // in hours
+  estimatedMaxTime   Int       @default(40) @map("estimated_max_time") // in hours
   deliverables       String[]  @default([]) // Specific items student must submit
   supposedDeadline   String?   // Realistic timeframe (e.g., "1 Week")
+  optionalExtensions String?   @db.Text @map("optional_extensions")
+  requirements       String[]  @default([])
+  requirementsText   String?   @db.Text @map("requirements_text")
+  evaluationCriteria String?   @db.Text @map("evaluation_criteria")
+  
+  qaStatus           String    @default("PENDING") @map("qa_status")
+  qaFeedback         String?   @db.Text @map("qa_feedback")
+  reviewedAt         DateTime? @map("reviewed_at")
+  reviewedBy         String?   @map("reviewed_by")
   
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
   
-  sourceCode    ProjectSourceCode?
-  bookmarks     Bookmark[]
+  sourceCode        ProjectSourceCode?
+  bookmarks         Bookmark[]
+  projectProgress   GitHubProjectProgress[]
 
   @@index([domainId])
   @@index([difficulty])
@@ -474,4 +497,26 @@ model LearningPath {
   @@index([difficulty])
   @@index([isActive])
   @@map("learning_paths")
+}
+
+model GitHubProjectProgress {
+  id                String         @id @default(uuid())
+  userId            String         @map("user_id")
+  githubProjectId   String         @map("github_project_id")
+  user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  githubProject     GitHubProject  @relation(fields: [githubProjectId], references: [id], onDelete: Cascade)
+  status            String         @default("IN_PROGRESS") // Mapped from ProgressStatus enum if appropriate
+  startedAt         DateTime       @default(now()) @map("started_at")
+  completedAt       DateTime?      @map("completed_at")
+  timeSpent         Int            @default(0) @map("time_spent") // in seconds
+  notes             String?        @db.Text
+  checklist         Boolean[]      @default([]) // Mapped correctly to scalar list
+  createdAt         DateTime       @default(now()) @map("created_at")
+  updatedAt         DateTime       @updatedAt @map("updated_at")
+
+  @@unique([userId, githubProjectId])
+  @@index([userId])
+  @@index([githubProjectId])
+  @@index([status])
+  @@map("github_project_progress")
 }

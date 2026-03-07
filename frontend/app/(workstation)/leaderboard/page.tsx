@@ -8,11 +8,11 @@ interface LeaderboardUser {
     rank: number;
     id: string;
     name: string;
-    image: string | null;
+    image?: string | null;
     points: number;
-    level: number;
-    projectsCompleted: number;
-    totalTimeSpent: number;
+    level?: number;
+    projectsCompleted?: number;
+    totalTimeSpent?: number;
 }
 
 export default function LeaderboardPage() {
@@ -23,7 +23,16 @@ export default function LeaderboardPage() {
         const fetchLeaderboard = async () => {
             try {
                 const data = await analyticsApi.getLeaderboard();
-                setUsers(data);
+                const mappedUsers = data.map((u: any, index: number) => ({
+                    ...u,
+                    rank: index + 1,
+                    image: null, // Placeholder since api doesn't return it
+                    points: u.points || Math.floor(u.totalMinutes / 10), // Example point derivation
+                    level: Math.floor((u.totalMinutes || 0) / 100) + 1,
+                    projectsCompleted: 0,
+                    name: `${u.firstName} ${u.lastName}`.trim() || u.email
+                }));
+                setUsers(mappedUsers);
             } catch (error) {
                 console.error('Failed to load leaderboard', error);
             } finally {

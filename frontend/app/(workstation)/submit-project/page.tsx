@@ -179,7 +179,7 @@ export default function SubmitProjectPage() {
                 scope: formData.solutionDescription,
                 screenshots: formData.screenshots,
                 isPublished: false, // Requires admin approval
-            };
+            } as any; // Cast as any because some default Prisma schema fields aren't initialized yet
 
             await projectApi.create(projectData);
             setSuccess(true);

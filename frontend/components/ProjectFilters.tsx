@@ -9,7 +9,7 @@ interface FilterState {
     maxTime: number;
     skills: string[];
     domains: string[];
-    projectType: string; // 'ALL', 'PROJECT', 'LIBRARY'
+    projectType: string;
 }
 
 interface ProjectFiltersProps {
@@ -23,13 +23,21 @@ export default function ProjectFilters({
     availableSkills = [],
     availableDomains = []
 }: ProjectFiltersProps) {
+    const difficultyLabels: Record<string, string> = {
+        EASY: 'Beginner',
+        MEDIUM: 'Intermediate',
+        HARD: 'Advanced',
+        ADVANCED: 'Advanced',
+        EXPERT: 'Advanced+',
+    };
+
     const [filters, setFilters] = useState<FilterState>({
         difficulty: [],
         minTime: 0,
         maxTime: 100,
         skills: [],
         domains: [],
-        projectType: 'ALL',
+        projectType: 'PROJECT',
     });
 
     const updateFilters = (newFilters: Partial<FilterState>) => {
@@ -52,35 +60,8 @@ export default function ProjectFilters({
         updateFilters({ domains: newDomains });
     };
 
-    const handleProjectTypeChange = (type: string) => {
-        updateFilters({ projectType: type });
-    };
-
     return (
         <aside className="lg:sticky lg:top-24 flex flex-col gap-8 flex-shrink-0">
-            {/* Project Type */}
-            <div>
-                <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-4">Type</h3>
-                <div className="flex bg-secondary inline-flex rounded-lg overflow-hidden border border-border">
-                    {[
-                        { id: 'ALL', label: 'All' },
-                        { id: 'PROJECT', label: 'Projects' },
-                        { id: 'LIBRARY', label: 'Libraries' }
-                    ].map((btn) => (
-                        <button
-                            key={btn.id}
-                            onClick={() => handleProjectTypeChange(btn.id)}
-                            className={`px-3 py-1.5 text-xs font-semibold transition-colors ${filters.projectType === btn.id
-                                ? 'bg-primary text-primary-foreground'
-                                : 'text-muted-foreground hover:bg-foreground/5'
-                                }`}
-                        >
-                            {btn.label}
-                        </button>
-                    ))}
-                </div>
-            </div>
-
             {/* Domains */}
             <div>
                 <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-4">Domain</h3>
@@ -105,7 +86,7 @@ export default function ProjectFilters({
             <div>
                 <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-4">Difficulty</h3>
                 <div className="flex flex-wrap gap-2">
-                    {['EASY', 'MEDIUM', 'HARD'].map((level) => {
+                    {['EASY', 'MEDIUM', 'ADVANCED'].map((level) => {
                         const isActive = filters.difficulty.includes(level);
                         return (
                             <button
@@ -116,7 +97,7 @@ export default function ProjectFilters({
                                     : 'border-border text-muted-foreground hover:border-foreground/20 hover:text-foreground'
                                     }`}
                             >
-                                {level}
+                                {difficultyLabels[level]}
                             </button>
                         );
                     })}
@@ -201,10 +182,10 @@ export default function ProjectFilters({
                 </div>
             </div>
 
-            {(filters.difficulty.length > 0 || filters.domains.length > 0 || filters.skills.length > 0 || filters.projectType !== 'ALL') && (
+            {(filters.difficulty.length > 0 || filters.domains.length > 0 || filters.skills.length > 0 || filters.minTime > 0 || filters.maxTime < 100) && (
                 <button
                     onClick={() => {
-                        const cleared = { difficulty: [], minTime: 0, maxTime: 100, skills: [], domains: [], projectType: 'ALL' };
+                        const cleared = { difficulty: [], minTime: 0, maxTime: 100, skills: [], domains: [], projectType: 'PROJECT' };
                         setFilters(cleared);
                         onFilterChange(cleared);
                     }}

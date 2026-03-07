@@ -35,13 +35,13 @@ export default function CommentSection({ projectId }: CommentSectionProps) {
 
     const loadComments = async (pageNum = 1) => {
         try {
-            const response = await socialApi.getComments(projectId, pageNum, 50); // Fetch more per page for threading
+            const response = await socialApi.getComments(projectId, pageNum, 50) as any; // Fetch more per page for threading
             if (pageNum === 1) {
-                setComments(response.comments || []);
+                setComments((response.comments as Comment[]) || []);
             } else {
                 setComments(prev => {
                     // Filter duplicates
-                    const newComments = response.comments || [];
+                    const newComments = (response.comments as Comment[]) || [];
                     const existingIds = new Set(prev.map(c => c.id));
                     const uniqueNewComments = newComments.filter((c: Comment) => !existingIds.has(c.id));
                     return [...prev, ...uniqueNewComments];
@@ -63,7 +63,7 @@ export default function CommentSection({ projectId }: CommentSectionProps) {
     const handleCommentSubmit = async (text: string, parentId?: string) => {
         if (!user) return;
         try {
-            const newComment = await socialApi.addComment(projectId, text, parentId);
+            const newComment = await socialApi.addComment(projectId, text, parentId) as any;
             setComments(prev => [newComment, ...prev]);
             setReplyingTo(null);
         } catch (error) {

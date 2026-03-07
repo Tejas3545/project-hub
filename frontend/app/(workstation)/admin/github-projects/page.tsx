@@ -170,7 +170,7 @@ export default function GithubProjectQaPage() {
             {['PENDING', 'APPROVED', 'NEEDS_REWORK'].map(status => (
               <button
                 key={status}
-                onClick={() => setFilter(status)}
+                onClick={() => setFilter(status as QaFilter)}
                 className={`px-10 py-4 rounded-[18px] text-[11px] font-black uppercase tracking-widest transition-all ${filter === status ? 'bg-background text-primary shadow-sm border border-border' : 'text-muted-foreground hover:text-foreground'}`}
               >
                 {status.replace('_', ' ')}

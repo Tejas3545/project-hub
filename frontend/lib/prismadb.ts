@@ -29,12 +29,12 @@ const client = baseClient.$extends({
           const isConnectionError =
             errorMessage.includes('ConnectionReset') ||
             errorMessage.includes('forcibly closed') ||
-            error.message?.includes('connection') ||
-            error.message?.includes('10054') ||
-            error.code === 'P1001' ||
-            error.code === 'P1002' ||
-            error.code === 'P1017' ||
-            error.code === '10054';
+            errorMessage.includes('connection') ||
+            errorMessage.includes('10054') ||
+            (error as any).code === 'P1001' ||
+            (error as any).code === 'P1002' ||
+            (error as any).code === 'P1017' ||
+            (error as any).code === '10054';
 
           if (isConnectionError && attempt < MAX_RETRIES) {
             console.warn(`⚠️ DB query failed (${model}.${operation}), retrying ${attempt}/${MAX_RETRIES}...`)

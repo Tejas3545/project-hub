@@ -25,7 +25,7 @@ export default function DeadlineManager({ projectId }: DeadlineManagerProps) {
     title: '',
     description: '',
     dueDate: '',
-    priority: 'MEDIUM' as const
+    priority: 'MEDIUM' as 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT'
   });
 
   const fetchDeadlines = async () => {
@@ -177,7 +177,7 @@ export default function DeadlineManager({ projectId }: DeadlineManagerProps) {
           />
           <select
             value={newDeadline.priority}
-            onChange={e => setNewDeadline({ ...newDeadline, priority: e.target.value as 'LOW' | 'MEDIUM' | 'HIGH' })}
+            onChange={e => setNewDeadline({ ...newDeadline, priority: e.target.value as 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT' })}
             aria-label="Priority"
             className="w-full mb-2 p-2 border border-border rounded bg-background text-foreground"
           >

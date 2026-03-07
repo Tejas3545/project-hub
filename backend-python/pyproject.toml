@@ -23,4 +23,5 @@ dependencies = [
     "python-multipart>=0.0.22",
     "google-genai>=1.64.0",
     "cerebras-cloud-sdk>=1.67.0",
+    "psycopg2-binary>=2.9.11",
 ]

@@ -7,22 +7,41 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 // between users. TTL is short to favour freshness while preventing duplicate requests.
 const getCache = new Map<string, { timestamp: number; data: unknown }>();
 const GET_CACHE_TTL = parseInt(process.env.NEXT_PUBLIC_GET_CACHE_TTL_MS || '60000'); // Increase to 60s for better production performance
-// Helper to get auth token from localStorage
-const getAuthToken = (): string | null => {
+import { getSession } from 'next-auth/react';
+
+// Helper to get auth token from localStorage or NextAuth session
+let cachedSessionToken: string | null = null;
+
+const getAuthToken = async (): Promise<string | null> => {
     if (typeof window !== 'undefined') {
-        return localStorage.getItem('accessToken');
+        const localToken = localStorage.getItem('accessToken');
+        if (localToken) return localToken;
+        
+        // If no local token, try resolving from NextAuth session
+        if (cachedSessionToken) return cachedSessionToken;
+        try {
+            const session = await getSession();
+            if (session?.accessToken) {
+                cachedSessionToken = session.accessToken as string;
+                return cachedSessionToken;
+            }
+        } catch (e) {
+            console.error('Failed to get session token', e);
+        }
     }
     return null;
 };
 
 // Helper to create authenticated fetch options
-const getAuthHeaders = (token?: string): HeadersInit => {
-    const authToken = token || getAuthToken();
+const getAuthHeaders = async (token?: string): Promise<HeadersInit> => {
+    const authToken = token || await getAuthToken();
     return {
         'Content-Type': 'application/json',
         ...(authToken && { Authorization: `Bearer ${authToken}` }),
     };
 };
+
+// Note: getAuthHeaders is now async and replaced above
 
 // Helper to notify the app that the auth token has expired and cannot be refreshed.
 // AuthContext listens for this event to clear user state and redirect to login.
@@ -81,7 +100,13 @@ const fetchWithAutoRefresh = async (
     options: RequestInit,
     retried = false
 ): Promise<Response> => {
-    const res = await fetch(url, options);
+    let res: Response;
+    try {
+        res = await fetch(url, options);
+    } catch (error) {
+        const message = error instanceof Error ? error.message : 'Unknown network error';
+        throw new Error(`API network error for ${url}: ${message}. Check NEXT_PUBLIC_API_URL and backend CORS settings.`);
+    }
 
     // If unauthorized and haven't retried yet, try refreshing the token
     if (res.status === 401 && !retried) {
@@ -144,12 +169,12 @@ export const authApi = {
     },
 
     logout: async () => {
-        const token = getAuthToken();
+        const token = await getAuthToken();
         if (token) {
             try {
                 await fetch(`${API_URL}/auth/logout`, {
                     method: 'POST',
-                    headers: getAuthHeaders(),
+                    headers: await getAuthHeaders(),
                 });
             } catch {
                 // Logout locally even if server request fails
@@ -165,7 +190,7 @@ export const authApi = {
 
     getCurrentUser: async () => {
         const res = await fetch(`${API_URL}/auth/me`, {
-            headers: getAuthHeaders(),
+            headers: await getAuthHeaders(),
         });
         if (!res.ok) {
             throw new Error('Not authenticated');
@@ -234,7 +259,7 @@ export const authApi = {
     ) => {
         const res = await fetch(`${API_URL}/auth/update-profile`, {
             method: 'PUT',
-            headers: getAuthHeaders(token),
+            headers: await getAuthHeaders(token),
             body: JSON.stringify(data),
         });
         if (!res.ok) {
@@ -412,7 +437,7 @@ export const userApi = {
     },
 
     uploadProfileImage: async (formData: FormData) => {
-        const token = getAuthToken();
+        const token = await getAuthToken();
         const res = await fetch(`${API_URL}/user/profile/image`, {
             method: 'POST',
             headers: {
@@ -503,7 +528,7 @@ export const api = {
             console.log('Fetching from URL:', url);
             const res = await fetchWithAutoRefresh(url, {
                 method: 'GET',
-                headers: getAuthHeaders(options?.token),
+                headers: await getAuthHeaders(options?.token),
                 cache: options?.cache || 'default', // Leverage browser cache where possible
             });
 
@@ -527,7 +552,7 @@ export const api = {
 
             return json;
         } catch (error) {
-            console.error('Fetch error:', error);
+            console.warn('API GET failed:', url, error instanceof Error ? error.message : error);
             throw error;
         }
     },
@@ -535,7 +560,7 @@ export const api = {
     post: async <T = unknown>(endpoint: string, body?: unknown): Promise<T> => {
         const res = await fetchWithAutoRefresh(`${API_URL}${endpoint}`, {
             method: 'POST',
-            headers: getAuthHeaders(),
+            headers: await getAuthHeaders(),
             body: body ? JSON.stringify(body) : undefined,
         });
 
@@ -550,7 +575,7 @@ export const api = {
     put: async <T = unknown>(endpoint: string, body?: unknown, token?: string): Promise<T> => {
         const res = await fetchWithAutoRefresh(`${API_URL}${endpoint}`, {
             method: 'PUT',
-            headers: getAuthHeaders(token),
+            headers: await getAuthHeaders(token),
             body: body ? JSON.stringify(body) : undefined,
         });
 
@@ -565,7 +590,7 @@ export const api = {
     delete: async <T = unknown>(endpoint: string): Promise<T> => {
         const res = await fetchWithAutoRefresh(`${API_URL}${endpoint}`, {
             method: 'DELETE',
-            headers: getAuthHeaders(),
+            headers: await getAuthHeaders(),
         });
 
         if (!res.ok) {

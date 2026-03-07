@@ -18,7 +18,7 @@ export default function HelpCenterPage() {
     },
     {
       q: 'What are the difficulty levels?',
-      a: 'Projects are rated Easy, Medium, or Hard based on the technical skills required and estimated completion time. Start with Easy projects if you\'re new to a domain.',
+      a: 'Projects are rated Beginner, Intermediate, or Advanced based on the technical skills required and estimated completion time. Start with Beginner projects if you\'re new to a domain.',
     },
     {
       q: 'How do I submit my own project?',

@@ -1,7 +1,7 @@
 from typing import List
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import Union, Any
-from pydantic import validator
+from pydantic import field_validator
 
 class Settings(BaseSettings):
     """
@@ -26,9 +26,14 @@ class Settings(BaseSettings):
     GEMINI_API_KEY: Union[str, None] = None
 
     # CORS
-    BACKEND_CORS_ORIGINS: Union[List[str], str] = ["http://localhost:3000", "http://localhost:3001"]
+    BACKEND_CORS_ORIGINS: Union[List[str], str] = [
+        "http://localhost:3000",
+        "http://localhost:3001",
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:3001",
+    ]
 
-    @validator("BACKEND_CORS_ORIGINS", pre=True)
+    @field_validator("BACKEND_CORS_ORIGINS", mode="before")
     def assemble_cors_origins(cls, v: Union[str, List[str]]) -> Union[List[str], str]:
         if isinstance(v, str) and not v.startswith("["):
             return [i.strip() for i in v.split(",")]

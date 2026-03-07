@@ -49,11 +49,20 @@ export default function NotificationBell() {
 
         try {
             setIsLoading(true);
-            const response = await notificationApi.getNotifications(1, 30);
+            const response = await notificationApi.getNotifications(1, 30) as any;
 
             // Handle both array and object response formats
-            const fetchedNotifs = Array.isArray(response) ? response : (response.notifications || []);
-            const fetchedUnread = typeof response.unreadCount === 'number' ? response.unreadCount : fetchedNotifs.filter((n: { isRead?: boolean }) => !n.isRead).length;
+            const rawNotifs: any[] = Array.isArray(response) ? response : (response.notifications || []);
+            const fetchedNotifs: Notification[] = rawNotifs.map((n: any) => ({
+                id: n.id || Math.random().toString(),
+                message: n.message || '',
+                isRead: !!n.isRead,
+                createdAt: n.createdAt || new Date().toISOString(),
+                type: n.type,
+                relatedProjectId: n.relatedProjectId,
+                icon: n.icon
+            }));
+            const fetchedUnread = typeof response.unreadCount === 'number' ? response.unreadCount : fetchedNotifs.filter(n => !n.isRead).length;
 
             // Do NOT use mock notifications as fallback if API is empty/failed
             setNotifications(fetchedNotifs);

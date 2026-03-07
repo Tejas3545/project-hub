@@ -2,15 +2,14 @@
 Routes for GitHub projects with pagination support.
 The frontend expects responses in {projects: [], pagination: {}} format.
 """
-import json
 from datetime import datetime, timezone
-import aiohttp
-from src.services.ai_service import generate_project_details
+from typing import Optional
+
 from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy import and_, func, not_, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from sqlalchemy import func
-from typing import Optional
+from sqlalchemy.orm import selectinload
 
 from src.core.database import get_db
 from src.core.config import settings
@@ -19,12 +18,91 @@ from src.schemas.project import (
     GitHubProjectListResponse, GitHubProjectResponse
 )
 from src.services.ai_service import generate_project_details
-from sqlalchemy.orm import selectinload
-from src.api.dependencies import get_current_user
 import httpx
-from datetime import datetime, timezone
 
 router = APIRouter()
+
+SUPPORTED_DOMAIN_SLUGS = {
+    "web-development",
+    "artificial-intelligence",
+    "machine-learning",
+    "data-science",
+    "cybersecurity",
+}
+
+CURATION_EXCLUSION_PATTERNS = [
+    "%awesome%",
+    "%free-programming-books%",
+    "%free programming books%",
+    "%tutorial%",
+    "%course%",
+    "%boilerplate%",
+    "%template%",
+    "%cheatsheet%",
+    "%cookbook%",
+    "%reference%",
+    "%roadmap%",
+    "%snippets%",
+    "%ebook%",
+    "%books%",
+]
+
+
+def apply_curation_filters(stmt, count_stmt=None):
+    excluded = [
+        or_(
+            GitHubProject.title.ilike(pattern),
+            GitHubProject.description.ilike(pattern),
+            GitHubProject.slug.ilike(pattern),
+        )
+        for pattern in CURATION_EXCLUSION_PATTERNS
+    ]
+
+    domain_filter = Domain.slug.in_(SUPPORTED_DOMAIN_SLUGS)
+    base_filters = [
+        GitHubProject.is_active.is_(True),
+        GitHubProject.project_type == "PROJECT",
+        not_(or_(*excluded)),
+        domain_filter,
+    ]
+
+    stmt = stmt.join(Domain).where(and_(*base_filters))
+    if count_stmt is not None:
+        count_stmt = count_stmt.join(Domain).where(and_(*base_filters))
+        return stmt, count_stmt
+    return stmt
+
+
+def resolve_sort_column(sort_by: Optional[str]):
+    sort_mapping = {
+        "createdAt": GitHubProject.created_at,
+        "created_at": GitHubProject.created_at,
+        "lastUpdated": GitHubProject.last_updated,
+        "last_updated": GitHubProject.last_updated,
+        "downloadCount": GitHubProject.download_count,
+        "download_count": GitHubProject.download_count,
+        "stars": GitHubProject.stars,
+        "forks": GitHubProject.forks,
+        "language": GitHubProject.language,
+        "difficulty": GitHubProject.difficulty,
+    }
+    return sort_mapping.get(sort_by or "stars", GitHubProject.stars)
+
+
+def apply_difficulty_filter(stmt, count_stmt, difficulty: Optional[str]):
+    if not difficulty:
+        return stmt, count_stmt
+
+    normalized = difficulty.upper()
+    if normalized == "ADVANCED":
+        difficulty_values = ["HARD", "ADVANCED", "EXPERT"]
+        stmt = stmt.where(GitHubProject.difficulty.in_(difficulty_values))
+        count_stmt = count_stmt.where(GitHubProject.difficulty.in_(difficulty_values))
+        return stmt, count_stmt
+
+    stmt = stmt.where(GitHubProject.difficulty == normalized)
+    count_stmt = count_stmt.where(GitHubProject.difficulty == normalized)
+    return stmt, count_stmt
 
 async def proxy_github_search(
     db: AsyncSession,
@@ -173,16 +251,16 @@ async def get_github_projects(
     order: Optional[str] = "desc",
     qaStatus: Optional[str] = None,
     projectType: Optional[str] = None,
+    live: bool = Query(False, description="Set true to query GitHub live instead of the curated local catalog."),
     db: AsyncSession = Depends(get_db),
 ):
     """
     Get paginated list of GitHub projects with optional filtering.
     Returns {projects: [], pagination: {total, page, limit, totalPages}}.
     """
-    # === 1. Attempt Live Proxy of GitHub API ===
-    # If the user is specifically looking for a QA status, we MUST query local DB.
-    # Otherwise, proxy to GitHub first.
-    if not qaStatus:
+    # Default to the curated local catalog. Live GitHub proxy is opt-in only because
+    # raw GitHub search returns unwanted entries like awesome lists, books, and tutorials.
+    if live and not qaStatus:
         gh_projects, gh_total = await proxy_github_search(
             db=db, search=search, domain_id=domainId, difficulty=difficulty, page=page, limit=limit
         )
@@ -206,14 +284,13 @@ async def get_github_projects(
     # === 2. Fallback to Local DB (Rate Limit or QA Status Filter) ===
     stmt = select(GitHubProject).options(selectinload(GitHubProject.domain))
     count_stmt = select(func.count()).select_from(GitHubProject)
+    stmt, count_stmt = apply_curation_filters(stmt, count_stmt)
 
     if domainId:
         stmt = stmt.where(GitHubProject.domain_id == domainId)
         count_stmt = count_stmt.where(GitHubProject.domain_id == domainId)
 
-    if difficulty:
-        stmt = stmt.where(GitHubProject.difficulty == difficulty.upper())
-        count_stmt = count_stmt.where(GitHubProject.difficulty == difficulty.upper())
+    stmt, count_stmt = apply_difficulty_filter(stmt, count_stmt, difficulty)
 
     if qaStatus:
         stmt = stmt.where(GitHubProject.qa_status == qaStatus)
@@ -236,7 +313,7 @@ async def get_github_projects(
     total = total_result.scalar() or 0
 
     # Apply sorting
-    sort_column = getattr(GitHubProject, sortBy, GitHubProject.created_at)
+    sort_column = resolve_sort_column(sortBy)
     if order == "asc":
         stmt = stmt.order_by(sort_column.asc())
     else:
@@ -267,6 +344,7 @@ async def search_github_projects(
     q: str = Query(..., min_length=1),
     page: int = Query(1, ge=1),
     limit: int = Query(50, ge=1, le=100),
+    live: bool = Query(False, description="Set true to query GitHub live instead of the curated local catalog."),
     db: AsyncSession = Depends(get_db),
 ):
     """
@@ -279,34 +357,32 @@ async def search_github_projects(
         | GitHubProject.description.ilike(search_term)
     )
 
-    # Proxy to GitHub API
-    gh_projects, gh_total = await proxy_github_search(
-        db=db, search=q, domain_id=None, difficulty=None, page=page, limit=limit
-    )
-    if gh_projects is not None:
-        total_pages = (gh_total + limit - 1) // limit if gh_total > 0 else 0
-        return {
-            "projects": gh_projects,
-            "pagination": {
-                "total": gh_total,
-                "page": page,
-                "limit": limit,
-                "totalPages": total_pages,
+    if live:
+        gh_projects, gh_total = await proxy_github_search(
+            db=db, search=q, domain_id=None, difficulty=None, page=page, limit=limit
+        )
+        if gh_projects is not None:
+            total_pages = (gh_total + limit - 1) // limit if gh_total > 0 else 0
+            return {
+                "projects": gh_projects,
+                "pagination": {
+                    "total": gh_total,
+                    "page": page,
+                    "limit": limit,
+                    "totalPages": total_pages,
+                }
             }
-        }
 
     # Fallback to Local Search
-    count_stmt = select(func.count()).select_from(GitHubProject).where(search_filter)
+    count_stmt = select(func.count()).select_from(GitHubProject)
+    stmt = select(GitHubProject).options(selectinload(GitHubProject.domain))
+    stmt, count_stmt = apply_curation_filters(stmt, count_stmt)
+    count_stmt = count_stmt.where(search_filter)
     total_result = await db.execute(count_stmt)
     total = total_result.scalar() or 0
 
     offset = (page - 1) * limit
-    stmt = (
-        select(GitHubProject)
-        .where(search_filter)
-        .offset(offset)
-        .limit(limit)
-    )
+    stmt = stmt.where(search_filter).offset(offset).limit(limit)
     result = await db.execute(stmt)
     projects = result.scalars().all()
 
@@ -328,6 +404,11 @@ async def get_github_projects_by_domain(
     domain_slug: str,
     page: int = Query(1, ge=1),
     limit: int = Query(200, ge=1, le=500),
+    difficulty: Optional[str] = None,
+    language: Optional[str] = None,
+    search: Optional[str] = None,
+    sortBy: Optional[str] = "stars",
+    order: Optional[str] = "desc",
     db: AsyncSession = Depends(get_db),
 ):
     """
@@ -338,22 +419,41 @@ async def get_github_projects_by_domain(
     domain = domain_result.scalars().first()
     if not domain:
         raise HTTPException(status_code=404, detail="Domain not found")
+    if domain.slug not in SUPPORTED_DOMAIN_SLUGS:
+        raise HTTPException(status_code=404, detail="Domain not supported")
 
-    count_stmt = (
-        select(func.count())
-        .select_from(GitHubProject)
-        .where(GitHubProject.domain_id == domain.id)
-    )
+    count_stmt = select(func.count()).select_from(GitHubProject)
+    stmt = select(GitHubProject).options(selectinload(GitHubProject.domain))
+    stmt, count_stmt = apply_curation_filters(stmt, count_stmt)
+    stmt = stmt.where(GitHubProject.domain_id == domain.id)
+    count_stmt = count_stmt.where(GitHubProject.domain_id == domain.id)
+
+    stmt, count_stmt = apply_difficulty_filter(stmt, count_stmt, difficulty)
+
+    if language:
+        stmt = stmt.where(GitHubProject.language == language)
+        count_stmt = count_stmt.where(GitHubProject.language == language)
+
+    if search:
+        search_term = f"%{search}%"
+        search_filter = (
+            GitHubProject.title.ilike(search_term)
+            | GitHubProject.description.ilike(search_term)
+        )
+        stmt = stmt.where(search_filter)
+        count_stmt = count_stmt.where(search_filter)
+
     total_result = await db.execute(count_stmt)
     total = total_result.scalar() or 0
 
     offset = (page - 1) * limit
-    stmt = (
-        select(GitHubProject)
-        .where(GitHubProject.domain_id == domain.id)
-        .offset(offset)
-        .limit(limit)
-    )
+    sort_column = resolve_sort_column(sortBy)
+    if order == "asc":
+        stmt = stmt.order_by(sort_column.asc())
+    else:
+        stmt = stmt.order_by(sort_column.desc())
+
+    stmt = stmt.offset(offset).limit(limit)
     result = await db.execute(stmt)
     projects = result.scalars().all()
 
@@ -365,7 +465,7 @@ async def get_github_projects_by_domain(
             "total": total,
             "page": page,
             "limit": limit,
-            "total_pages": total_pages,
+            "totalPages": total_pages,
         },
     }
 

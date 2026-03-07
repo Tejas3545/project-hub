@@ -6,6 +6,7 @@ import { projectApi } from '@/lib/api';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
+import { Project } from '@/types';
 
 interface PendingProject {
     id: string;

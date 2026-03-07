@@ -13,3 +13,6 @@ env/
 .cache/
 
 .env
+
+.pytest_cache
+.venv

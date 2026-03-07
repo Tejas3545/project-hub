@@ -11,6 +11,14 @@ interface GitHubProjectsListProps {
 export default function GitHubProjectsList({
   domainSlug
 }: GitHubProjectsListProps) {
+  const difficultyLabels: Record<string, string> = {
+    EASY: 'Beginner',
+    MEDIUM: 'Intermediate',
+    HARD: 'Advanced',
+    ADVANCED: 'Advanced',
+    EXPERT: 'Advanced+',
+  };
+
   const [projects, setProjects] = useState<GitHubProject[]>([]);
   const [total, setTotal] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
@@ -173,9 +181,9 @@ export default function GitHubProjectsList({
                 className="w-full appearance-none px-4 py-3 pr-10 bg-secondary border border-border rounded-xl text-foreground focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all cursor-pointer"
               >
                 <option value="">All Levels</option>
-                <option value="EASY">Easy</option>
-                <option value="MEDIUM">Medium</option>
-                <option value="HARD">Hard</option>
+                <option value="EASY">Beginner</option>
+                <option value="MEDIUM">Intermediate</option>
+                <option value="ADVANCED">Advanced</option>
               </select>
               <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
                 <svg className="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -247,7 +255,7 @@ export default function GitHubProjectsList({
                 onClick={() => setDifficulty('')}
                 className="flex items-center gap-2 px-3 py-1.5 bg-accent text-primary border border-primary/20 rounded-lg text-sm hover:bg-primary/20 transition-colors"
               >
-                <span>Difficulty: {difficulty}</span>
+                <span>Difficulty: {difficultyLabels[difficulty] || difficulty}</span>
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>

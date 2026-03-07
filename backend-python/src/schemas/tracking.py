@@ -32,6 +32,14 @@ class NotificationResponse(NotificationBase):
 
     model_config = ConfigDict(from_attributes=True, alias_generator=to_camel, populate_by_name=True)
 
+class NotificationListResponse(BaseModel):
+    notifications: List[NotificationResponse]
+    unread_count: int
+    page: int
+    limit: int
+
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
+
 class ProjectProgressBase(BaseModel):
     status: str
     time_spent: int = 0

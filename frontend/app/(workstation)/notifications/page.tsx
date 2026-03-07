@@ -77,7 +77,7 @@ export default function NotificationsPage() {
     const loadNotifications = async () => {
         try {
             setLoading(true);
-            const response = await notificationApi.getNotifications(1, 50);
+            const response = await notificationApi.getNotifications(1, 50) as any;
 
             let data = response.notifications || [];
             const readIds = getReadNotifications();

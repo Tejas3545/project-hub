@@ -17,6 +17,14 @@ interface Domain {
 }
 
 function ProjectsContent() {
+    const difficultyLabels: Record<string, string> = {
+        EASY: 'Beginner',
+        MEDIUM: 'Intermediate',
+        HARD: 'Advanced',
+        ADVANCED: 'Advanced',
+        EXPERT: 'Advanced+',
+    };
+
     const [projects, setProjects] = useState<GitHubProject[]>([]);
     const [allDomains, setAllDomains] = useState<{ id: string; name: string; slug: string }[]>([]);
     const [loading, setLoading] = useState(true);
@@ -32,8 +40,15 @@ function ProjectsContent() {
         maxTime: 100,
         skills: [] as string[],
         domains: [] as string[],
-        projectType: 'ALL',
+        projectType: 'PROJECT',
     });
+
+    const matchesDifficulty = (selected: string, actual: string) => {
+        if (selected === 'ADVANCED') {
+            return ['HARD', 'ADVANCED', 'EXPERT'].includes(actual);
+        }
+        return selected === actual;
+    };
     const [bookmarkMap, setBookmarkMap] = useState<Record<string, boolean>>({});
 
     const sentinelRef = useRef<HTMLDivElement | null>(null);
@@ -56,7 +71,7 @@ function ProjectsContent() {
                 search: debouncedSearch.trim() || undefined,
                 difficulty: filters.difficulty.length === 1 ? filters.difficulty[0] : undefined,
                 domainId: filters.domains.length === 1 ? filters.domains[0] : undefined,
-                projectType: filters.projectType === 'ALL' ? undefined : filters.projectType,
+                projectType: 'PROJECT',
             });
 
             const fetched = (result.projects || []) as GitHubProject[];
@@ -83,7 +98,7 @@ function ProjectsContent() {
             setLoading(false);
             setLoadingMore(false);
         }
-    }, [debouncedSearch, filters.difficulty, filters.domains, filters.projectType]);
+    }, [debouncedSearch, filters.difficulty, filters.domains]);
 
     useEffect(() => {
         fetchProjects(1, false);
@@ -109,7 +124,7 @@ function ProjectsContent() {
     const filteredProjects = useMemo(() => {
         return projects.filter(project => {
             // Difficulty filter
-            if (filters.difficulty.length > 1 && !filters.difficulty.includes(project.difficulty)) return false;
+            if (filters.difficulty.length > 0 && !filters.difficulty.some(level => matchesDifficulty(level, project.difficulty))) return false;
 
             // Domain filter
             if (filters.domains.length > 1 && !filters.domains.includes(project.domainId)) return false;
@@ -155,6 +170,37 @@ function ProjectsContent() {
 
     const handleSearch = (query: string) => setSearchQuery(query);
 
+    const selectedDomainNames = useMemo(
+        () => allDomains.filter(domain => filters.domains.includes(domain.id)).map(domain => domain.name),
+        [allDomains, filters.domains]
+    );
+
+    const activeFilterLabels = useMemo(() => {
+        const labels: string[] = [];
+        filters.difficulty.forEach(level => labels.push(difficultyLabels[level] || level));
+        selectedDomainNames.forEach(name => labels.push(name));
+        if (filters.minTime > 0 || filters.maxTime < 100) {
+            labels.push(`${filters.minTime}h-${filters.maxTime === 100 ? '100+h' : `${filters.maxTime}h`}`);
+        }
+        filters.skills.slice(0, 3).forEach(skill => labels.push(skill));
+        return labels;
+    }, [difficultyLabels, filters.difficulty, filters.minTime, filters.maxTime, filters.skills, selectedDomainNames]);
+
+    const quickStats = useMemo(() => {
+        const totalLoaded = projects.length;
+        const beginnerFriendly = filteredProjects.filter(project => project.difficulty === 'EASY').length;
+        const avgTime = filteredProjects.length
+            ? Math.round(filteredProjects.reduce((sum, project) => sum + ((project.estimatedMinTime + project.estimatedMaxTime) / 2), 0) / filteredProjects.length)
+            : 0;
+
+        return [
+            { label: 'Loaded', value: totalLoaded },
+            { label: 'Filtered', value: filteredProjects.length },
+            { label: 'Beginner', value: beginnerFriendly },
+            { label: 'Avg Time', value: avgTime ? `${avgTime}h` : '—' },
+        ];
+    }, [projects, filteredProjects]);
+
     return (
         <div className="min-h-screen">
             {/* Header */}
@@ -177,6 +223,15 @@ function ProjectsContent() {
                 <div className="max-w-2xl mb-6">
                     <SearchBar onSearch={handleSearch} />
                 </div>
+
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-2">
+                    {quickStats.map((stat) => (
+                        <div key={stat.label} className="rounded-xl border border-border bg-background px-4 py-3 shadow-sm">
+                            <p className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">{stat.label}</p>
+                            <p className="text-xl font-bold text-foreground mt-1">{stat.value}</p>
+                        </div>
+                    ))}
+                </div>
             </div>
 
             <div className="flex gap-8">
@@ -194,10 +249,24 @@ function ProjectsContent() {
                 {/* Main Content */}
                 <main className="flex-1 flex flex-col min-w-0">
                     <div className="flex items-center justify-between mb-6 pb-4 border-b border-border">
-                        <div className="flex items-center gap-4">
-                            <span className="text-sm font-semibold text-primary">
-                                {filteredProjects.length} shown
-                            </span>
+                        <div className="flex flex-col gap-2">
+                            <div className="flex items-center gap-4">
+                                <span className="text-sm font-semibold text-primary">
+                                    {filteredProjects.length} shown
+                                </span>
+                                <span className="text-sm text-muted-foreground">
+                                    from {totalCount} curated projects
+                                </span>
+                            </div>
+                            {activeFilterLabels.length > 0 && (
+                                <div className="flex flex-wrap gap-2">
+                                    {activeFilterLabels.map((label) => (
+                                        <span key={label} className="rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-medium text-primary">
+                                            {label}
+                                        </span>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     </div>
 
@@ -222,6 +291,17 @@ function ProjectsContent() {
                                     <p className="text-muted-foreground max-w-sm mx-auto">
                                         No projects match your current filters. Try adjusting your search criteria.
                                     </p>
+                                    <div className="mt-6 flex flex-wrap justify-center gap-2">
+                                        {allDomains.slice(0, 5).map((domain) => (
+                                            <button
+                                                key={domain.id}
+                                                onClick={() => setFilters(prev => ({ ...prev, domains: [domain.id] }))}
+                                                className="rounded-full border border-border bg-background px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground hover:border-primary/30"
+                                            >
+                                                {domain.name}
+                                            </button>
+                                        ))}
+                                    </div>
                                 </div>
                             )}
 
