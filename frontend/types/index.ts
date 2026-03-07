@@ -75,6 +75,9 @@ export interface ProjectProgress {
     startedAt?: Date;
     completedAt?: Date;
     timeSpent: number;
+    isRunning?: boolean;
+    lastTimerStart?: Date;
+    targetCompletionDate?: Date;
     createdAt: Date;
     updatedAt: Date;
 }

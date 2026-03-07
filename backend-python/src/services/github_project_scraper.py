@@ -8,11 +8,11 @@ from pathlib import Path
 from typing import Any, Iterable
 
 import httpx
-from sqlalchemy import select
+from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.config import settings
-from src.models.project import Domain, GitHubProject
+from src.models.project import Domain, GitHubProject, Project
 from src.services.ai_service import generate_project_details
 
 
@@ -183,6 +183,165 @@ def estimate_duration(stars: int, size: int, readme_text: str) -> tuple[int, int
     if complexity == 3:
         return 40, 80, "3-4 weeks"
     return 80, 120, "4-6 weeks"
+
+
+def _build_regular_project_payload(
+    *,
+    title: str,
+    domain_id: str,
+    sub_domain: str | None,
+    difficulty: str | None,
+    min_time: int,
+    max_time: int,
+    tech_stack: list[str] | None,
+    case_study: str | None,
+    problem_statement: str | None,
+    solution_description: str | None,
+    supposed_deadline: str | None,
+    prerequisites: list[str] | None,
+    deliverables: list[str] | None,
+    requirements: list[str] | None,
+    requirements_text: str | None,
+    evaluation_criteria: str | None,
+    repo_url: str | None = None,
+    live_url: str | None = None,
+    download_url: str | None = None,
+    skill_focus: list[str] | None = None,
+) -> dict[str, Any]:
+    normalized_problem_statement = (problem_statement or case_study or title).strip()
+    normalized_case_study = (case_study or normalized_problem_statement).strip()
+    normalized_solution_description = (solution_description or "Review the repository architecture and complete an implementation walkthrough.").strip()
+
+    guide_lines = [
+        "Imported from the GitHub curated catalog.",
+        f"Source repository: {repo_url}" if repo_url else None,
+        f"Live demo: {live_url}" if live_url else None,
+        f"Download archive: {download_url}" if download_url else None,
+    ]
+
+    return {
+        "title": title,
+        "domain_id": domain_id,
+        "sub_domain": sub_domain,
+        "difficulty": (difficulty or "MEDIUM").upper(),
+        "min_time": min_time,
+        "max_time": max_time,
+        "skill_focus": list(dict.fromkeys(skill_focus or tech_stack or [])),
+        "case_study": normalized_case_study,
+        "problem_statement": normalized_problem_statement,
+        "solution_description": normalized_solution_description,
+        "tech_stack": list(dict.fromkeys(tech_stack or [])),
+        "supposed_deadline": supposed_deadline,
+        "screenshots": [],
+        "initialization_guide": "\n".join(line for line in guide_lines if line),
+        "industry_context": normalized_case_study,
+        "scope": normalized_solution_description,
+        "prerequisites": prerequisites or [],
+        "deliverables": deliverables or [],
+        "requirements": requirements or [],
+        "requirements_text": requirements_text,
+        "advanced_extensions": None,
+        "evaluation_criteria": evaluation_criteria,
+        "is_published": True,
+    }
+
+
+async def sync_regular_project_from_payload(
+    db: AsyncSession,
+    *,
+    project_payload: dict[str, Any],
+    repo_url: str | None = None,
+) -> Project:
+    base_filters = [
+        Project.domain_id == project_payload["domain_id"],
+        Project.created_by_id.is_(None),
+        Project.deleted_at.is_(None),
+    ]
+
+    existing = None
+    if repo_url:
+        result = await db.execute(
+            select(Project).where(
+                *base_filters,
+                Project.initialization_guide.is_not(None),
+                Project.initialization_guide.ilike(f"%{repo_url}%"),
+            )
+        )
+        existing = result.scalar_one_or_none()
+
+    if existing is None:
+        result = await db.execute(
+            select(Project).where(
+                *base_filters,
+                or_(
+                    Project.title == project_payload["title"],
+                    Project.problem_statement == project_payload["problem_statement"],
+                ),
+            )
+        )
+        existing = result.scalar_one_or_none()
+
+    if existing:
+        for field_name, value in project_payload.items():
+            setattr(existing, field_name, value)
+        return existing
+
+    project = Project(**project_payload)
+    db.add(project)
+    await db.flush()
+    return project
+
+
+async def sync_regular_project_from_github_project(db: AsyncSession, github_project: GitHubProject) -> Project:
+    payload = _build_regular_project_payload(
+        title=github_project.title,
+        domain_id=github_project.domain_id,
+        sub_domain=github_project.sub_domain,
+        difficulty=github_project.difficulty,
+        min_time=github_project.estimated_min_time,
+        max_time=github_project.estimated_max_time,
+        tech_stack=github_project.tech_stack,
+        case_study=github_project.case_study or github_project.introduction,
+        problem_statement=github_project.problem_statement or github_project.description,
+        solution_description=github_project.solution_description or github_project.implementation,
+        supposed_deadline=github_project.supposed_deadline,
+        prerequisites=github_project.prerequisites,
+        deliverables=github_project.deliverables,
+        requirements=github_project.requirements,
+        requirements_text=github_project.requirements_text,
+        evaluation_criteria=github_project.evaluation_criteria,
+        repo_url=github_project.repo_url,
+        live_url=github_project.live_url,
+        download_url=github_project.download_url,
+        skill_focus=(github_project.technical_skills or github_project.tech_stack),
+    )
+    return await sync_regular_project_from_payload(db, project_payload=payload, repo_url=github_project.repo_url)
+
+
+async def sync_regular_project_from_candidate(db: AsyncSession, candidate: ScrapeCandidate, domain_id: str) -> Project:
+    payload = _build_regular_project_payload(
+        title=candidate.title,
+        domain_id=domain_id,
+        sub_domain=candidate.sub_domain,
+        difficulty=candidate.difficulty,
+        min_time=candidate.estimated_min_time,
+        max_time=candidate.estimated_max_time,
+        tech_stack=candidate.tech_stack,
+        case_study=candidate.case_study or candidate.introduction,
+        problem_statement=candidate.problem_statement or candidate.description,
+        solution_description=candidate.solution_description or candidate.implementation,
+        supposed_deadline=candidate.supposed_deadline,
+        prerequisites=candidate.prerequisites,
+        deliverables=candidate.deliverables,
+        requirements=candidate.requirements,
+        requirements_text=candidate.requirements_text,
+        evaluation_criteria=candidate.evaluation_criteria,
+        repo_url=candidate.repo_url,
+        live_url=candidate.live_url,
+        download_url=candidate.download_url,
+        skill_focus=candidate.technical_skills or candidate.tech_stack,
+    )
+    return await sync_regular_project_from_payload(db, project_payload=payload, repo_url=candidate.repo_url)
 
 
 def assign_balanced_difficulties(candidates: list[ScrapeCandidate]) -> list[ScrapeCandidate]:
@@ -558,6 +717,7 @@ async def ensure_domain(db: AsyncSession, domain_slug: str) -> Domain:
 async def upsert_candidates(db: AsyncSession, candidates: list[ScrapeCandidate]) -> dict[str, int]:
     inserted = 0
     updated = 0
+    synced_projects = 0
     by_domain: dict[str, Domain] = {}
 
     for candidate in candidates:
@@ -580,13 +740,18 @@ async def upsert_candidates(db: AsyncSession, candidates: list[ScrapeCandidate])
                 setattr(existing, field_name, value)
             existing.domain_id = domain.id
             updated += 1
+            await sync_regular_project_from_candidate(db, candidate, domain.id)
+            synced_projects += 1
         else:
             project = GitHubProject(**payload, domain_id=domain.id, last_updated=datetime.now(timezone.utc))
             db.add(project)
             inserted += 1
+            await db.flush()
+            await sync_regular_project_from_candidate(db, candidate, domain.id)
+            synced_projects += 1
 
     await db.commit()
-    return {"inserted": inserted, "updated": updated}
+    return {"inserted": inserted, "updated": updated, "synced_projects": synced_projects}
 
 
 def save_candidates_to_file(candidates: list[ScrapeCandidate], output_path: Path) -> Path:

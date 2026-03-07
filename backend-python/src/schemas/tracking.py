@@ -3,19 +3,7 @@ from pydantic.alias_generators import to_camel
 from typing import Optional, List, Any
 from datetime import datetime
 
-class ProjectSimpleResponse(BaseModel):
-    id: str
-    title: str
-
-    model_config = ConfigDict(from_attributes=True, alias_generator=to_camel, populate_by_name=True)
-
-class GitHubProjectSimpleResponse(BaseModel):
-    id: str
-    title: str
-    repo_owner: Optional[str] = None
-    repo_name: Optional[str] = None
-
-    model_config = ConfigDict(from_attributes=True, alias_generator=to_camel, populate_by_name=True)
+from src.schemas.project import ProjectResponse, GitHubProjectResponse
 
 class NotificationBase(BaseModel):
     message: str
@@ -42,8 +30,8 @@ class NotificationListResponse(BaseModel):
 
 class ProjectProgressBase(BaseModel):
     status: str
-    time_spent: int = 0
-    is_running: bool = False
+    time_spent: Optional[int] = None
+    is_running: Optional[bool] = None
     notes: Optional[str] = None
 
     model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
@@ -58,15 +46,15 @@ class ProjectProgressResponse(ProjectProgressBase):
     target_completion_date: Optional[datetime] = None
     created_at: datetime
     updated_at: datetime
-    project: Optional[ProjectSimpleResponse] = None
+    project: Optional[ProjectResponse] = None
 
     model_config = ConfigDict(from_attributes=True, alias_generator=to_camel, populate_by_name=True)
 
 class GitHubProjectProgressBase(BaseModel):
     status: str
-    time_spent: int = 0
+    time_spent: Optional[int] = None
     notes: Optional[str] = None
-    checklist: List[bool] = []
+    checklist: Optional[List[bool]] = None
 
     model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
@@ -78,6 +66,6 @@ class GitHubProjectProgressResponse(GitHubProjectProgressBase):
     completed_at: Optional[datetime] = None
     created_at: datetime
     updated_at: datetime
-    github_project: Optional[GitHubProjectSimpleResponse] = None
+    github_project: Optional[GitHubProjectResponse] = None
 
     model_config = ConfigDict(from_attributes=True, alias_generator=to_camel, populate_by_name=True)

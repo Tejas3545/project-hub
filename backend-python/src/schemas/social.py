@@ -25,7 +25,8 @@ class CommentCreateRequest(BaseModel):
 class CommentResponse(BaseModel):
     id: str
     user_id: str
-    project_id: str
+    project_id: Optional[str] = None
+    github_project_id: Optional[str] = None
     text: str
     parent_id: Optional[str] = None
     upvotes: int

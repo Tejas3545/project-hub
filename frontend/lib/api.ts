@@ -375,13 +375,13 @@ export const userApi = {
         return api.get<ProjectProgress[]>('/user/progress');
     },
 
-    updateProgress: async (projectId: string, data: { status: string; notes?: string }) => {
+    updateProgress: async (projectId: string, data: { status: string; notes?: string; timeSpent?: number; isRunning?: boolean }) => {
         return api.put(`/user/progress/${projectId}`, data);
     },
 
-    getProjectProgress: async (projectId: string): Promise<{ status: string }> => {
+    getProjectProgress: async (projectId: string): Promise<Partial<ProjectProgress> & { status: string }> => {
         try {
-            return await api.get<{ status: string }>(`/user/progress/${projectId}`);
+            return await api.get<Partial<ProjectProgress> & { status: string }>(`/user/progress/${projectId}`);
         } catch {
             return { status: 'NOT_STARTED' };
         }

@@ -52,6 +52,7 @@ class User(Base):
     notifications: Mapped[list] = relationship("Notification", back_populates="user", cascade="all, delete-orphan")
     progress: Mapped[list] = relationship("ProjectProgress", back_populates="user", cascade="all, delete-orphan")
     github_progress: Mapped[list] = relationship("GitHubProjectProgress", back_populates="user", cascade="all, delete-orphan")
+    created_projects: Mapped[list] = relationship("Project", back_populates="created_by")
     bookmarks: Mapped[list] = relationship("Bookmark", back_populates="user", cascade="all, delete-orphan")
     comments: Mapped[list] = relationship("Comment", back_populates="user", cascade="all, delete-orphan")
     likes: Mapped[list] = relationship("Like", back_populates="user", cascade="all, delete-orphan")

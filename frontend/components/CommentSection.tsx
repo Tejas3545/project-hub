@@ -21,9 +21,10 @@ interface Comment {
 
 interface CommentSectionProps {
     projectId: string;
+    onCountChange?: (count: number) => void;
 }
 
-export default function CommentSection({ projectId }: CommentSectionProps) {
+export default function CommentSection({ projectId, onCountChange }: CommentSectionProps) {
     const { user } = useAuth();
     const [comments, setComments] = useState<Comment[]>([]);
     const [loading, setLoading] = useState(true);
@@ -36,6 +37,7 @@ export default function CommentSection({ projectId }: CommentSectionProps) {
     const loadComments = async (pageNum = 1) => {
         try {
             const response = await socialApi.getComments(projectId, pageNum, 50) as any; // Fetch more per page for threading
+            const total = response.total || response.comments?.length || 0;
             if (pageNum === 1) {
                 setComments((response.comments as Comment[]) || []);
             } else {
@@ -47,7 +49,9 @@ export default function CommentSection({ projectId }: CommentSectionProps) {
                     return [...prev, ...uniqueNewComments];
                 });
             }
+            setPage(pageNum);
             setHasMore((response.page || 1) < (response.totalPages || 1));
+            onCountChange?.(total);
         } catch (error) {
             console.error('Failed to load comments:', error);
         } finally {
@@ -64,18 +68,44 @@ export default function CommentSection({ projectId }: CommentSectionProps) {
         if (!user) return;
         try {
             const newComment = await socialApi.addComment(projectId, text, parentId) as any;
-            setComments(prev => [newComment, ...prev]);
+            setComments(prev => {
+                const next = [newComment, ...prev];
+                onCountChange?.(next.length);
+                return next;
+            });
             setReplyingTo(null);
         } catch (error) {
             console.error('Failed to add comment:', error);
         }
     };
 
+    const collectDescendantIds = (commentId: string, source: Comment[]): Set<string> => {
+        const ids = new Set<string>([commentId]);
+        let changed = true;
+
+        while (changed) {
+            changed = false;
+            for (const comment of source) {
+                if (comment.parentId && ids.has(comment.parentId) && !ids.has(comment.id)) {
+                    ids.add(comment.id);
+                    changed = true;
+                }
+            }
+        }
+
+        return ids;
+    };
+
     const handleDelete = async (commentId: string) => {
         if (!confirm('Delete this comment?')) return;
         try {
             await socialApi.deleteComment(commentId);
-            setComments(prev => prev.filter(c => c.id !== commentId));
+            setComments(prev => {
+                const idsToRemove = collectDescendantIds(commentId, prev);
+                const next = prev.filter(c => !idsToRemove.has(c.id));
+                onCountChange?.(next.length);
+                return next;
+            });
         } catch (error) {
             console.error('Failed to delete comment:', error);
         }
@@ -148,10 +178,10 @@ export default function CommentSection({ projectId }: CommentSectionProps) {
                                 key={comment.id}
                                 comment={comment}
                                 getReplies={getReplies}
+                                replyingTo={replyingTo}
                                 onReply={(id) => setReplyingTo(id)}
                                 onCancelReply={() => setReplyingTo(null)}
-                                isReplying={replyingTo === comment.id}
-                                onSubmitReply={(text) => handleCommentSubmit(text, comment.id)}
+                                onSubmitReply={(parentId, text) => handleCommentSubmit(text, parentId)}
                                 onDelete={handleDelete}
                                 onUpvote={handleUpvote}
                                 currentUserId={user?.id}
@@ -178,9 +208,9 @@ export default function CommentSection({ projectId }: CommentSectionProps) {
 function CommentItem({
     comment,
     getReplies,
+    replyingTo,
     onReply,
     onCancelReply,
-    isReplying,
     onSubmitReply,
     onDelete,
     onUpvote,
@@ -188,15 +218,16 @@ function CommentItem({
 }: {
     comment: Comment,
     getReplies: (id: string) => Comment[],
+    replyingTo: string | null,
     onReply: (id: string) => void,
     onCancelReply: () => void,
-    isReplying: boolean,
-    onSubmitReply: (text: string) => void,
+    onSubmitReply: (parentId: string, text: string) => void,
     onDelete: (id: string) => void,
     onUpvote: (id: string) => void,
     currentUserId?: string
 }) {
     const replies = getReplies(comment.id);
+    const isReplying = replyingTo === comment.id;
 
     const formatDate = (dateString: string) => {
         const date = new Date(dateString);
@@ -292,7 +323,7 @@ function CommentItem({
                     {isReplying && (
                         <div className="mt-3 pl-2 border-l-2 border-border">
                             <CommentForm
-                                onSubmit={onSubmitReply}
+                                onSubmit={(text) => onSubmitReply(comment.id, text)}
                                 autoFocus
                                 placeholder={`Reply to ${comment.user.firstName || 'user'}...`}
                                 onCancel={onCancelReply}
@@ -307,19 +338,11 @@ function CommentItem({
                                 <CommentItem
                                     key={reply.id}
                                     comment={reply}
-                                    getReplies={getReplies} // Pass recursion down
-                                    onReply={onReply} // In deep nesting, usually flat "reply" opens form at current level or creates a new top level logic. 
-                                    // For simple threading: recursive rendering handles visual nesting.
-                                    // But infinite nesting gets squeezed. 
-                                    // We'll allow nesting.
+                                    getReplies={getReplies}
+                                    replyingTo={replyingTo}
+                                    onReply={onReply}
                                     onCancelReply={onCancelReply}
-                                    isReplying={false} // Start simple: only reply to top level? No, let's allow deep reply but maybe stop visual indentation after data depth 3? 
-                                    // For now, full recursion.
-                                    onSubmitReply={(text) => onSubmitReply(text)} // Actually, replying to a reply usually replies to the parent or creates a new reply with parentId = reply.id
-                                    // The `onSubmitReply` passed here from parent `rootComments.map` uses `comment.id` (root).
-                                    // So all replies to replies become siblings at level 1?
-                                    // If we want deep nesting, we need to pass a handler that takes the ID.
-                                    // Let's adjust `onSubmitReply` in recursive call.
+                                    onSubmitReply={onSubmitReply}
                                     onDelete={onDelete}
                                     onUpvote={onUpvote}
                                     currentUserId={currentUserId}

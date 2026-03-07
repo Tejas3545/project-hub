@@ -6,25 +6,56 @@ This document summarizes all tasks from the project documentation.
 
 ## 📊 NEW: Comprehensive Progress Reports Available
 
-**As of March 3, 2026, detailed progress reports have been generated:**
+**As of March 8, 2026, detailed progress reports have been generated:**
 
-- 🚀 **[QUICK_STATUS.md](./QUICK_STATUS.md)** - 2-min executive summary
-- 📋 **[ACTION_PLAN.md](./ACTION_PLAN.md)** - Detailed execution roadmap  
-- 🔧 **[TECHNICAL_STATUS.md](./TECHNICAL_STATUS.md)** - Complete technical reference
-- 📈 **[PROGRESS_REPORT.md](./PROGRESS_REPORT.md)** - 500-line comprehensive analysis
-- 📁 **[REPORTS_README.md](./REPORTS_README.md)** - Navigation guide
+- 🚀 **[QUICK_STATUS.md](../docs_generated/QUICK_STATUS.md)** - 2-min executive summary
+- 📋 **[ACTION_PLAN.md](../docs_generated/ACTION_PLAN.md)** - Detailed execution roadmap  
+- 🔧 **[TECHNICAL_STATUS.md](../docs_generated/TECHNICAL_STATUS.md)** - Complete technical reference
+- 📈 **[PROGRESS_REPORT.md](../docs_generated/PROGRESS_REPORT.md)** - 500-line comprehensive analysis
+- 📁 **[REPORTS_README.md](../docs_generated/REPORTS_README.md)** - Navigation guide
 
 **Key Findings:**
-- ✅ Platform 75% complete with solid infrastructure
-- ✅ Backend API 89% functional (54/61 endpoints)
-- ✅ Frontend 95% complete (all pages done)
-- ⚠️ Social API routes missing (comments/likes broken)
-- ❌ Content creation 0% (0/500 projects)
+- ✅ Platform foundation is strong with working frontend and FastAPI backend
+- ✅ Social backend and primary project-detail social UI wiring are in place
+- ✅ Workspace timer, analytics, and learning path backend routes now return real derived data
+- ✅ Regular project CRUD and per-project regular progress endpoints are implemented in the Python backend
+- ✅ GitHub scraped/catalog projects now sync into regular projects during import/live catalog caching
+- ⚠️ Content pipeline is active, but the 500-project goal is still incomplete
 
 **Critical Actions:**
-1. Fix `/api/social/*` routes (4-6 hours)
-2. Create 500 projects (200-400 hours)
-3. Add monitoring & testing
+1. Continue project curation to reach the 500-project target with QA
+2. Add monitoring, testing, and production hardening
+3. Runtime-validate analytics, learning path, and timer flows end-to-end
+4. Backfill older imported GitHub rows into regular projects if the database was populated before the sync change
+
+---
+
+## 📌 Codebase Reality Check (March 8, 2026)
+
+After reviewing the current `frontend` and `backend-python` codebases, the platform status is more nuanced than the earlier summary.
+
+### What is confirmed working in code
+- Public project browsing and filtering UI
+- Protected workstation/dashboard layout
+- NextAuth-based login flow with Google and credentials support
+- GitHub project catalog endpoints and detail pages
+- Regular project catalog CRUD endpoints in the Python backend
+- Bookmarking, notifications, profile editing, and project submission UI
+- Social backend routes for likes, comments, and comment upvotes
+- Primary project detail social UI wiring for likes/comments
+- Workspace timer routes for active-session lookup, start, stop, notes updates, history, and per-project history
+- Analytics routes with derived summary/dashboard metrics
+- Learning path routes with domain-based recommendations
+- GitHub import/live-catalog pipeline mirroring into regular projects
+
+### What is only partially complete
+- Analytics and learning path responses are now live, but recommendation quality and end-to-end frontend behavior still need validation
+- Workspace timer backend/frontend compatibility has been aligned, but full runtime validation is still advisable
+- GitHub-to-regular-project sync is implemented for new imports/live caching, but older imported rows may still need a one-time backfill
+
+### What is still missing or mismatched
+- The 500-project content goal is not complete; recent scraping/import progress reached 240 curated candidates, not 500 finalized projects
+- Automated testing, monitoring, and production hardening remain thin
 
 ---
 
@@ -43,7 +74,7 @@ You are building a **Domain-Based Student Project Platform** that serves as:
 | Layer | Technology |
 |-------|------------|
 | Frontend | Next.js (React), Tailwind CSS, TypeScript |
-| Backend | any |
+| Backend | FastAPI (Python) |
 | Database | PostgreSQL with Prisma ORM |
 | Auth | NextAuth.js (Google OAuth) |
 | Storage | AWS S3 or Cloudinary |
@@ -75,6 +106,8 @@ You are building a **Domain-Based Student Project Platform** that serves as:
 - Like/Upvote system (one vote per user)
 - Comment section with threaded replies
 - Notifications (top-right tooltip)
+
+**Implementation note:** the backend contains `/api/social/*` endpoints and the primary project detail flows now mount the engagement UI, but this area still benefits from runtime QA.
 
 #### D. User Profile
 - Profile image, name, bio
@@ -193,7 +226,7 @@ Build **100 functional web applications** as a personal portfolio.
 
 ## Summary Checklist
 
-### Platform Development (~90% Complete)
+### Platform Development (~95% Complete)
 - [x] Set up Next.js project with Tailwind CSS
 - [x] Implement Google OAuth authentication
 - [x] Build public Launchpad with domain filtering
@@ -202,21 +235,31 @@ Build **100 functional web applications** as a personal portfolio.
 - [x] Implement Project Inventory system
 - [x] Add time tracking functionality
 - [x] Create project upload form
-- [ ] **INCOMPLETE: Implement likes/upvotes backend** (frontend exists, backend missing /social/ routes)
-- [ ] **INCOMPLETE: Implement comments backend** (frontend exists, backend missing /social/ routes)
+- [x] Implement likes/upvotes backend routes in FastAPI
+- [x] Implement comments backend routes in FastAPI
+- [x] Wire likes/comments into the main GitHub project detail UX
 - [x] Add notification system
 - [x] Build user profile with stats
+- [x] Align frontend API expectations with backend for regular project CRUD
+- [x] Add missing regular project per-item progress endpoints used by frontend
+- [x] Implement analytics summary endpoints
+- [x] Implement learning path recommendation endpoints
+- [x] Sync GitHub scraped/catalog projects into regular projects
 
-### Project Creation (0/500 Projects - 0% Complete) ⚠️ CRITICAL
-- [x] Create 100 Web Development projects (0/100)
-- [x] Create 100 AI projects (0/100)
-- [x] Create 100 Machine Learning projects (0/100)
-- [x] Create 100 Data Science projects (0/100)
-- [x] Create 100 Cybersecurity projects (0/100)
+### Project Creation (~240 Imported Candidates / 500 Target) ⚠️ CRITICAL
+- [ ] Create 100 Web Development projects
+- [ ] Create 100 AI projects
+- [ ] Create 100 Machine Learning projects
+- [ ] Create 100 Data Science projects
+- [ ] Create 100 Cybersecurity projects
 - [x] Infrastructure ready (database schema, API endpoints, submission form)
-- [x] Ensure each project has case study, problem, solution
-- [x] Add screenshots to each project
-- [x] Include source code with README
+- [x] GitHub scraping/import pipeline working
+- [ ] QA-review and finalize imported projects to production quality
+- [ ] Ensure each project has case study, problem, solution
+- [ ] Add screenshots to each project
+- [ ] Include source code with README
+
+**Current measurable progress:** a recent multi-domain import wrote **240** project candidates into the pipeline/database (`174 inserted`, `66 updated`). This is useful momentum, but it is **not yet equivalent to 500 fully reviewed, production-ready projects**.
 
 ### Quality Assurance (⚠️ Minimal)
 - [ ] Internal QA review for all projects
@@ -226,3 +269,22 @@ Build **100 functional web applications** as a personal portfolio.
 - [ ] Security audit
 - [ ] Domain-wise delivery
 - [ ] Each project independently downloadable
+
+### Backend Reality Notes
+- [x] Social routes exist in `backend-python/src/api/routes/social.py`
+- [x] Notifications routes exist in `backend-python/src/api/routes/notifications.py`
+- [x] GitHub catalog routes are implemented in `backend-python/src/api/routes/github_projects.py`
+- [x] Analytics routes now return derived summary/dashboard data
+- [x] Learning path routes now return recommendation data
+- [x] Workspace timer routes support active-session lookup, start, stop, notes updates, history, and per-project history
+
+### Frontend Reality Notes
+- [x] Main workstation pages are present and styled
+- [x] Comment UI component exists
+- [x] Comment UI is mounted in the primary project detail pages
+- [x] Main GitHub project cards/details expose the social flow
+- [x] Frontend/backend gaps for regular project CRUD and per-item progress have been addressed
+
+### New Integration Notes
+- [x] Newly scraped/imported GitHub projects are mirrored into the regular projects catalog
+- [ ] Older already-imported GitHub rows may still need a one-time backfill if they were imported before the sync change

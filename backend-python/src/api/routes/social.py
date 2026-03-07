@@ -1,4 +1,5 @@
 from math import ceil
+from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import func, select
@@ -7,7 +8,7 @@ from sqlalchemy.orm import selectinload
 
 from src.api.dependencies import get_current_user
 from src.core.database import get_db
-from src.models.project import Project
+from src.models.project import GitHubProject, Project
 from src.models.social import Comment, Like
 from src.models.tracking import Notification
 from src.models.user import User
@@ -24,14 +25,57 @@ from src.schemas.social import (
 router = APIRouter()
 
 
+class ProjectTargetSummary:
+    def __init__(
+        self,
+        project_id: str,
+        title: str,
+        target_type: Literal["project", "github"],
+        created_by_id: str | None = None,
+    ):
+        self.id = project_id
+        self.title = title
+        self.target_type = target_type
+        self.created_by_id = created_by_id
+
+
 async def get_project_summary(db: AsyncSession, project_id: str):
     result = await db.execute(
         select(Project.id, Project.title, Project.created_by_id).where(Project.id == project_id)
     )
     project_row = result.first()
-    if not project_row:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
-    return project_row
+    if project_row:
+        return ProjectTargetSummary(
+            project_id=project_row.id,
+            title=project_row.title,
+            target_type="project",
+            created_by_id=project_row.created_by_id,
+        )
+
+    github_result = await db.execute(
+        select(GitHubProject.id, GitHubProject.title).where(GitHubProject.id == project_id)
+    )
+    github_row = github_result.first()
+    if github_row:
+        return ProjectTargetSummary(
+            project_id=github_row.id,
+            title=github_row.title,
+            target_type="github",
+        )
+
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
+
+
+def target_filter(model, target: ProjectTargetSummary):
+    if target.target_type == "github":
+        return model.github_project_id == target.id
+    return model.project_id == target.id
+
+
+def target_kwargs(target: ProjectTargetSummary) -> dict[str, str | None]:
+    if target.target_type == "github":
+        return {"project_id": None, "github_project_id": target.id}
+    return {"project_id": target.id, "github_project_id": None}
 
 
 async def create_notification(
@@ -63,7 +107,11 @@ async def toggle_project_like(
     project = await get_project_summary(db, project_id)
 
     existing_result = await db.execute(
-        select(Like).where(Like.user_id == current_user.id, Like.project_id == project_id)
+        select(Like).where(
+            Like.user_id == current_user.id,
+            Like.comment_id.is_(None),
+            target_filter(Like, project),
+        )
     )
     existing_like = existing_result.scalar_one_or_none()
 
@@ -72,7 +120,7 @@ async def toggle_project_like(
         await db.delete(existing_like)
     else:
         liked = True
-        db.add(Like(user_id=current_user.id, project_id=project_id))
+        db.add(Like(user_id=current_user.id, **target_kwargs(project)))
         if project.created_by_id and project.created_by_id != current_user.id:
             actor_name = current_user.first_name or current_user.email.split("@")[0]
             await create_notification(
@@ -86,7 +134,10 @@ async def toggle_project_like(
     await db.commit()
 
     count_result = await db.execute(
-        select(func.count(Like.id)).where(Like.project_id == project_id)
+        select(func.count(Like.id)).where(
+            Like.comment_id.is_(None),
+            target_filter(Like, project),
+        )
     )
     count = count_result.scalar() or 0
 
@@ -99,16 +150,25 @@ async def get_project_like_status(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
+    project = await get_project_summary(db, project_id)
     result = await db.execute(
-        select(Like.id).where(Like.user_id == current_user.id, Like.project_id == project_id)
+        select(Like.id).where(
+            Like.user_id == current_user.id,
+            Like.comment_id.is_(None),
+            target_filter(Like, project),
+        )
     )
     return {"liked": result.first() is not None}
 
 
 @router.get("/projects/{project_id}/like/count", response_model=LikeCountResponse)
 async def get_project_like_count(project_id: str, db: AsyncSession = Depends(get_db)):
+    project = await get_project_summary(db, project_id)
     count_result = await db.execute(
-        select(func.count(Like.id)).where(Like.project_id == project_id)
+        select(func.count(Like.id)).where(
+            Like.comment_id.is_(None),
+            target_filter(Like, project),
+        )
     )
     return {"count": count_result.scalar() or 0}
 
@@ -129,7 +189,7 @@ async def add_project_comment(
     parent_comment = None
     if payload.parent_id:
         parent_result = await db.execute(
-            select(Comment).where(Comment.id == payload.parent_id, Comment.project_id == project_id)
+            select(Comment).where(Comment.id == payload.parent_id, target_filter(Comment, project))
         )
         parent_comment = parent_result.scalar_one_or_none()
         if not parent_comment:
@@ -137,9 +197,9 @@ async def add_project_comment(
 
     comment = Comment(
         user_id=current_user.id,
-        project_id=project_id,
         text=cleaned_text,
         parent_id=payload.parent_id,
+        **target_kwargs(project),
     )
     db.add(comment)
 
@@ -179,17 +239,18 @@ async def get_project_comments(
     limit: int = Query(20, ge=1, le=100),
     db: AsyncSession = Depends(get_db),
 ):
+    project = await get_project_summary(db, project_id)
     offset = (page - 1) * limit
 
     total_result = await db.execute(
-        select(func.count(Comment.id)).where(Comment.project_id == project_id)
+        select(func.count(Comment.id)).where(target_filter(Comment, project))
     )
     total = total_result.scalar() or 0
 
     comments_result = await db.execute(
         select(Comment)
         .options(selectinload(Comment.user))
-        .where(Comment.project_id == project_id)
+        .where(target_filter(Comment, project))
         .order_by(Comment.created_at.desc())
         .offset(offset)
         .limit(limit)
@@ -246,7 +307,14 @@ async def upvote_comment(
     upvoted = like is None
 
     if like is None:
-        db.add(Like(user_id=current_user.id, comment_id=comment_id, project_id=comment.project_id))
+        db.add(
+            Like(
+                user_id=current_user.id,
+                comment_id=comment_id,
+                project_id=comment.project_id,
+                github_project_id=comment.github_project_id,
+            )
+        )
         comment.upvotes += 1
 
         if comment.user_id != current_user.id:
@@ -256,7 +324,7 @@ async def upvote_comment(
                 user_id=comment.user_id,
                 message=f"{actor_name} upvoted your comment.",
                 notification_type="NEW_UPVOTE",
-                related_project_id=comment.project_id,
+                related_project_id=comment.project_id or comment.github_project_id,
             )
 
         await db.commit()

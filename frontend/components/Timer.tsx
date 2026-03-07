@@ -20,7 +20,6 @@ export default function Timer({
 }: TimerProps) {
   const [isRunning, setIsRunning] = useState(false);
   const [elapsedTime, setElapsedTime] = useState(0); // seconds
-  const [sessionId, setSessionId] = useState<string | null>(null);
   const [totalTimeSpent, setTotalTimeSpent] = useState(initialTimeSpent * 60); // convert to seconds
 
   // Format time as HH:MM:SS
@@ -60,14 +59,8 @@ export default function Timer({
       if (res.ok) {
         const data = await res.json();
         if (data.session && data.session.projectId === projectId) {
-          setSessionId(data.session.id);
           setIsRunning(true);
-          
-          // Calculate elapsed time from start
-          const startTime = new Date(data.session.startTime).getTime();
-          const now = Date.now();
-          const elapsed = Math.floor((now - startTime) / 1000);
-          setElapsedTime(elapsed);
+          setElapsedTime(data.session.duration || 0);
         }
       }
     } catch (error) {
@@ -101,9 +94,8 @@ export default function Timer({
       const data = await res.json();
 
       if (res.ok) {
-        setSessionId(data.session.id);
+        setElapsedTime(data.session?.duration || 0);
         setIsRunning(true);
-        setElapsedTime(0);
       } else {
         alert(data.message || 'Failed to start timer');
       }
@@ -124,7 +116,7 @@ export default function Timer({
   const handleStop = async () => {
     try {
       const token = localStorage.getItem('accessToken');
-      if (!token || !sessionId) return;
+      if (!token) return;
 
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/workspace/timer/stop`, {
         method: 'POST',
@@ -133,7 +125,7 @@ export default function Timer({
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({ 
-          sessionId,
+          projectId,
           notes: `Worked on ${projectTitle}`
         })
       });
@@ -141,18 +133,17 @@ export default function Timer({
       const data = await res.json();
 
       if (res.ok) {
-        const newTotal = totalTimeSpent + elapsedTime;
+        const newTotal = data.session?.duration || (totalTimeSpent + elapsedTime);
         setTotalTimeSpent(newTotal);
         setIsRunning(false);
         setElapsedTime(0);
-        setSessionId(null);
         
         // Notify parent component
         if (onTimerUpdate) {
-          onTimerUpdate(Math.floor(data.totalTimeSpent / 60)); // convert to minutes
+          onTimerUpdate(Math.floor(newTotal / 60));
         }
 
-        alert(`Session completed! Total time: ${formatTime(elapsedTime)}`);
+        alert(`Session completed! Total time: ${formatTime(newTotal)}`);
       } else {
         alert(data.message || 'Failed to stop timer');
       }
@@ -188,7 +179,7 @@ export default function Timer({
 
       {/* Timer Controls */}
       <div className="flex gap-2 justify-center">
-        {!sessionId ? (
+        {!isRunning && elapsedTime === 0 ? (
           <Button
             onClick={handleStart}
             className="bg-green-600 hover:bg-green-700 text-white"
@@ -200,7 +191,7 @@ export default function Timer({
           <>
             {isRunning ? (
               <Button
-                onClick={handlePause}
+                onClick={handleStop}
                 className="bg-yellow-600 hover:bg-yellow-700 text-white"
               >
                 <Pause className="w-4 h-4 mr-2" />
@@ -227,7 +218,7 @@ export default function Timer({
       </div>
 
       {/* Instructions */}
-      {!sessionId && (
+      {!isRunning && elapsedTime === 0 && (
         <div className="mt-4 text-xs text-center text-muted-foreground">
           Click Start to begin tracking your work on this project
         </div>

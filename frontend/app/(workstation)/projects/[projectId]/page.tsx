@@ -4,14 +4,84 @@ import { useState, useEffect, useCallback, use } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/AuthContext';
-import { githubProjectApi, userApi } from '@/lib/api';
-import { GitHubProject } from '@/types';
+import ProjectEngagement from '@/components/ProjectEngagement';
+import { githubProjectApi, projectApi, userApi } from '@/lib/api';
+import { GitHubProject, Project } from '@/types';
+
+interface ProjectDetail {
+    id: string;
+    title: string;
+    description?: string;
+    difficulty: string;
+    domain?: { name?: string };
+    subDomain?: string;
+    supposedDeadline?: string;
+    estimatedMinTime?: number;
+    estimatedMaxTime?: number;
+    author?: string;
+    language?: string | null;
+    techStack?: string[];
+    technicalSkills?: string[];
+    toolsUsed?: string[];
+    conceptsUsed?: string[];
+    topics?: string[];
+    repoUrl?: string;
+    downloadUrl?: string;
+    liveUrl?: string | null;
+    sourceCode?: GitHubProject['sourceCode'];
+    caseStudy?: string;
+    problemStatement?: string;
+    solutionDescription?: string;
+    introduction?: string | null;
+    prerequisites?: string[];
+    deliverables?: string[];
+    requirements?: string[];
+    requirementsText?: string;
+    implementation?: string | null;
+    evaluationCriteria?: string | null;
+    optionalExtensions?: string | null;
+    isRegularProject: boolean;
+}
+
+function normalizeRegularProject(project: Project): ProjectDetail {
+    return {
+        id: project.id,
+        title: project.title,
+        description: project.solutionDescription || project.problemStatement,
+        difficulty: project.difficulty,
+        domain: project.domain,
+        subDomain: project.subDomain,
+        supposedDeadline: project.supposedDeadline,
+        estimatedMinTime: project.minTime,
+        estimatedMaxTime: project.maxTime,
+        techStack: project.techStack,
+        technicalSkills: project.skillFocus,
+        topics: project.skillFocus,
+        caseStudy: project.caseStudy,
+        problemStatement: project.problemStatement,
+        solutionDescription: project.solutionDescription,
+        prerequisites: project.prerequisites,
+        deliverables: project.deliverables,
+        requirements: project.requirements,
+        requirementsText: project.requirementsText,
+        evaluationCriteria: project.evaluationCriteria,
+        optionalExtensions: project.advancedExtensions,
+        isRegularProject: true,
+    };
+}
+
+function normalizeGithubProject(project: GitHubProject): ProjectDetail {
+    return {
+        ...project,
+        isRegularProject: false,
+    };
+}
 
 export default function ProjectDetailPage({ params }: { params: Promise<{ projectId: string }> }) {
     const { projectId } = use(params);
     const router = useRouter();
     const { user } = useAuth();
-    const [project, setProject] = useState<GitHubProject | null>(null);
+    const [project, setProject] = useState<ProjectDetail | null>(null);
     const [loading, setLoading] = useState(true);
     const [starting, setStarting] = useState(false);
     const [error, setError] = useState('');
@@ -20,9 +90,14 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ projec
 
     const loadProject = useCallback(async () => {
         try {
-            const data = await githubProjectApi.getById(projectId);
-            console.log("LOADED PROJECT DATA", data);
-            setProject(data);
+            try {
+                const githubProject = await githubProjectApi.getById(projectId);
+                setProject(normalizeGithubProject(githubProject));
+                return;
+            } catch {
+                const regularProject = await projectApi.getById(projectId);
+                setProject(normalizeRegularProject(regularProject));
+            }
         } catch (err) {
             setError('Failed to load project details');
             console.error(err);
@@ -736,6 +811,8 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ projec
                     </div>
                 </aside>
             </div>
+
+            <ProjectEngagement projectId={project.id} className="mt-10" />
         </div>
     );
 }

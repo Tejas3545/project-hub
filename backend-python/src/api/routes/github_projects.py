@@ -18,6 +18,7 @@ from src.schemas.project import (
     GitHubProjectListResponse, GitHubProjectResponse
 )
 from src.services.ai_service import generate_project_details
+from src.services.github_project_scraper import sync_regular_project_from_github_project
 import httpx
 
 router = APIRouter()
@@ -205,10 +206,26 @@ async def proxy_github_search(
                             last_updated=datetime.now(timezone.utc)
                         )
                         db.add(existing)
+                        await db.flush()
                     else:
+                        existing.title = repo["name"]
+                        existing.description = repo.get("description") or existing.description
+                        existing.repo_url = repo["html_url"]
+                        existing.repo_owner = repo["owner"]["login"]
+                        existing.repo_name = repo["name"]
+                        existing.default_branch = repo.get("default_branch", existing.default_branch)
+                        existing.domain_id = domain_id_to_use
+                        existing.language = repo.get("language") or domain_name
+                        existing.difficulty = diff
+                        existing.topics = topics
+                        existing.live_url = live_url
+                        existing.author = repo["owner"]["login"]
+                        existing.last_updated = datetime.now(timezone.utc)
                         existing.stars = repo.get("stargazers_count", existing.stars)
                         existing.forks = repo.get("forks_count", existing.forks)
                         existing.project_type = project_type
+
+                    await sync_regular_project_from_github_project(db, existing)
                         
                     saved_projects.append(existing)
                     

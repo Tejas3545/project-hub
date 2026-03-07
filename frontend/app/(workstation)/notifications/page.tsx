@@ -10,56 +10,21 @@ interface Notification {
     message: string;
     isRead: boolean;
     createdAt: string;
-    type: 'comment' | 'like' | 'approval' | 'system';
+    type?: string;
+    relatedProjectId?: string;
 }
 
-// localStorage key for tracking read notifications (Fallback for demo/offline)
-const READ_NOTIFICATIONS_KEY = 'project-hub-read-notifications';
-
-function getReadNotifications(): Set<string> {
-    if (typeof window === 'undefined') return new Set();
-    try {
-        const stored = localStorage.getItem(READ_NOTIFICATIONS_KEY);
-        return stored ? new Set(JSON.parse(stored)) : new Set();
-    } catch {
-        return new Set();
-    }
-}
-
-function saveReadNotifications(readIds: Set<string>) {
-    if (typeof window === 'undefined') return;
-    try {
-        localStorage.setItem(READ_NOTIFICATIONS_KEY, JSON.stringify([...readIds]));
-    } catch (error) {
-        console.error('Failed to save read notifications:', error);
-    }
-}
-
-function getMockNotifications(readIds: Set<string>): Notification[] {
-    return [
-        {
-            id: 'notif-1',
-            message: '🎉 Welcome to Project Hub! We\'re excited to have you here.',
-            isRead: readIds.has('notif-1'),
-            createdAt: new Date(Date.now() - 3600000).toISOString(),
-            type: 'system',
-        },
-        {
-            id: 'notif-2',
-            message: '💡 Pro Tip: Save projects to your workspace for quick access later.',
-            isRead: readIds.has('notif-2'),
-            createdAt: new Date(Date.now() - 7200000).toISOString(),
-            type: 'system',
-        },
-        {
-            id: 'notif-3',
-            message: '📚 Explore projects by difficulty level using the new filters.',
-            isRead: readIds.has('notif-3'),
-            createdAt: new Date(Date.now() - 172800000).toISOString(),
-            type: 'system',
-        },
-    ];
-}
+const NOTIFICATION_ICONS: Record<string, string> = {
+    NEW_COMMENT: 'chat_bubble',
+    NEW_UPVOTE: 'favorite',
+    PROJECT_APPROVED: 'verified',
+    PROJECT_REJECTED: 'warning',
+    comment: 'chat_bubble',
+    like: 'favorite',
+    approval: 'verified',
+    system: 'info',
+    default: 'notifications',
+};
 
 export default function NotificationsPage() {
     const { user } = useAuth();
@@ -71,37 +36,44 @@ export default function NotificationsPage() {
     useEffect(() => {
         if (user) {
             loadNotifications();
+        } else {
+            setNotifications([]);
+            setLoading(false);
         }
     }, [user]);
+
+    useEffect(() => {
+        if (!user) {
+            router.push('/login');
+        }
+    }, [router, user]);
 
     const loadNotifications = async () => {
         try {
             setLoading(true);
             const response = await notificationApi.getNotifications(1, 50) as any;
 
-            let data = response.notifications || [];
-            const readIds = getReadNotifications();
-
-            // Fallback to mock data if API is empty
-            if (data.length === 0) {
-                data = getMockNotifications(readIds);
-            }
-
-            setNotifications(data);
+            const rawNotifications = Array.isArray(response) ? response : (response.notifications || []);
+            setNotifications(
+                rawNotifications.map((notification: any) => ({
+                    id: notification.id,
+                    message: notification.message || '',
+                    isRead: !!notification.isRead,
+                    createdAt: notification.createdAt || new Date().toISOString(),
+                    type: notification.type,
+                    relatedProjectId: notification.relatedProjectId,
+                }))
+            );
         } catch (error) {
             console.error('Failed to load notifications:', error);
-            const readIds = getReadNotifications();
-            setNotifications(getMockNotifications(readIds));
+            setNotifications([]);
         } finally {
             setLoading(false);
         }
     };
 
     const markAsRead = async (notificationId: string) => {
-        const readIds = getReadNotifications();
-        readIds.add(notificationId);
-        saveReadNotifications(readIds);
-
+        const previous = notifications;
         setNotifications(prev => prev.map(n =>
             n.id === notificationId ? { ...n, isRead: true } : n
         ));
@@ -109,28 +81,25 @@ export default function NotificationsPage() {
         try {
             await notificationApi.markAsRead(notificationId);
         } catch (error) {
-            // Silently fail as we already updated UI and local storage
+            console.error('Failed to mark notification as read:', error);
+            setNotifications(previous);
         }
     };
 
     const markAllAsRead = async () => {
-        const readIds = getReadNotifications();
-        notifications.forEach(n => readIds.add(n.id));
-        saveReadNotifications(readIds);
-
+        const previous = notifications;
         setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
 
         try {
             await notificationApi.markAllAsRead();
         } catch (error) {
-            // Silently fail
+            console.error('Failed to mark all notifications as read:', error);
+            setNotifications(previous);
         }
     };
 
     const clearAllNotifications = () => {
-        if (confirm('Are you sure you want to clear all notifications?')) {
-            setNotifications([]);
-        }
+        loadNotifications();
     };
 
     const formatTime = (dateString: string) => {
@@ -152,20 +121,16 @@ export default function NotificationsPage() {
 
     const unreadCount = notifications.filter(n => !n.isRead).length;
 
-    const NOTIFICATION_ICONS: Record<string, string> = {
-        comment: 'chat_bubble',
-        like: 'favorite',
-        approval: 'verified',
-        system: 'info',
-        default: 'notifications',
-    };
-
     if (loading) {
         return (
             <div className="flex items-center justify-center h-[60vh]">
                 <div className="inline-block animate-spin rounded-full h-10 w-10 border-2 border-primary/20 border-t-primary"></div>
             </div>
         );
+    }
+
+    if (!user) {
+        return null;
     }
 
     return (
@@ -195,9 +160,9 @@ export default function NotificationsPage() {
                     {notifications.length > 0 && (
                         <button
                             onClick={clearAllNotifications}
-                            className="px-5 py-2.5 bg-red-500/10 text-red-500 border border-red-500/20 rounded-xl hover:bg-red-500/20 transition-all text-sm font-bold active:scale-95"
+                            className="px-5 py-2.5 bg-secondary text-foreground border border-border rounded-xl hover:bg-muted transition-all text-sm font-bold active:scale-95"
                         >
-                            Clear all
+                            Refresh
                         </button>
                     )}
                 </div>
@@ -256,7 +221,7 @@ export default function NotificationsPage() {
                                     : 'bg-secondary border-border text-muted-foreground'
                                     }`}>
                                     <span className="material-symbols-outlined text-2xl">
-                                        {NOTIFICATION_ICONS[notification.type] || NOTIFICATION_ICONS.default}
+                                        {NOTIFICATION_ICONS[notification.type ?? 'default'] || NOTIFICATION_ICONS.default}
                                     </span>
                                 </div>
 

@@ -35,6 +35,16 @@ interface WorkspaceState {
   startedAt: string;
 }
 
+function hasRunningTimerState(
+  value: unknown
+): value is { lastTimerStart?: string | Date | null; isRunning?: boolean } {
+  return typeof value === 'object' && value !== null && ('lastTimerStart' in value || 'isRunning' in value);
+}
+
+function hasChecklistState(value: unknown): value is { checklist?: boolean[] } {
+  return typeof value === 'object' && value !== null && 'checklist' in value;
+}
+
 function WorkspaceContent() {
   const { id } = useParams();
   const searchParams = useSearchParams();
@@ -56,14 +66,33 @@ function WorkspaceContent() {
 
   // Load saved state from DB
   const loadState = useCallback(async () => {
-    if (!isGithub) return;
     try {
-      const saved = await userApi.getGithubSingleProgress(id as string);
+      const saved = isGithub
+        ? await userApi.getGithubSingleProgress(id as string)
+        : await userApi.getProjectProgress(id as string);
+
       if (saved && saved.status !== 'NOT_STARTED') {
-        setTimeSpent(saved.timeSpent || 0);
+        if (isGithub) {
+          setTimeSpent(saved.timeSpent || 0);
+        } else {
+          const persistedMinutes = saved.timeSpent || 0;
+          const timerState = hasRunningTimerState(saved) ? saved : undefined;
+          const lastTimerStart = timerState?.lastTimerStart ? new Date(timerState.lastTimerStart) : null;
+          const extraSeconds = timerState?.isRunning && lastTimerStart
+            ? Math.max(0, Math.floor((Date.now() - lastTimerStart.getTime()) / 1000))
+            : 0;
+
+          setTimeSpent((persistedMinutes * 60) + extraSeconds);
+          setIsTimerRunning(Boolean(timerState?.isRunning));
+        }
+
         setNotes(saved.notes || '');
-        setChecklist(saved.checklist || []);
         setStatus((saved.status as 'IN_PROGRESS' | 'COMPLETED' | 'ON_HOLD') || 'IN_PROGRESS');
+
+        const checklistState = hasChecklistState(saved) ? saved.checklist : undefined;
+        if (isGithub && Array.isArray(checklistState)) {
+          setChecklist(checklistState);
+        }
       }
     } catch (err) {
       console.warn('Failed to load workspace state (may be first visit):', err);
@@ -72,14 +101,22 @@ function WorkspaceContent() {
 
   // Save state to DB
   const saveState = useCallback(async () => {
-    if (!isGithub) return;
     try {
-      await userApi.updateGithubProgress(id as string, {
-        timeSpent,
-        notes,
-        checklist,
-        status,
-      });
+      if (isGithub) {
+        await userApi.updateGithubProgress(id as string, {
+          timeSpent,
+          notes,
+          checklist,
+          status,
+        });
+      } else {
+        await userApi.updateProgress(id as string, {
+          timeSpent: Math.floor(timeSpent / 60),
+          notes,
+          status,
+          isRunning: isTimerRunning,
+        });
+      }
 
       setSaveMessage('Saved!');
       setTimeout(() => setSaveMessage(''), 2000);
@@ -87,7 +124,7 @@ function WorkspaceContent() {
       setSaveMessage('Save failed');
       setTimeout(() => setSaveMessage(''), 2000);
     }
-  }, [timeSpent, notes, checklist, status, id, isGithub]);
+  }, [timeSpent, notes, checklist, status, id, isGithub, isTimerRunning]);
 
   // Auto-save every 30 seconds
   useEffect(() => {
@@ -336,8 +373,9 @@ function WorkspaceContent() {
               <div className="grid grid-cols-2 gap-3">
                 <button
                   onClick={() => {
-                    setIsTimerRunning(!isTimerRunning);
-                    if (!isTimerRunning && status !== 'IN_PROGRESS') {
+                    const nextRunning = !isTimerRunning;
+                    setIsTimerRunning(nextRunning);
+                    if (nextRunning && status !== 'IN_PROGRESS') {
                       setStatus('IN_PROGRESS');
                     }
                   }}

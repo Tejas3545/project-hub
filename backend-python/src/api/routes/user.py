@@ -1,5 +1,7 @@
 import os
 import shutil
+from datetime import datetime, timezone
+
 from fastapi import APIRouter, Depends, Query, UploadFile, File, HTTPException, Body
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
@@ -9,9 +11,10 @@ from typing import List
 from src.core.database import get_db
 from src.core.config import settings
 from src.api.dependencies import get_current_user
+from src.models.project import Project, GitHubProject
 from src.models.user import User
 from src.models.tracking import ProjectProgress, GitHubProjectProgress, Bookmark, Notification
-from src.schemas.tracking import ProjectProgressResponse, GitHubProjectProgressResponse, GitHubProjectProgressBase
+from src.schemas.tracking import ProjectProgressResponse, GitHubProjectProgressResponse, ProjectProgressBase, GitHubProjectProgressBase
 
 router = APIRouter()
 
@@ -25,11 +28,102 @@ async def get_user_progress(
     """
     stmt = (
         select(ProjectProgress)
-        .options(selectinload(ProjectProgress.project))
+        .options(selectinload(ProjectProgress.project).selectinload(Project.domain))
         .where(ProjectProgress.user_id == current_user.id)
     )
     result = await db.execute(stmt)
     return result.scalars().all()
+
+
+@router.get("/progress/{project_id}", response_model=ProjectProgressResponse)
+async def get_single_project_progress(
+    project_id: str,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    stmt = (
+        select(ProjectProgress)
+        .options(selectinload(ProjectProgress.project).selectinload(Project.domain))
+        .where(
+            ProjectProgress.user_id == current_user.id,
+            ProjectProgress.project_id == project_id,
+        )
+    )
+    result = await db.execute(stmt)
+    progress = result.scalar_one_or_none()
+
+    if not progress:
+        progress = ProjectProgress(
+            user_id=current_user.id,
+            project_id=project_id,
+            status="NOT_STARTED",
+            time_spent=0,
+            is_running=False,
+        )
+        db.add(progress)
+        await db.commit()
+
+    refreshed = await db.execute(
+        select(ProjectProgress)
+        .options(selectinload(ProjectProgress.project).selectinload(Project.domain))
+        .where(ProjectProgress.user_id == current_user.id, ProjectProgress.project_id == project_id)
+    )
+    return refreshed.scalar_one()
+
+
+@router.put("/progress/{project_id}", response_model=ProjectProgressResponse)
+async def update_project_progress(
+    project_id: str,
+    data: ProjectProgressBase,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    stmt = (
+        select(ProjectProgress)
+        .options(selectinload(ProjectProgress.project).selectinload(Project.domain))
+        .where(
+            ProjectProgress.user_id == current_user.id,
+            ProjectProgress.project_id == project_id,
+        )
+    )
+    result = await db.execute(stmt)
+    progress = result.scalar_one_or_none()
+
+    if not progress:
+        progress = ProjectProgress(user_id=current_user.id, project_id=project_id)
+        db.add(progress)
+
+    progress.status = data.status
+    if data.time_spent is not None:
+        progress.time_spent = data.time_spent
+    if data.is_running is not None:
+        progress.is_running = data.is_running
+    if data.notes is not None:
+        progress.notes = data.notes
+
+    now = datetime.now(timezone.utc)
+    if data.is_running is True:
+        progress.last_timer_start = now
+    elif data.is_running is False:
+        progress.last_timer_start = None
+
+    if data.status == "IN_PROGRESS" and not progress.started_at:
+        progress.started_at = now
+    if data.status == "COMPLETED":
+        progress.completed_at = progress.completed_at or now
+        progress.is_running = False
+        progress.last_timer_start = None
+    elif data.status != "COMPLETED":
+        progress.completed_at = None
+
+    await db.commit()
+
+    refreshed = await db.execute(
+        select(ProjectProgress)
+        .options(selectinload(ProjectProgress.project).selectinload(Project.domain))
+        .where(ProjectProgress.user_id == current_user.id, ProjectProgress.project_id == project_id)
+    )
+    return refreshed.scalar_one()
 
 @router.get("/github-progress", response_model=List[GitHubProjectProgressResponse])
 async def get_github_progress(
@@ -41,7 +135,7 @@ async def get_github_progress(
     """
     stmt = (
         select(GitHubProjectProgress)
-        .options(selectinload(GitHubProjectProgress.github_project))
+        .options(selectinload(GitHubProjectProgress.github_project).selectinload(GitHubProject.domain))
         .where(GitHubProjectProgress.user_id == current_user.id)
     )
     result = await db.execute(stmt)
@@ -59,7 +153,7 @@ async def get_single_github_progress(
     Creates a NOT_STARTED record if none exists.
     """
     stmt = select(GitHubProjectProgress).options(
-        selectinload(GitHubProjectProgress.github_project)
+        selectinload(GitHubProjectProgress.github_project).selectinload(GitHubProject.domain)
     ).where(
         GitHubProjectProgress.user_id == current_user.id,
         GitHubProjectProgress.github_project_id == project_id,
@@ -78,7 +172,12 @@ async def get_single_github_progress(
         await db.commit()
         await db.refresh(progress)
 
-    return progress
+    refreshed = await db.execute(
+        select(GitHubProjectProgress).options(
+            selectinload(GitHubProjectProgress.github_project).selectinload(GitHubProject.domain)
+        ).where(GitHubProjectProgress.id == progress.id)
+    )
+    return refreshed.scalar_one()
 
 
 @router.put("/github-progress/{project_id}", response_model=GitHubProjectProgressResponse)
@@ -92,10 +191,8 @@ async def update_github_progress(
     Update the authenticated user's progress for a specific GitHub project.
     Creates a new record if none exists. Auto-manages started_at/completed_at timestamps.
     """
-    from datetime import datetime, timezone
-
     stmt = select(GitHubProjectProgress).options(
-        selectinload(GitHubProjectProgress.github_project)
+        selectinload(GitHubProjectProgress.github_project).selectinload(GitHubProject.domain)
     ).where(
         GitHubProjectProgress.user_id == current_user.id,
         GitHubProjectProgress.github_project_id == project_id,
@@ -112,9 +209,12 @@ async def update_github_progress(
 
     # Update fields from request body
     progress.status = data.status
-    progress.time_spent = data.time_spent
-    progress.notes = data.notes
-    progress.checklist = data.checklist
+    if data.time_spent is not None:
+        progress.time_spent = data.time_spent
+    if data.notes is not None:
+        progress.notes = data.notes
+    if data.checklist is not None:
+        progress.checklist = data.checklist
 
     # Auto-manage timestamps
     if data.status == "IN_PROGRESS" and not progress.started_at:
@@ -123,8 +223,13 @@ async def update_github_progress(
         progress.completed_at = datetime.now(timezone.utc)
 
     await db.commit()
-    await db.refresh(progress, attribute_names=["github_project"])
-    return progress
+
+    refreshed = await db.execute(
+        select(GitHubProjectProgress).options(
+            selectinload(GitHubProjectProgress.github_project).selectinload(GitHubProject.domain)
+        ).where(GitHubProjectProgress.id == progress.id)
+    )
+    return refreshed.scalar_one()
 
 @router.put("/profile")
 async def update_profile(
@@ -241,7 +346,10 @@ async def get_user_bookmarks(
     """
     stmt = (
         select(Bookmark)
-        .options(selectinload(Bookmark.project), selectinload(Bookmark.github_project))
+        .options(
+            selectinload(Bookmark.project).selectinload(Project.domain),
+            selectinload(Bookmark.github_project).selectinload(GitHubProject.domain),
+        )
         .where(Bookmark.user_id == current_user.id)
         .order_by(Bookmark.created_at.desc())
     )
@@ -321,10 +429,15 @@ async def toggle_bookmark(
     """
     Toggle bookmark status for a project.
     """
-    project_type = data.get("type", "github")
-    
-    # Need to check exactly which column to target based on type
-    is_github = project_type.lower() == "github"
+    project_type = data.get("type")
+
+    if project_type:
+        is_github = project_type.lower() == "github"
+    else:
+        regular_result = await db.execute(
+            select(Project.id).where(Project.id == project_id, Project.deleted_at.is_(None))
+        )
+        is_github = regular_result.scalar_one_or_none() is None
     
     stmt = select(Bookmark).where(
         Bookmark.user_id == current_user.id,

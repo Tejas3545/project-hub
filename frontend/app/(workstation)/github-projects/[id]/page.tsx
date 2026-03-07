@@ -2,6 +2,7 @@
 
 import { use, useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import ProjectEngagement from '@/components/ProjectEngagement';
 import { useAuth } from '@/lib/AuthContext';
 import { userApi } from '@/lib/api';
 import ReactMarkdown from 'react-markdown';
@@ -56,6 +57,7 @@ export default function GitHubProjectDetailPage({ params }: { params: Promise<{ 
   const [loading, setLoading] = useState(true);
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [bookmarkLoading, setBookmarkLoading] = useState(false);
+  const [starting, setStarting] = useState(false);
   const [readmeOpen, setReadmeOpen] = useState(false);
   const [readmeContent, setReadmeContent] = useState<string | null>(null);
   const [readmeLoading, setReadmeLoading] = useState(false);
@@ -98,6 +100,30 @@ export default function GitHubProjectDetailPage({ params }: { params: Promise<{ 
       setIsBookmarked(res.bookmarked);
     } catch (err) { console.error('Failed to toggle bookmark:', err); }
     finally { setBookmarkLoading(false); }
+  };
+
+  const handleStartProject = async () => {
+    if (!user) {
+      router.push('/login');
+      return;
+    }
+
+    setStarting(true);
+    try {
+      const progress = await userApi.getGithubSingleProgress(id);
+      if (progress?.status && progress.status !== 'NOT_STARTED') {
+        router.push(`/workspace/${id}?type=github`);
+        return;
+      }
+
+      await userApi.startGithubProject(id);
+      router.push(`/workspace/${id}?type=github`);
+    } catch (error) {
+      console.error('Failed to start GitHub project:', error);
+      router.push(`/workspace/${id}?type=github`);
+    } finally {
+      setStarting(false);
+    }
   };
 
   /**
@@ -669,11 +695,18 @@ export default function GitHubProjectDetailPage({ params }: { params: Promise<{ 
               {/* Quick Actions */}
               <div className="bg-background border border-border rounded-2xl p-6 shadow-sm space-y-5">
                 <button
-                  onClick={() => router.push(`/workspace/${project.id}?type=github`)}
+                  onClick={handleStartProject}
+                  disabled={starting}
                   className="w-full flex items-center justify-center gap-2 py-3.5 bg-primary hover:bg-primary/90 text-white font-semibold rounded-xl transition-all shadow-lg shadow-primary/20 text-sm"
                 >
-                  <span className="material-symbols-outlined text-lg">play_arrow</span>
-                  Start Project
+                  {starting ? (
+                    <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  ) : (
+                    <>
+                      <span className="material-symbols-outlined text-lg">play_arrow</span>
+                      Start Project
+                    </>
+                  )}
                 </button>
                 <button
                   onClick={handleToggleBookmark}
@@ -925,6 +958,8 @@ export default function GitHubProjectDetailPage({ params }: { params: Promise<{ 
             </div>
           </aside>
         </div>
+
+        <ProjectEngagement projectId={project.id} className="mt-10" />
       </main>
     </div>
   );

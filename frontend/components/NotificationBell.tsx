@@ -17,6 +17,10 @@ interface Notification {
 }
 
 const NOTIFICATION_ICONS: Record<string, string> = {
+    NEW_COMMENT: 'chat_bubble',
+    NEW_UPVOTE: 'favorite',
+    PROJECT_APPROVED: 'verified',
+    PROJECT_REJECTED: 'warning',
     achievement: 'trophy',
     project: 'assignment',
     comment: 'chat_bubble',

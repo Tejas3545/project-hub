@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { GitHubProject } from '@/types';
-import { userApi } from '@/lib/api';
+import { socialApi, userApi } from '@/lib/api';
+import { useAuth } from '@/lib/AuthContext';
 
 interface GitHubProjectCardProps {
   project: GitHubProject;
@@ -12,7 +13,11 @@ interface GitHubProjectCardProps {
 }
 
 export default function GitHubProjectCard({ project, initialBookmarked, hrefRoot = '/github-projects' }: GitHubProjectCardProps) {
+  const { user } = useAuth();
   const [isBookmarked, setIsBookmarked] = useState(initialBookmarked ?? false);
+  const [isLiked, setIsLiked] = useState(false);
+  const [likesCount, setLikesCount] = useState(0);
+  const [commentsCount, setCommentsCount] = useState(0);
 
   const techPreview = [...new Set([...(project.techStack || []), ...(project.technicalSkills || [])])].slice(0, 3);
   const difficultyLabel: Record<string, string> = {
@@ -39,6 +44,42 @@ export default function GitHubProjectCard({ project, initialBookmarked, hrefRoot
       .catch(() => { });
   }, [project.id, initialBookmarked]);
 
+  useEffect(() => {
+    const loadEngagement = async () => {
+      try {
+        const [likes, comments] = await Promise.all([
+          socialApi.getProjectLikesCount(project.id) as Promise<{ count?: number }>,
+          socialApi.getComments(project.id, 1, 1) as Promise<{ total?: number; comments?: Array<unknown> }>,
+        ]);
+        setLikesCount(likes.count || 0);
+        setCommentsCount(comments.total || comments.comments?.length || 0);
+      } catch {
+        setLikesCount(0);
+        setCommentsCount(0);
+      }
+    };
+
+    loadEngagement();
+  }, [project.id]);
+
+  useEffect(() => {
+    const loadLikeStatus = async () => {
+      if (!user) {
+        setIsLiked(false);
+        return;
+      }
+
+      try {
+        const result = await socialApi.getProjectLikeStatus(project.id) as { liked?: boolean };
+        setIsLiked(!!result.liked);
+      } catch {
+        setIsLiked(false);
+      }
+    };
+
+    loadLikeStatus();
+  }, [project.id, user]);
+
   const toggleBookmark = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -48,6 +89,21 @@ export default function GitHubProjectCard({ project, initialBookmarked, hrefRoot
       await userApi.toggleBookmark(project.id);
     } catch {
       setIsBookmarked(prev); // revert on failure
+    }
+  };
+
+  const toggleLike = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!user) return;
+
+    try {
+      const result = await socialApi.toggleProjectLike(project.id) as { liked?: boolean; count?: number };
+      setIsLiked(!!result.liked);
+      setLikesCount(result.count || 0);
+    } catch {
+      // ignore
     }
   };
 
@@ -108,24 +164,40 @@ export default function GitHubProjectCard({ project, initialBookmarked, hrefRoot
         </div>
 
         {/* Footer */}
-        <div className="mt-auto px-6 py-4 border-t border-border flex items-center justify-between bg-secondary/50">
-          <div className="flex items-center gap-4 flex-wrap">
-            <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-              <span className="material-symbols-outlined text-sm text-primary/60">schedule</span>
-              {project.estimatedMinTime}-{project.estimatedMaxTime}h
+        <div className="mt-auto px-6 py-4 border-t border-border bg-secondary/50 space-y-3">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-4 flex-wrap">
+              <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                <span className="material-symbols-outlined text-sm text-primary/60">schedule</span>
+                {project.estimatedMinTime}-{project.estimatedMaxTime}h
+              </div>
+              <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                <span className="material-symbols-outlined text-sm text-primary/60">code</span>
+                {project.language || 'Code'}
+              </div>
+              <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                <span className="material-symbols-outlined text-sm text-primary/60">star</span>
+                {Intl.NumberFormat('en', { notation: 'compact' }).format(project.stars || 0)}
+              </div>
             </div>
-            <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-              <span className="material-symbols-outlined text-sm text-primary/60">code</span>
-              {project.language || 'Code'}
-            </div>
-            <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-              <span className="material-symbols-outlined text-sm text-primary/60">star</span>
-              {Intl.NumberFormat('en', { notation: 'compact' }).format(project.stars || 0)}
+
+            <div className="size-8 rounded-full border border-border flex items-center justify-center text-muted-foreground group-hover:bg-primary group-hover:text-white group-hover:border-primary transition-all">
+              <span className="material-symbols-outlined text-sm">arrow_forward</span>
             </div>
           </div>
 
-          <div className="size-8 rounded-full border border-border flex items-center justify-center text-muted-foreground group-hover:bg-primary group-hover:text-white group-hover:border-primary transition-all">
-            <span className="material-symbols-outlined text-sm">arrow_forward</span>
+          <div className="flex items-center gap-4 text-xs font-semibold text-muted-foreground">
+            <button
+              onClick={toggleLike}
+              className={`inline-flex items-center gap-1.5 transition-colors ${isLiked ? 'text-red-500' : 'hover:text-foreground'}`}
+            >
+              <span className="material-symbols-outlined text-sm">favorite</span>
+              {likesCount}
+            </button>
+            <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+              <span className="material-symbols-outlined text-sm">chat_bubble</span>
+              {commentsCount}
+            </div>
           </div>
         </div>
       </div>
